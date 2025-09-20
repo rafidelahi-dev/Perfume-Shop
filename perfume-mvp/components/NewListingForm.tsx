@@ -17,12 +17,19 @@ export default function NewListingForm() {
     setSaving(true);
     setError(null);
     try {
+      // inside onSubmit before insert, get the user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       // TODO: replace perfume_id and user_id with real values after auth is wired
       const { error } = await supabase.from("listings").insert({
+        user_id: user.id,
         title,
         quantity_ml: quantityMl,
-        price,
+        price
       });
+
+      
       if (error) throw error;
       router.push("/perfumes");
     } catch (err: any) {
