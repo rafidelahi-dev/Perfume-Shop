@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import Link from "next/link";
 
 export default function SignupPage() {
   const [email,setEmail]=useState(""); const [password,setPassword]=useState("");
   const [loading,setLoading]=useState(false); const [error,setError]=useState<string|null>(null);
+  const [oauthLoading, setOauthLoading] = useState<"google" | "facebook" | null>(null);
   const router = useRouter();
 
   async function onSubmit(e: React.FormEvent) {
@@ -15,6 +17,22 @@ export default function SignupPage() {
     if (error) setError(error.message); else router.push("/perfumes");
     setLoading(false);
   }
+
+  async function signInWithOAuth(provider: "google" | "facebook") {
+  try {
+    setOauthLoading(provider);
+    setError(null);
+    const redirectTo =
+      typeof window !== "undefined" ? `${location.origin}` : undefined;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo },
+    });
+    if (error) setError(error.message);
+  } finally {
+    setOauthLoading(null);
+  }
+}
 
   return (
     <div className="max-w-sm mx-auto rounded-xl border bg-white p-6">
@@ -27,6 +45,34 @@ export default function SignupPage() {
           {loading?"Creating…":"Sign up"}
         </button>
       </form>
+      <div className="my-4 flex items-center gap-2">
+      <div className="h-px flex-1 bg-gray-200" />
+      <span className="text-xs text-gray-500">or</span>
+      <div className="h-px flex-1 bg-gray-200" />
+    </div>
+
+    <div className="space-y-2">
+      <button
+        onClick={() => signInWithOAuth("google")}
+        disabled={oauthLoading === "google"}
+        className="w-full border rounded p-2"
+      >
+        {oauthLoading === "google" ? "Connecting to Google…" : "Continue with Google"}
+      </button>
+      <button
+        onClick={() => signInWithOAuth("facebook")}
+        disabled={oauthLoading === "facebook"}
+        className="w-full border rounded p-2"
+      >
+        {oauthLoading === "facebook" ? "Connecting to Facebook…" : "Continue with Facebook"}
+      </button>
+    </div>
+    <p className="mt-4 text-sm text-gray-700">
+        Already have an account?{" "}
+        <Link href="/login" className="text-blue-600 underline">
+          Log in
+        </Link>
+      </p>
     </div>
   );
 }

@@ -100,14 +100,14 @@ export default function LoginPage() {
 
       <p className="mt-4 text-sm text-gray-700">
         Don’t have an account?{" "}
-        <Link href="/(auth)/signup" className="text-blue-600 underline">
+        <Link href="/signup" className="text-blue-600 underline">
           Sign up
         </Link>
       </p>
 
       <p className="mt-2 text-xs text-gray-500">
         Forgot your password?{" "}
-        <Link href="/(auth)/reset" className="underline">
+        <Link href="/reset" className="underline">
           Reset it
         </Link>
       </p>
