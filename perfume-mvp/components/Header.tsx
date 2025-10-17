@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabaseClient";
 export default function Header() {
   const pathname = usePathname();
   const [email,setEmail] = useState<string|null>(null);
+  const [userName,setUserName] = useState<string|null>(null);
 
 
   useEffect(() => {
@@ -17,6 +18,37 @@ export default function Header() {
     });
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+  async function fetchUserProfile() {
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
+    if (!user) return;
+
+    // Get username from your profiles table
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("username, display_name")
+      .eq("id", user.id)
+      .single();
+
+    setEmail(user.email ?? null);
+    setUserName(profile?.display_name || profile?.username);
+  }
+
+  fetchUserProfile();
+
+  // Update when auth state changes
+  const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+    if (session?.user) fetchUserProfile();
+    else {
+      setEmail(null);
+      setUserName(null);
+    }
+  });
+  return () => sub.subscription.unsubscribe();
+}, []);
+
 
 
   const link = (href: string, label: string) => (
@@ -42,7 +74,7 @@ export default function Header() {
         {link("/new", "New Listing")}
         {email ? (
           <>
-            <span className="text-sm text-gray-600">Hi, {email}</span>
+            <span className="text-sm text-gray-600">Hi, {userName}</span>
             <button onClick={logout} className="px-3 py-2 rounded-md border">Logout</button>
           </>
         ) : (
