@@ -1,23 +1,20 @@
-@import "tailwindcss";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* --- Warm luxury base --- */
+html, body {
+  height: 100%;
+  background-color: #f9f6ef;  /* warm ivory */
+  color: #1a1a1a;             /* deep charcoal */
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Inter, Roboto, "Helvetica Neue", Arial;
+}
+
+
 /* your global styles here */
-
-
-
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -27,8 +24,39 @@
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+
+/* smoother UI */
+header, nav, button, a { transition: all .2s ease; }
+
+
+/* ---------- Component layer: reusable styles ---------- */
+@layer components {
+  .card {
+    @apply rounded-2xl border border-black/5 bg-[#ffffff]/70 shadow-[0_2px_8px_rgba(0,0,0,0.05)] transition hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)];
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-medium transition;
+  }
+
+  .btn-primary {
+    background-color: #1a1a1a;
+    color: #f8f7f3;
+  }
+  .btn-primary:hover { opacity: 0.9; }
+
+  .btn-outline {
+    border: 1px solid #1a1a1a;
+    color: #1a1a1a;
+  }
+  .btn-outline:hover { background-color: #eae8e1; }
+}
+
+
+/* Smooth hover effects */
+a, button {
+  transition: color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease, opacity .2s ease;
+}
+a:hover, button:hover {
+  transform: translateY(-2px);
 }
