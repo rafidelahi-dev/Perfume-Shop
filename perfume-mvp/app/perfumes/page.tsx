@@ -15,72 +15,62 @@ export default function PerfumesPage() {
   return (
     <div className="min-h-screen">
       <Header />
-      
-      {/* Hero Section - Matching your luxury theme */}
-      <section className="relative bg-gradient-to-r from-[#1a1a1a] via-[#2a2a2a] to-[#1a1a1a] text-white py-20 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="flex justify-center mb-6">
-            <Sparkles className="w-10 h-10 text-[#d4af37] animate-pulse" />
+
+      {/* Warm, luxurious hero (no dark stripe) */}
+      <section className="relative w-full bg-gradient-to-br from-[#f9f6ef] via-[#f5f1e8] to-[#efe9dc] py-16">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="flex justify-center mb-4">
+            <Sparkles className="h-8 w-8 text-[#d4af37]" />
           </div>
-          <h1 className="text-4xl md:text-6xl font-light mb-6 tracking-wide">
-            Discover Your Signature Scent
+          <h1 className="text-center text-4xl md:text-5xl font-semibold tracking-tight text-[#111]">
+            Discover your <span className="text-[#d4af37]">signature scent</span>
           </h1>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto font-light leading-relaxed">
-            Explore our curated collection of luxury fragrances that tell your unique story
+          <p className="mx-auto mt-3 max-w-2xl text-center text-[#444]">
+            Explore our curated collection of luxury fragrances for every occasion.
           </p>
         </div>
-        
-        {/* Subtle pattern overlay */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23d4af37\' fill-opacity=\'0.03\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3Ccircle cx=\'13\' cy=\'13\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E')]"></div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        {/* Header with Filters */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12 gap-6">
+      <div className="mx-auto max-w-7xl px-4 py-10">
+        {/* Filters header */}
+        <div className="mb-8 flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
           <div>
-            <h2 className="text-4xl font-light text-[#1a1a1a] mb-3">Perfume Collection</h2>
-            <p className="text-lg text-[#666]">Find the perfect fragrance for every occasion</p>
+            <h2 className="mb-1 text-3xl font-light text-[#1a1a1a]">Perfume Collection</h2>
+            <p className="text-[#666]">Find the perfect fragrance for every occasion</p>
           </div>
-          
-          <div className="flex items-center gap-3">
-            <button
-              onClick={toggle}
-              className={`flex items-center gap-3 px-8 py-4 rounded-full transition-all duration-300 font-medium ${
-                isOpen 
-                  ? "bg-[#1a1a1a] text-white shadow-2xl" 
-                  : "bg-white/80 text-[#1a1a1a] border border-gray-200/80 hover:shadow-xl backdrop-blur-sm"
-              }`}
-            >
-              <Filter className="w-5 h-5" />
-              {isOpen ? "Hide Filters" : "Show Filters"}
-            </button>
-          </div>
+
+          <button
+            onClick={toggle}
+            className={`flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-all ${
+              isOpen
+                ? "bg-[#1a1a1a] text-[#f9f6ef] shadow"
+                : "border border-black/10 bg-[#fffdf7]/80 text-[#1a1a1a] hover:bg-[#f2eee4]"
+            }`}
+          >
+            <Filter className="h-5 w-5" />
+            {isOpen ? "Hide Filters" : "Show Filters"}
+          </button>
         </div>
 
-        {/* Enhanced Filter Panel */}
+        {/* Filter panel */}
         {isOpen && (
-          <div className="mb-12 bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-8 border border-white/40 animate-in fade-in duration-300">
-            <div className="flex justify-between items-center mb-8">
-              <h3 className="text-2xl font-light text-[#1a1a1a]">Refine Your Search</h3>
-              <button 
-                onClick={reset}
-                className="flex items-center gap-3 text-base text-[#666] hover:text-[#1a1a1a] transition-colors font-medium"
-              >
-                <X className="w-5 h-5" />
-                Reset All
+          <div className="mb-10 rounded-3xl border border-black/5 bg-[#fffdf7]/80 p-6 shadow-sm">
+            <div className="mb-6 flex items-center justify-between">
+              <h3 className="text-xl font-light text-[#1a1a1a]">Refine your search</h3>
+              <button onClick={reset} className="flex items-center gap-2 text-[#666] hover:text-[#1a1a1a]">
+                <X className="h-4 w-4" />
+                Reset all
               </button>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Brand Search */}
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {/* Brand */}
               <div className="relative">
-                <label className="block text-sm font-medium text-[#1a1a1a] mb-3">
-                  Brand
-                </label>
+                <label className="mb-2 block text-sm font-medium text-[#1a1a1a]">Brand</label>
                 <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-black/30" />
                   <input
-                    className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-300/50 focus:border-[#d4af37] focus:ring-2 focus:ring-[#d4af37]/20 transition-all duration-200 bg-white/90 backdrop-blur-sm"
+                    className="w-full rounded-2xl border border-black/10 bg-white/90 px-12 py-3 outline-none ring-2 ring-transparent transition focus:border-[#d4af37] focus:ring-[#d4af37]/20"
                     placeholder="e.g., Dior, Chanel"
                     value={filters.brand}
                     onChange={(e) => setFilters({ brand: e.target.value })}
@@ -88,29 +78,25 @@ export default function PerfumesPage() {
                 </div>
               </div>
 
-              {/* General Search */}
+              {/* Search */}
               <div className="relative">
-                <label className="block text-sm font-medium text-[#1a1a1a] mb-3">
-                  Search Fragrances
-                </label>
+                <label className="mb-2 block text-sm font-medium text-[#1a1a1a]">Search fragrances</label>
                 <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-black/30" />
                   <input
-                    className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-300/50 focus:border-[#d4af37] focus:ring-2 focus:ring-[#d4af37]/20 transition-all duration-200 bg-white/90 backdrop-blur-sm"
-                    placeholder="Notes, occasion, mood..."
+                    className="w-full rounded-2xl border border-black/10 bg-white/90 px-12 py-3 outline-none ring-2 ring-transparent transition focus:border-[#d4af37] focus:ring-[#d4af37]/20"
+                    placeholder="Notes, occasion, mood…"
                     value={filters.q}
                     onChange={(e) => setFilters({ q: e.target.value })}
                   />
                 </div>
               </div>
 
-              {/* Additional Filter Placeholders */}
+              {/* Family */}
               <div>
-                <label className="block text-sm font-medium text-[#1a1a1a] mb-3">
-                  Scent Family
-                </label>
-                <select className="w-full px-4 py-4 rounded-2xl border border-gray-300/50 focus:border-[#d4af37] focus:ring-2 focus:ring-[#d4af37]/20 transition-all duration-200 bg-white/90 backdrop-blur-sm">
-                  <option>All Families</option>
+                <label className="mb-2 block text-sm font-medium text-[#1a1a1a]">Scent family</label>
+                <select className="w-full rounded-2xl border border-black/10 bg-white/90 px-4 py-3 outline-none ring-2 ring-transparent transition focus:border-[#d4af37] focus:ring-[#d4af37]/20">
+                  <option>All families</option>
                   <option>Floral</option>
                   <option>Woody</option>
                   <option>Fresh</option>
@@ -118,43 +104,35 @@ export default function PerfumesPage() {
                 </select>
               </div>
 
+              {/* Price */}
               <div>
-                <label className="block text-sm font-medium text-[#1a1a1a] mb-3">
-                  Price Range
-                </label>
-                <select className="w-full px-4 py-4 rounded-2xl border border-gray-300/50 focus:border-[#d4af37] focus:ring-2 focus:ring-[#d4af37]/20 transition-all duration-200 bg-white/90 backdrop-blur-sm">
-                  <option>All Prices</option>
+                <label className="mb-2 block text-sm font-medium text-[#1a1a1a]">Price range</label>
+                <select className="w-full rounded-2xl border border-black/10 bg-white/90 px-4 py-3 outline-none ring-2 ring-transparent transition focus:border-[#d4af37] focus:ring-[#d4af37]/20">
+                  <option>All prices</option>
                   <option>Under $50</option>
-                  <option>$50 - $100</option>
-                  <option>$100 - $200</option>
+                  <option>$50 – $100</option>
+                  <option>$100 – $200</option>
                   <option>Over $200</option>
                 </select>
               </div>
             </div>
 
-            {/* Active Filters Display */}
             {(filters.brand || filters.q) && (
-              <div className="mt-8 pt-8 border-t border-gray-200/50">
-                <div className="flex flex-wrap gap-3">
+              <div className="mt-6 border-t border-black/5 pt-6">
+                <div className="flex flex-wrap gap-2">
                   {filters.brand && (
-                    <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#d4af37]/10 text-[#1a1a1a] text-sm font-medium border border-[#d4af37]/20">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-[#d4af37]/30 bg-[#d4af37]/10 px-4 py-2 text-sm">
                       Brand: {filters.brand}
-                      <button 
-                        onClick={() => setFilters({ brand: '' })}
-                        className="hover:text-[#d4af37] transition-colors"
-                      >
-                        <X className="w-4 h-4" />
+                      <button onClick={() => setFilters({ brand: "" })} className="hover:text-[#d4af37]">
+                        <X className="h-4 w-4" />
                       </button>
                     </span>
                   )}
                   {filters.q && (
-                    <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#d4af37]/10 text-[#1a1a1a] text-sm font-medium border border-[#d4af37]/20">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-[#d4af37]/30 bg-[#d4af37]/10 px-4 py-2 text-sm">
                       Search: {filters.q}
-                      <button 
-                        onClick={() => setFilters({ q: '' })}
-                        className="hover:text-[#d4af37] transition-colors"
-                      >
-                        <X className="w-4 h-4" />
+                      <button onClick={() => setFilters({ q: "" })} className="hover:text-[#d4af37]">
+                        <X className="h-4 w-4" />
                       </button>
                     </span>
                   )}
@@ -164,10 +142,8 @@ export default function PerfumesPage() {
           </div>
         )}
 
-        {/* Perfume List Container */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-sm border border-white/30 overflow-hidden">
-          <PerfumeList />
-        </div>
+        {/* 👉 No outer white panel anymore */}
+        <PerfumeList />
       </div>
     </div>
   );

@@ -26,57 +26,43 @@ export default function PerfumeList() {
   });
 
   const toggleFavorite = (id: number) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(id)) {
-        newFavorites.delete(id);
-      } else {
-        newFavorites.add(id);
-      }
-      return newFavorites;
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
     });
   };
 
-  // Loading State
   if (isLoading) return <PerfumeListLoading />;
-  
-  // Error State
   if (error) return <PerfumeListError onRetry={refetch} />;
-  
-  // Empty State
   if (!data?.length) return <PerfumeListEmpty />;
 
   return (
     <div className="space-y-6">
-      {/* Header with Stats and Refresh */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      {/* header */}
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">
-            {data.length} Fragrances Found
-          </h3>
-          <p className="text-sm text-gray-600 mt-1">
-            Discover your perfect scent from our curated collection
-          </p>
+          <h3 className="text-lg font-semibold text-[#1a1a1a]">{data.length} Fragrances Found</h3>
+          <p className="mt-1 text-sm text-[#555]">Discover your perfect scent from our curated collection</p>
         </div>
-        
-        <button 
+        <button
           onClick={() => refetch()}
           disabled={isRefetching}
-          className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-full border border-black/10 bg-[#fffdf7] px-4 py-2 text-[#1a1a1a] transition hover:bg-[#f2eee4] disabled:opacity-60"
         >
-          <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
-          {isRefetching ? 'Refreshing...' : 'Refresh'}
+          <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+          {isRefetching ? "Refreshing…" : "Refresh"}
         </button>
       </div>
 
-      {/* Perfume Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {data.map((perfume: any) => (
-          <PerfumeCard 
-            key={perfume.id}
-            perfume={perfume}
-            isFavorite={favorites.has(perfume.id)}
-            onToggleFavorite={() => toggleFavorite(perfume.id)}
+      {/* grid */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {data.map((p: any) => (
+          <PerfumeCard
+            key={p.id}
+            perfume={p}
+            isFavorite={favorites.has(p.id)}
+            onToggleFavorite={() => toggleFavorite(p.id)}
           />
         ))}
       </div>
@@ -84,96 +70,80 @@ export default function PerfumeList() {
   );
 }
 
-// Perfume Card Component
-function PerfumeCard({ perfume, isFavorite, onToggleFavorite }: { 
-  perfume: any; 
-  isFavorite: boolean; 
-  onToggleFavorite: () => void; 
+function PerfumeCard({
+  perfume,
+  isFavorite,
+  onToggleFavorite,
+}: {
+  perfume: any;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
 }) {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
-
-  // Generate a placeholder image URL based on brand and name
-  const placeholderImage = `https://images.unsplash.com/photo-1541643600914-78b084683601?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80`;
+  const [loaded, setLoaded] = useState(false);
+  const [imgErr, setImgErr] = useState(false);
+  const placeholder =
+    "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=800&q=80";
 
   return (
-    <div className="group relative bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-      {/* Favorite Button */}
+    <div className="group relative overflow-hidden rounded-2xl border border-black/5 bg-[#fffdf7] shadow-[0_2px_8px_rgba(0,0,0,0.05)] transition hover:shadow-[0_6px_20px_rgba(0,0,0,0.08)] hover:-translate-y-[2px]">
+      {/* favorite */}
       <button
         onClick={onToggleFavorite}
-        className="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-200 shadow-sm hover:shadow-md"
+        className="absolute right-3 top-3 z-10 rounded-full bg-white/80 p-2 shadow-sm backdrop-blur hover:bg-white"
       >
-        <Heart 
-          className={`w-4 h-4 transition-all duration-200 ${
-            isFavorite 
-              ? 'fill-rose-500 text-rose-500 scale-110' 
-              : 'text-gray-400 hover:text-rose-400'
+        <Heart
+          className={`h-4 w-4 transition ${
+            isFavorite ? "scale-110 fill-rose-500 text-rose-500" : "text-black/40 hover:text-rose-500"
           }`}
         />
       </button>
 
-      {/* Image Section */}
-      <div className="relative h-48 bg-gradient-to-br from-rose-50 to-amber-50 overflow-hidden">
-        {!imageError ? (
+      {/* image */}
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-amber-50 to-rose-50">
+        {!imgErr ? (
           <img
-            src={perfume.image_url || placeholderImage}
+            src={perfume.image_url || placeholder}
             alt={`${perfume.brand} ${perfume.name}`}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
-              imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageError(true)}
+            onLoad={() => setLoaded(true)}
+            onError={() => setImgErr(true)}
+            className={`h-full w-full object-cover transition-opacity ${loaded ? "opacity-100" : "opacity-0"}`}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Sparkles className="w-12 h-12 text-rose-200" />
+          <div className="flex h-full w-full items-center justify-center">
+            <Sparkles className="h-10 w-10 text-amber-300" />
           </div>
         )}
-        
-        {/* Overlay Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/15 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
       </div>
 
-      {/* Content Section */}
+      {/* content */}
       <div className="p-4">
-        {/* Brand */}
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs font-medium text-rose-600 uppercase tracking-wide">
-            {perfume.brand}
-          </span>
+        <div className="mb-1 flex items-center justify-between">
+          <span className="text-xs font-medium uppercase tracking-wide text-[#c08a00]">{perfume.brand}</span>
           {perfume.rating && (
-            <div className="flex items-center gap-1 text-amber-600">
-              <Star className="w-3 h-3 fill-current" />
+            <span className="flex items-center gap-1 text-amber-600">
+              <Star className="h-3 w-3 fill-current" />
               <span className="text-xs font-medium">{perfume.rating}</span>
-            </div>
+            </span>
           )}
         </div>
 
-        {/* Name */}
-        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1 group-hover:text-rose-700 transition-colors">
-          {perfume.name}
-        </h3>
+        <h3 className="mb-2 line-clamp-1 font-semibold text-[#111]">{perfume.name}</h3>
 
-        {/* Notes */}
         {perfume.notes && (
-          <p className="text-sm text-gray-600 line-clamp-2 mb-3 leading-relaxed">
-            {perfume.notes}
-          </p>
+          <p className="mb-3 line-clamp-2 text-sm leading-relaxed text-[#555]">{perfume.notes}</p>
         )}
 
-        {/* Price & Action */}
-        <div className="flex items-center justify-between mt-4">
+        <div className="mt-4 flex items-center justify-between">
           {perfume.price ? (
-            <span className="text-lg font-semibold text-gray-900">
-              ${parseFloat(perfume.price).toFixed(2)}
-            </span>
+            <span className="text-lg font-semibold text-[#111]">${parseFloat(perfume.price).toFixed(2)}</span>
           ) : (
-            <span className="text-sm text-gray-500">Price on request</span>
+            <span className="text-sm text-[#666]">Price on request</span>
           )}
-          
-          <button className="flex items-center gap-1 px-3 py-2 rounded-full bg-rose-600 text-white text-sm font-medium hover:bg-rose-700 transition-all duration-200 group/btn">
-            <ShoppingBag className="w-3 h-3 group-hover/btn:scale-110 transition-transform" />
-            Add
+
+          <button className="group/btn rounded-full bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-[#f9f6ef] transition hover:opacity-90">
+            <ShoppingBag className="h-3 w-3 transition group-hover/btn:scale-110" />
+            <span className="ml-1">Add</span>
           </button>
         </div>
       </div>
@@ -181,29 +151,23 @@ function PerfumeCard({ perfume, isFavorite, onToggleFavorite }: {
   );
 }
 
-// Loading Component
+/* Loading / Error / Empty unchanged except palette tweaks */
+
 function PerfumeListLoading() {
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="h-8 bg-gray-200 rounded-lg w-48 animate-pulse" />
-        <div className="h-10 bg-gray-200 rounded-full w-32 animate-pulse" />
+      <div className="flex items-center justify-between">
+        <div className="h-7 w-44 rounded bg-black/10" />
+        <div className="h-9 w-28 rounded-full bg-black/10" />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {[...Array(8)].map((_, i) => (
-          <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
-            <div className="h-48 bg-gray-200" />
-            <div className="p-4 space-y-3">
-              <div className="h-4 bg-gray-200 rounded w-20" />
-              <div className="h-5 bg-gray-200 rounded w-32" />
-              <div className="space-y-2">
-                <div className="h-3 bg-gray-200 rounded w-full" />
-                <div className="h-3 bg-gray-200 rounded w-3/4" />
-              </div>
-              <div className="flex justify-between items-center pt-2">
-                <div className="h-6 bg-gray-200 rounded w-16" />
-                <div className="h-8 bg-gray-200 rounded-full w-20" />
-              </div>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="overflow-hidden rounded-2xl border border-black/5 bg-[#fffdf7]">
+            <div className="h-40 animate-pulse bg-black/10" />
+            <div className="space-y-3 p-4">
+              <div className="h-3 w-20 animate-pulse rounded bg-black/10" />
+              <div className="h-4 w-32 animate-pulse rounded bg-black/10" />
+              <div className="h-3 w-full animate-pulse rounded bg-black/10" />
             </div>
           </div>
         ))}
@@ -212,56 +176,40 @@ function PerfumeListLoading() {
   );
 }
 
-// Error Component
 function PerfumeListError({ onRetry }: { onRetry: () => void }) {
   return (
-    <div className="text-center py-12">
-      <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <Sparkles className="w-8 h-8 text-rose-600" />
+    <div className="py-12 text-center">
+      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+        <Sparkles className="h-8 w-8 text-amber-700" />
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-        Unable to Load Fragrances
-      </h3>
-      <p className="text-gray-600 mb-6 max-w-md mx-auto">
-        We encountered an issue while loading the perfume collection. Please try again.
-      </p>
+      <h3 className="mb-2 text-lg font-semibold text-[#111]">Unable to load fragrances</h3>
+      <p className="mx-auto mb-6 max-w-md text-[#555]">Please try again.</p>
       <button
         onClick={onRetry}
-        className="px-6 py-3 bg-rose-600 text-white rounded-full hover:bg-rose-700 transition-colors duration-200 font-medium"
+        className="rounded-full bg-[#1a1a1a] px-6 py-3 text-sm font-medium text-[#f9f6ef] hover:opacity-90"
       >
-        Try Again
+        Try again
       </button>
     </div>
   );
 }
 
-// Empty State Component
 function PerfumeListEmpty() {
   return (
-    <div className="text-center py-16">
-      <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <Sparkles className="w-10 h-10 text-amber-600" />
+    <div className="py-16 text-center">
+      <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100">
+        <Sparkles className="h-10 w-10 text-amber-700" />
       </div>
-      <h3 className="text-xl font-semibold text-gray-900 mb-3">
-        No Fragrances Found
-      </h3>
-      <p className="text-gray-600 mb-6 max-w-md mx-auto">
-        We couldn't find any perfumes matching your criteria. Try adjusting your filters or search terms.
+      <h3 className="mb-3 text-xl font-semibold text-[#111]">No fragrances found</h3>
+      <p className="mx-auto mb-6 max-w-md text-[#555]">
+        Try different filters or search terms.
       </p>
-      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <button
-          onClick={() => window.location.reload()}
-          className="px-6 py-3 bg-amber-600 text-white rounded-full hover:bg-amber-700 transition-colors duration-200 font-medium"
-        >
-          Clear Filters
-        </button>
-        <button
-          onClick={() => window.location.href = '/contact'}
-          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition-colors duration-200 font-medium"
-        >
-          Request a Scent
-        </button>
-      </div>
+      <button
+        onClick={() => window.location.reload()}
+        className="rounded-full bg-[#1a1a1a] px-6 py-3 text-sm font-medium text-[#f9f6ef] hover:opacity-90"
+      >
+        Clear filters
+      </button>
     </div>
   );
 }
