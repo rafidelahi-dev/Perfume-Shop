@@ -92,7 +92,6 @@ export default function Header() {
         <nav className="hidden md:flex items-center gap-1">
           <NavLink href="/" label="Home" />
           <NavLink href="/perfumes" label="Perfumes" />
-          <NavLink href="/new" label="New Listing" />
 
           {email ? (
             <>
