@@ -3,29 +3,41 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import { useUiStore } from "@/stores/useUiStore";
-import { RefreshCw, Sparkles, Star, Heart, ShoppingBag } from "lucide-react";
+import { RefreshCw, Heart, Sparkles, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 
-async function fetchPerfumes(brand: string, q: string) {
-  let query = supabase.from("perfumes").select("*").order("brand");
+async function fetchListings(brand: string, q: string) {
+  let query = supabase
+    .from("listings")
+    .select(`
+      id, brand, sub_brand, perfume_name, type, price, decants, images, created_at,
+      seller:profiles!listings_user_id_fkey ( display_name, username )
+    `)
+    .order("created_at", { ascending: false });
+
   if (brand) query = query.ilike("brand", `%${brand}%`);
-  if (q) query = query.or(`name.ilike.%${q}%,notes.ilike.%${q}%`);
+  if (q) query = query.or(`perfume_name.ilike.%${q}%,brand.ilike.%${q}%,sub_brand.ilike.%${q}%`);
+
   const { data, error } = await query;
-  if (error) throw error;
+  if (error) {
+    console.error("Supabase listings error", error);
+    throw error;
+  }
   return data ?? [];
 }
 
+
 export default function PerfumeList() {
   const { brand, q } = useUiStore((s) => s.filters);
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   const { data, isLoading, error, refetch, isRefetching } = useQuery({
-    queryKey: ["perfumes", { brand, q }],
-    queryFn: () => fetchPerfumes(brand, q),
+    queryKey: ["listings", { brand, q }],
+    queryFn: () => fetchListings(brand, q),
     staleTime: 60_000,
   });
 
-  const toggleFavorite = (id: number) => {
+  const toggleFavorite = (id: string) => {
     setFavorites((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
@@ -39,11 +51,12 @@ export default function PerfumeList() {
 
   return (
     <div className="space-y-6">
-      {/* header */}
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h3 className="text-lg font-semibold text-[#1a1a1a]">{data.length} Fragrances Found</h3>
-          <p className="mt-1 text-sm text-[#555]">Discover your perfect scent from our curated collection</p>
+          <h3 className="text-lg font-semibold text-[#1a1a1a]">{data.length} Perfumes Listed</h3>
+          <p className="mt-1 text-sm text-[#555]">
+            Explore perfumes uploaded by our community sellers
+          </p>
         </div>
         <button
           onClick={() => refetch()}
@@ -55,14 +68,14 @@ export default function PerfumeList() {
         </button>
       </div>
 
-      {/* grid */}
+      {/* cards */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {data.map((p: any) => (
-          <PerfumeCard
-            key={p.id}
-            perfume={p}
-            isFavorite={favorites.has(p.id)}
-            onToggleFavorite={() => toggleFavorite(p.id)}
+        {data.map((l: any) => (
+          <ListingCard
+            key={l.id}
+            listing={l}
+            isFavorite={favorites.has(l.id)}
+            onToggleFavorite={() => toggleFavorite(l.id)}
           />
         ))}
       </div>
@@ -70,22 +83,33 @@ export default function PerfumeList() {
   );
 }
 
-function PerfumeCard({
-  perfume,
+function ListingCard({
+  listing,
   isFavorite,
   onToggleFavorite,
 }: {
-  perfume: any;
+  listing: any;
   isFavorite: boolean;
   onToggleFavorite: () => void;
 }) {
-  const [loaded, setLoaded] = useState(false);
   const [imgErr, setImgErr] = useState(false);
-  const placeholder =
+  const [loaded, setLoaded] = useState(false);
+
+  const image = listing.images?.[0] ||
     "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=800&q=80";
 
+  // Price logic
+  let priceDisplay = "—";
+  if (listing.type === "intact" || listing.type === "partial") {
+    priceDisplay = `$${Number(listing.price).toFixed(2)}`;
+  } else if (listing.type === "decant" && Array.isArray(listing.decants)) {
+    const min = Math.min(...listing.decants.map((d: any) => Number(d.price)));
+    const max = Math.max(...listing.decants.map((d: any) => Number(d.price)));
+    priceDisplay = `$${min.toFixed(2)}–$${max.toFixed(2)}`;
+  }
+
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-black/5 bg-[#fffdf7] shadow-[0_2px_8px_rgba(0,0,0,0.05)] transition hover:shadow-[0_6px_20px_rgba(0,0,0,0.08)] hover:-translate-y-[2px]">
+    <div className="group relative overflow-hidden rounded-2xl border border-black/5 bg-[#fffdf7] shadow-sm transition hover:-translate-y-[2px] hover:shadow-lg">
       {/* favorite */}
       <button
         onClick={onToggleFavorite}
@@ -99,60 +123,61 @@ function PerfumeCard({
       </button>
 
       {/* image */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-amber-50 to-rose-50">
+      <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-amber-50 to-rose-50">
         {!imgErr ? (
           <img
-            src={perfume.image_url || placeholder}
-            alt={`${perfume.brand} ${perfume.name}`}
+            src={image}
+            alt={`${listing.brand} ${listing.perfume_name}`}
             onLoad={() => setLoaded(true)}
             onError={() => setImgErr(true)}
-            className={`h-full w-full object-cover transition-opacity ${loaded ? "opacity-100" : "opacity-0"}`}
+            className={`h-full w-full object-cover transition-opacity ${
+              loaded ? "opacity-100" : "opacity-0"
+            }`}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
             <Sparkles className="h-10 w-10 text-amber-300" />
           </div>
         )}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/15 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
       </div>
 
       {/* content */}
       <div className="p-4">
         <div className="mb-1 flex items-center justify-between">
-          <span className="text-xs font-medium uppercase tracking-wide text-[#c08a00]">{perfume.brand}</span>
-          {perfume.rating && (
-            <span className="flex items-center gap-1 text-amber-600">
-              <Star className="h-3 w-3 fill-current" />
-              <span className="text-xs font-medium">{perfume.rating}</span>
-            </span>
-          )}
+          <span className="text-xs font-medium uppercase tracking-wide text-[#c08a00]">
+            {listing.brand}
+          </span>
+          <span className="inline-block rounded-full bg-[#f5f1e8] px-2 py-1 text-xs capitalize text-[#333]">
+            {listing.type}
+          </span>
         </div>
 
-        <h3 className="mb-2 line-clamp-1 font-semibold text-[#111]">{perfume.name}</h3>
-
-        {perfume.notes && (
-          <p className="mb-3 line-clamp-2 text-sm leading-relaxed text-[#555]">{perfume.notes}</p>
+        <h3 className="mb-1 line-clamp-1 font-semibold text-[#111]">{listing.perfume_name}</h3>
+        {listing.sub_brand && (
+          <p className="text-xs text-[#666] mb-2">{listing.sub_brand}</p>
         )}
 
-        <div className="mt-4 flex items-center justify-between">
-          {perfume.price ? (
-            <span className="text-lg font-semibold text-[#111]">${parseFloat(perfume.price).toFixed(2)}</span>
-          ) : (
-            <span className="text-sm text-[#666]">Price on request</span>
-          )}
-
-          <button className="group/btn rounded-full bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-[#f9f6ef] transition hover:opacity-90">
+        <div className="flex items-center justify-between mt-2">
+          <span className="text-lg font-semibold text-[#111]">{priceDisplay}</span>
+          <button className="group/btn flex items-center gap-1 rounded-full bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-[#f9f6ef] transition hover:opacity-90">
             <ShoppingBag className="h-3 w-3 transition group-hover/btn:scale-110" />
-            <span className="ml-1">Add</span>
+            <span>Add</span>
           </button>
         </div>
+
+        <p className="mt-3 text-xs text-[#666]">
+          Seller:{" "}
+          <span className="font-medium text-[#1a1a1a]">
+            {listing.profiles?.display_name || listing.profiles?.username || "Anonymous"}
+          </span>
+        </p>
       </div>
     </div>
   );
 }
 
-/* Loading / Error / Empty unchanged except palette tweaks */
-
+/* Skeletons / errors / empty remain same except titles */
 function PerfumeListLoading() {
   return (
     <div className="space-y-6">
@@ -182,7 +207,7 @@ function PerfumeListError({ onRetry }: { onRetry: () => void }) {
       <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
         <Sparkles className="h-8 w-8 text-amber-700" />
       </div>
-      <h3 className="mb-2 text-lg font-semibold text-[#111]">Unable to load fragrances</h3>
+      <h3 className="mb-2 text-lg font-semibold text-[#111]">Unable to load listings</h3>
       <p className="mx-auto mb-6 max-w-md text-[#555]">Please try again.</p>
       <button
         onClick={onRetry}
@@ -200,7 +225,7 @@ function PerfumeListEmpty() {
       <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100">
         <Sparkles className="h-10 w-10 text-amber-700" />
       </div>
-      <h3 className="mb-3 text-xl font-semibold text-[#111]">No fragrances found</h3>
+      <h3 className="mb-3 text-xl font-semibold text-[#111]">No listings found</h3>
       <p className="mx-auto mb-6 max-w-md text-[#555]">
         Try different filters or search terms.
       </p>

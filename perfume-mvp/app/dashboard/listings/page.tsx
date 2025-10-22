@@ -25,12 +25,21 @@ async function fetchMyListings() {
 }
 
 async function uploadImage(file: File, userId: string) {
-  const ext = file.name.split(".").pop();
+  // Fallback extension if the file has no extension in its name
+  const original = file.name || "image";
+  const parts = original.split(".");
+  const ext = parts.length > 1 ? parts.pop() : "jpg"; // default to jpg
   const path = `${userId}/${Date.now()}.${ext}`;
-  const { error } = await supabase.storage
+
+  const { error: upErr } = await supabase.storage
     .from("listing-images")
     .upload(path, file, { cacheControl: "3600", upsert: true });
-  if (error) throw error;
+
+  if (upErr) {
+    // This is the place that threw "row-level security policy" before
+    throw upErr;
+  }
+
   const { data } = supabase.storage.from("listing-images").getPublicUrl(path);
   return data.publicUrl;
 }
