@@ -1,7 +1,7 @@
 // app/(auth)/login/page.tsx
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -12,6 +12,8 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [oauthLoading, setOauthLoading] = useState<"google" | "facebook" | null>(null);
   const router = useRouter();
+  const search = useSearchParams();                      // ← read query string
+  const nextPath = search.get("next") || "/dashboard";
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -19,28 +21,32 @@ export default function LoginPage() {
     setError(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) setError(error.message);
-    else router.push("/perfumes");
+    else router.push(nextPath); 
     setLoading(false);
   }
 
   async function signInWithOAuth(provider: "google" | "facebook") {
-    try {
-      setOauthLoading(provider);
-      setError(null);
-      // Redirect back to your site after OAuth completes:
-      const redirectTo =
-        typeof window !== "undefined" ? `${location.origin}` : undefined;
+  try {
+    setOauthLoading(provider);
+    setError(null);
 
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: { redirectTo },
-      });
-      if (error) setError(error.message);
-      // On success, user is redirected; session will be available when they return.
-    } finally {
-      setOauthLoading(null);
-    }
+    // Will return to the desired page after OAuth completes:
+    const redirectTo =
+      typeof window !== "undefined"
+        ? `${location.origin}${nextPath}` // e.g. https://yoursite.com/dashboard
+        : undefined;
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo },
+    });
+
+    if (error) setError(error.message);
+  } finally {
+    setOauthLoading(null);
   }
+}
+
 
   return (
     <div className="max-w-sm mx-auto rounded-xl border bg-white p-6">
@@ -100,14 +106,14 @@ export default function LoginPage() {
 
       <p className="mt-4 text-sm text-gray-700">
         Don’t have an account?{" "}
-        <Link href="/signup" className="text-blue-600 underline">
+        <Link href={`/signup?next=${encodeURIComponent(nextPath)}`} className="text-blue-600 underline">
           Sign up
         </Link>
       </p>
 
       <p className="mt-2 text-xs text-gray-500">
         Forgot your password?{" "}
-        <Link href="/reset" className="underline">
+        <Link href={`/reset?next=${encodeURIComponent(nextPath)}`} className="underline">
           Reset it
         </Link>
       </p>
