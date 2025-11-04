@@ -11,4 +11,5 @@ export async function uploadToBucket(bucket: string, files: File[]){
         const {data} = supabase.storage.from(bucket).getPublicUrl(path);
         urls.push(data.publicUrl)
     }
+    return urls;
 }

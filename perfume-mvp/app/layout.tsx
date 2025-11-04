@@ -23,20 +23,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <Providers>
           {children}
-
-          {/* Footer */}
-          <footer className="mt-16 border-t border-white/20 py-10">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-muted-foreground">
-                © {new Date().getFullYear()} Perfume Share. All rights reserved.
-              </p>
-              <nav className="flex gap-6 text-sm">
-                <Link href="/perfumes">Explore</Link>
-                <Link href="/dashboard/listings">Sell</Link>
-                <Link href="/dashboard/profile">Profile</Link>
-              </nav>
-            </div>
-          </footer>
         </Providers>
       </body>
     </html>

@@ -1,6 +1,6 @@
 // app/(auth)/login/page.tsx
 "use client";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
@@ -11,42 +11,56 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [oauthLoading, setOauthLoading] = useState<"google" | "facebook" | null>(null);
+
   const router = useRouter();
-  const search = useSearchParams();                      // ← read query string
-  const nextPath = search.get("next") || "/dashboard";
+  const search = useSearchParams();
+
+  // ✅ Always ensure next starts with a leading slash
+  const nextPath = useMemo(() => {
+    const raw = search.get("next");
+    if (!raw) return "/dashboard";
+    return raw.startsWith("/") ? raw : `/${raw}`;
+  }, [search]);
+
+  // Optional: if already logged in, bounce to nextPath
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) router.replace(nextPath);
+    });
+  }, [nextPath, router]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) setError(error.message);
-    else router.push(nextPath); 
+    if (error) {
+      setError(error.message);
+    } else {
+      router.replace(nextPath); // replace is nicer after auth
+    }
     setLoading(false);
   }
 
   async function signInWithOAuth(provider: "google" | "facebook") {
-  try {
-    setOauthLoading(provider);
-    setError(null);
+    try {
+      setOauthLoading(provider);
+      setError(null);
 
-    // Will return to the desired page after OAuth completes:
-    const redirectTo =
-      typeof window !== "undefined"
-        ? `${location.origin}${nextPath}` // e.g. https://yoursite.com/dashboard
-        : undefined;
+      const redirectTo =
+        typeof window !== "undefined" ? `${location.origin}${nextPath}` : undefined;
 
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo },
-    });
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo },
+      });
 
-    if (error) setError(error.message);
-  } finally {
-    setOauthLoading(null);
+      if (error) setError(error.message);
+    } finally {
+      setOauthLoading(null);
+    }
   }
-}
-
 
   return (
     <div className="max-w-sm mx-auto rounded-xl border bg-white p-6">
@@ -72,11 +86,7 @@ export default function LoginPage() {
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <button
-          disabled={loading}
-          className="w-full bg-gray-900 text-white rounded p-2"
-          type="submit"
-        >
+        <button disabled={loading} className="w-full bg-gray-900 text-white rounded p-2" type="submit">
           {loading ? "Logging in…" : "Log in"}
         </button>
       </form>
