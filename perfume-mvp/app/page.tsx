@@ -1,25 +1,53 @@
+"use client";
+
 // app/page.tsx
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function Home() {
+  const [currentBg, setCurrentBg] = useState(0);
+
+   // Array of background images with different color variations
+  const backgroundImages = [
+    "/Background/1.png", 
+    "/Background/2.png", 
+    "/Background/6.png",
+    "/Background/3.png", 
+    "/Background/4.png", 
+    "/Background/5.png", 
+     
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBg((prev) => (prev + 1) % backgroundImages.length)
+    }, 3000)
+    return () => clearInterval(interval);
+  }, [])
+
+
   return (
     <>
-      <Header />
-
+    <Header/>
       {/* Enhanced Hero Section with Background */}
       <section className="relative w-full overflow-hidden rounded-none min-h-[85vh] flex items-center justify-center">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{
-              backgroundImage: "url('/Background.jpg')", // Replace with your background image
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-br from-[#f8f7f3]/90 via-[#f3f1ec]/85 to-[#e8e5dd]/80" />
-          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.02] mix-blend-overlay" />
+          {backgroundImages.map((bg, index) => (
+            <div
+              key={bg}
+              className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
+                index === currentBg ? "opacity-100" : "opacity-0"
+              }`}
+              style={{
+                backgroundImage: `url('${bg}')`,
+              }}
+            />
+          ))}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#f8f7f3]/50 via-[#f3f1ec]/5 to-[#e8e5dd]/40" />
+  
         </div>
 
         {/* Decorative Elements */}
@@ -66,77 +94,6 @@ export default function Home() {
               <div className="w-2 h-2 bg-[#d4af37] rounded-full" />
               <span>Secure Transactions</span>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Categories - Enhanced */}
-      <section className="py-20 px-6 sm:px-12 bg-white/30 backdrop-blur-sm">
-        <div className="mx-auto max-w-6xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-light text-[#111] mb-4">Curated Collections</h2>
-            <p className="text-[#666] max-w-2xl mx-auto font-light">
-              Explore fragrances by mood and occasion. Each collection tells a unique olfactory story.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { 
-                label: "Citrus Fresh", 
-                description: "Bright & Energizing",
-                gradient: "from-[#fff8e1] via-[#ffecb3] to-[#ffd54f]/20",
-                accent: "bg-[#ffd54f]"
-              },
-              { 
-                label: "Sweet & Gourmand", 
-                description: "Indulgent & Warm",
-                gradient: "from-[#fce4ec] via-[#f8bbd9] to-[#f48fb1]/20",
-                accent: "bg-[#f48fb1]"
-              },
-              { 
-                label: "Woody & Warm", 
-                description: "Earthy & Sophisticated",
-                gradient: "from-[#efebe9] via-[#d7ccc8] to-[#a1887f]/20",
-                accent: "bg-[#a1887f]"
-              },
-              { 
-                label: "Aquatic & Clean", 
-                description: "Fresh & Crisp",
-                gradient: "from-[#e1f5fe] via-[#b3e5fc] to-[#4fc3f7]/20",
-                accent: "bg-[#4fc3f7]"
-              },
-            ].map((category) => (
-              <Link
-                key={category.label}
-                href={`/perfumes?tag=${encodeURIComponent(category.label)}`}
-                className="group relative overflow-hidden rounded-3xl bg-gradient-to-br p-8 transition-all duration-500 hover:scale-105 hover:shadow-2xl h-48 flex flex-col justify-between"
-                style={{ background: `linear-gradient(135deg, var(--from-color), var(--to-color))` }}
-              >
-                {/* Background Gradient */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${category.gradient} opacity-80`} />
-                
-                {/* Accent Bar */}
-                <div className={`absolute top-0 left-0 w-1 h-full ${category.accent} opacity-80`} />
-                
-                {/* Content */}
-                <div className="relative z-10">
-                  <h3 className="text-xl font-medium text-[#111] group-hover:translate-x-2 transition-transform">
-                    {category.label}
-                  </h3>
-                  <p className="text-sm text-[#666] mt-2 font-light">
-                    {category.description}
-                  </p>
-                </div>
-                
-                <div className="relative z-10 flex justify-between items-center">
-                  <span className="text-xs text-[#666] font-medium">Explore</span>
-                  <span className="text-2xl opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300">
-                    →
-                  </span>
-                </div>
-              </Link>
-            ))}
           </div>
         </div>
       </section>

@@ -165,12 +165,31 @@ export default function MyListingsPage() {
         payload = { ...base, bottle_size_ml: Number(bottleSize), price: Number(singlePrice), partial_left_ml: null, decants: [] };
       } else if (type === "partial") {
         payload = { ...base, partial_left_ml: Number(partialLeft), price: Number(singlePrice), bottle_size_ml: null, decants: [] };
-      } else {
+      } else { // type === "decant"
         const cleaned = decants
-          .filter((d) => d.size_ml && d.price)
-          .map((d) => ({ size_ml: Number(d.size_ml), price: Number(d.price) }));
-        payload = { ...base, decants: cleaned, price: null, bottle_size_ml: null, partial_left_ml: null };
+          .map(d => ({
+            ml: d.size_ml === "" ? null : Number(d.size_ml),
+            price: d.price === "" ? null : Number(d.price),
+          }))
+          .filter(d => typeof d.ml === "number" && d.ml > 0 && typeof d.price === "number" && d.price > 0);
+
+        if (cleaned.length === 0) {
+          throw new Error("Add at least one decant size with a positive price.");
+        }
+
+        payload = {
+          ...base,
+          type: "decant",
+          decant_options: cleaned,   // <— IMPORTANT: use 'decant_options'
+          price: null,               // non-decant only
+          bottle_size_ml: null,
+          partial_left_ml: null,
+        };
       }
+
+      // right before: await create.mutateAsync(payload);
+      console.log("INSERT listings payload:", JSON.stringify(payload, null, 2));
+
 
       await create.mutateAsync(payload);
     } catch (err: any) {
@@ -391,60 +410,76 @@ export default function MyListingsPage() {
 
         {data && data.length > 0 && (
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.map((l: any) => (
-              <li
-                key={l.id}
-                className="rounded-2xl border border-black/5 bg-white overflow-hidden shadow-sm"
-              >
-                {l.images?.[0] && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={l.images[0]} alt="" className="h-40 w-full object-cover" />
-                )}
-                <div className="p-4">
-                  <div className="text-xs uppercase tracking-wide text-gray-500">
-                    {l.brand}{l.sub_brand ? ` • ${l.sub_brand}` : ""}
-                  </div>
-                  <h4 className="mt-1 font-semibold">{l.perfume_name}</h4>
+            {data.map((l: any) => {
+              // 👇 compute a single “from” price for decants (fallback to l.price if needed)
+              const fromPrice =
+                typeof l.min_price === "number"
+                ? Number(l.min_price)
+                : (l.price != null ? Number(l.price) : null);
 
-                  <div className="mt-2">
-                    <span className="inline-block rounded-full bg-[#f8f7f3] px-2 py-1 text-xs capitalize">
-                      {l.type}
-                    </span>
-                  </div>
-
-                  {l.type !== "decant" ? (
-                    <div className="mt-2 text-sm text-gray-700">
-                      {l.type === "intact" && l.bottle_size_ml && (
-                        <div>Bottle: {l.bottle_size_ml} ml</div>
-                      )}
-                      {l.type === "partial" && l.partial_left_ml && (
-                        <div>Left: {l.partial_left_ml} ml</div>
-                      )}
-                      {typeof l.price === "number" && (
-                        <div className="font-medium mt-1">${Number(l.price).toFixed(2)}</div>
-                      )}
+              return (
+                <li
+                  key={l.id}
+                  className="rounded-2xl border border-black/5 bg-white overflow-hidden shadow-sm"
+                >
+                  {l.images?.[0] && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={l.images[0]} alt="" className="h-40 w-full object-cover" />
+                  )}
+                  <div className="p-4">
+                    <div className="text-xs uppercase tracking-wide text-gray-500">
+                      {l.brand}{l.sub_brand ? ` • ${l.sub_brand}` : ""}
                     </div>
-                  ) : (
-                    <div className="mt-2 text-sm text-gray-700">
-                      {Array.isArray(l.decants) && l.decants.length > 0 ? (
-                        <div className="space-y-1">
-                          {l.decants.map((d: any, idx: number) => (
+                    <h4 className="mt-1 font-semibold">{l.perfume_name}</h4>
+
+                    <div className="mt-2">
+                      <span className="inline-block rounded-full bg-[#f8f7f3] px-2 py-1 text-xs capitalize">
+                        {l.type}
+                      </span>
+                    </div>
+
+                    {l.type !== "decant" ? (
+                      <div className="mt-2 text-sm text-gray-700">
+                        {l.type === "intact" && l.bottle_size_ml && (
+                          <div>Bottle: {l.bottle_size_ml} ml</div>
+                        )}
+                        {l.type === "partial" && l.partial_left_ml && (
+                          <div>Left: {l.partial_left_ml} ml</div>
+                        )}
+                        {typeof fromPrice === "number" && !Number.isNaN(fromPrice) && (
+                          <div className="font-medium mt-1">${fromPrice.toFixed(2)}</div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="mt-2 text-sm text-gray-700">
+                        {/* 👇 NEW: show a single “From $X.XX” line for decants */}
+                        {typeof fromPrice === "number" && !Number.isNaN(fromPrice) && (
+                          <div className="mt-1">
+                            From <span className="font-medium">${fromPrice.toFixed(2)}</span>
+                          </div>
+                        )}
+
+                        {Array.isArray(l.decant_options) && l.decant_options.length > 0 ? (
+                        <div className="mt-2 space-y-1">
+                          {l.decant_options.map((d: any, idx: number) => (
                             <div key={idx} className="flex items-center justify-between">
-                              <span>{d.size_ml} ml</span>
+                              <span>{Number(d.ml)} ml</span>
                               <span className="font-medium">${Number(d.price).toFixed(2)}</span>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <div>No decant sizes listed</div>
+                        <div className="mt-2">No decant sizes listed</div>
                       )}
-                    </div>
-                  )}
-                </div>
-              </li>
-            ))}
+                      </div> 
+                      )} 
+                  </div> 
+                </li>
+              );
+            })}
           </ul>
         )}
+
       </div>
     </section>
   );

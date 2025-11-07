@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuthProfile } from "@/lib/hooks/useAuthProfile";
 import Image from "next/image";
@@ -11,9 +11,10 @@ import Image from "next/image";
 export default function Header() {
   const pathname = usePathname();
   const next = useMemo(() => encodeURIComponent(pathname || "/"), [pathname]);
+  const router = useRouter();
 
   // Centralized auth/profile state
-  const { loading, email, displayName } = useAuthProfile();
+  const { loading, isAuthenticated, displayName } = useAuthProfile();
 
   const [open, setOpen] = useState(false);
 
@@ -21,6 +22,7 @@ export default function Header() {
     await supabase.auth.signOut();
     // optional: you can route to home here if you like:
     // router.push("/");
+    router.refresh();
   }
 
   const NavLink = ({
@@ -48,7 +50,7 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 mb-6 border-b border-black/5 bg-[#f8f7f3]/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-black/5 bg-[#f8f7f3]/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo with Image */}
         <Link href="/" className="flex items-center gap-3">
@@ -69,7 +71,7 @@ export default function Header() {
           <NavLink href="/" label="Home" />
           <NavLink href="/perfumes" label="Perfumes" />
 
-          {email ? (
+          {isAuthenticated ? (
             <>
               <NavLink href="/dashboard" label="Dashboard" />
 
@@ -118,7 +120,7 @@ export default function Header() {
             <NavLink href="/" label="Home" />
             <NavLink href="/perfumes" label="Perfumes" />
 
-            {email ? (
+            {isAuthenticated ? (
               <>
                 <NavLink href="/dashboard" label="Dashboard" />
                 <NavLink href="/dashboard/profile" label="Profile" />
