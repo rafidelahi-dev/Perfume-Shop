@@ -27,3 +27,14 @@ export async function fetchPublicListings(filters: { brand?: string; q?: string 
   if (error) throw error;
   return data ?? [];
 }
+
+
+export async function deleteMyListing(id: string) {
+  const userId = await getSessionUserId();
+  const { error } = await supabase
+    .from("listings")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", userId);
+  if (error) throw error;
+}

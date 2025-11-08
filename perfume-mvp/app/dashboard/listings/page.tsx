@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
+import { deleteMyListing } from "@/lib/queries/listings";
+import { qk } from "@/lib/queries/key";
 
 type DecantRow = { size_ml: number | ""; price: number | "" };
 
@@ -58,7 +60,7 @@ export default function MyListingsPage() {
   const [brand, setBrand] = useState("");
   const [subBrand, setSubBrand] = useState("");
   const [perfumeName, setPerfumeName] = useState("");
-  const [type, setType] = useState<"intact" | "partial" | "decant">("intact");
+  const [type, setType] = useState<"intact" | "partial" | "decant_options">("intact");
 
   const [bottleSize, setBottleSize] = useState<number | "">("");
   const [partialLeft, setPartialLeft] = useState<number | "">("");
@@ -75,6 +77,16 @@ export default function MyListingsPage() {
     queryFn: fetchMyListings,
   });
 
+    // create the mutation *inside* the component
+  const destroy = useMutation({
+    mutationFn: (id: string) => deleteMyListing(id), // or your local delete function
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.userListings }); // or ["my_listings"]
+    },
+  });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const create = useMutation({
     mutationFn: insertListing,
     onSuccess: () => {
@@ -101,6 +113,13 @@ export default function MyListingsPage() {
   function updateDecant(idx: number, key: "size_ml" | "price", val: number | "") {
     setDecants((rows) => rows.map((r, i) => (i === idx ? { ...r, [key]: val } : r)));
   }
+
+  function confirmAndDelete(id: string) {
+    const ok = window.confirm("Delete this listing permanently?");
+    if (!ok) return;
+    destroy.mutate(id); // your delete mutation
+  }
+
 
   async function onUploadImages(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
@@ -136,7 +155,7 @@ export default function MyListingsPage() {
       if (!partialLeft || partialLeft <= 0) return "Amount left (ml) is required for Partial.";
       if (!singlePrice || singlePrice <= 0) return "Price is required.";
     }
-    if (type === "decant") {
+    if (type === "decant_options") {
       const valid = decants.filter((d) => d.size_ml && d.price && d.size_ml > 0 && d.price > 0);
       if (valid.length === 0) return "Add at least one decant size with price.";
     }
@@ -179,9 +198,9 @@ export default function MyListingsPage() {
 
         payload = {
           ...base,
-          type: "decant",
+          type: "decant_options",
           decant_options: cleaned,   // <— IMPORTANT: use 'decant_options'
-          price: null,               // non-decant only
+          price: null,               
           bottle_size_ml: null,
           partial_left_ml: null,
         };
@@ -192,6 +211,8 @@ export default function MyListingsPage() {
 
 
       await create.mutateAsync(payload);
+
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err: any) {
       setFormError(err.message || "Failed to create listing");
     } finally {
@@ -268,6 +289,7 @@ export default function MyListingsPage() {
           <div className="space-y-3">
             <label className="block text-sm font-medium text-[#1a1a1a]">Photos *</label>
             <input
+              ref={fileInputRef}
               type="file"
               accept="image/*"
               multiple
@@ -336,7 +358,7 @@ export default function MyListingsPage() {
             </div>
           )}
 
-          {type === "decant" && (
+          {type === "decant_options" && (
             <div className="space-y-2">
               {decants.map((row, i) => (
                 <div key={i} className="grid grid-cols-12 gap-2">
@@ -436,9 +458,16 @@ export default function MyListingsPage() {
                       <span className="inline-block rounded-full bg-[#f8f7f3] px-2 py-1 text-xs capitalize">
                         {l.type}
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => confirmAndDelete(l.id)}
+                        className="rounded-full border px-3 py-1.5 text-xs text-red-600 hover:bg-red-50"
+                      >
+                        Delete
+                      </button>
                     </div>
 
-                    {l.type !== "decant" ? (
+                    {l.type !== "decant_options" ? (
                       <div className="mt-2 text-sm text-gray-700">
                         {l.type === "intact" && l.bottle_size_ml && (
                           <div>Bottle: {l.bottle_size_ml} ml</div>
