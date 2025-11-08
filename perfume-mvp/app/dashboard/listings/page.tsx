@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import { deleteMyListing } from "@/lib/queries/listings";
 import { qk } from "@/lib/queries/key";
+import { useRouter } from "next/navigation";
 
 type DecantRow = { size_ml: number | ""; price: number | "" };
 
@@ -60,7 +61,7 @@ export default function MyListingsPage() {
   const [brand, setBrand] = useState("");
   const [subBrand, setSubBrand] = useState("");
   const [perfumeName, setPerfumeName] = useState("");
-  const [type, setType] = useState<"intact" | "partial" | "decant_options">("intact");
+  const [type, setType] = useState<"intact" | "partial" | "decant">("intact");
 
   const [bottleSize, setBottleSize] = useState<number | "">("");
   const [partialLeft, setPartialLeft] = useState<number | "">("");
@@ -71,6 +72,7 @@ export default function MyListingsPage() {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const router = useRouter();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["my_listings"],
@@ -86,7 +88,7 @@ export default function MyListingsPage() {
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const create = useMutation({
     mutationFn: insertListing,
     onSuccess: () => {
@@ -155,7 +157,7 @@ export default function MyListingsPage() {
       if (!partialLeft || partialLeft <= 0) return "Amount left (ml) is required for Partial.";
       if (!singlePrice || singlePrice <= 0) return "Price is required.";
     }
-    if (type === "decant_options") {
+    if (type === "decant") {
       const valid = decants.filter((d) => d.size_ml && d.price && d.size_ml > 0 && d.price > 0);
       if (valid.length === 0) return "Add at least one decant size with price.";
     }
@@ -181,9 +183,9 @@ export default function MyListingsPage() {
       let payload: any = base;
 
       if (type === "intact") {
-        payload = { ...base, bottle_size_ml: Number(bottleSize), price: Number(singlePrice), partial_left_ml: null, decants: [] };
+        payload = { ...base, bottle_size_ml: Number(bottleSize), price: Number(singlePrice), partial_left_ml: null, decant_options: [] };
       } else if (type === "partial") {
-        payload = { ...base, partial_left_ml: Number(partialLeft), price: Number(singlePrice), bottle_size_ml: null, decants: [] };
+        payload = { ...base, partial_left_ml: Number(partialLeft), price: Number(singlePrice), bottle_size_ml: null, decants_options: [] };
       } else { // type === "decant"
         const cleaned = decants
           .map(d => ({
@@ -198,7 +200,7 @@ export default function MyListingsPage() {
 
         payload = {
           ...base,
-          type: "decant_options",
+          type: "decant",
           decant_options: cleaned,   // <— IMPORTANT: use 'decant_options'
           price: null,               
           bottle_size_ml: null,
@@ -358,7 +360,7 @@ export default function MyListingsPage() {
             </div>
           )}
 
-          {type === "decant_options" && (
+          {type === "decant" && (
             <div className="space-y-2">
               {decants.map((row, i) => (
                 <div key={i} className="grid grid-cols-12 gap-2">
@@ -459,6 +461,13 @@ export default function MyListingsPage() {
                         {l.type}
                       </span>
                       <button
+                        onClick={() => router.push(`/dashboard/listings/${l.id}`)}
+                        className="rounded-full border px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50"
+                        title="Edit"
+                      >
+                        Edit
+                      </button>
+                      <button
                         type="button"
                         onClick={() => confirmAndDelete(l.id)}
                         className="rounded-full border px-3 py-1.5 text-xs text-red-600 hover:bg-red-50"
@@ -467,7 +476,7 @@ export default function MyListingsPage() {
                       </button>
                     </div>
 
-                    {l.type !== "decant_options" ? (
+                    {l.type !== "decant" ? (
                       <div className="mt-2 text-sm text-gray-700">
                         {l.type === "intact" && l.bottle_size_ml && (
                           <div>Bottle: {l.bottle_size_ml} ml</div>
