@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, Upload, ArrowLeft, Save } from "lucide-react";
 
 async function fetchListing(id: string) {
   const { data, error } = await supabase
@@ -165,171 +165,327 @@ export default function EditListingPage() {
     });
   }
 
-  if (isLoading) return <p>Loading…</p>;
-  if (error) return <p>Error loading listing</p>;
-  if (!listing) return <p>Not found</p>;
+  if (isLoading) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="text-red-600 text-lg font-semibold">Error loading listing</div>
+        <button 
+          onClick={() => router.back()}
+          className="mt-4 text-indigo-600 hover:text-indigo-700 font-medium"
+        >
+          Go Back
+        </button>
+      </div>
+    </div>
+  );
+  
+  if (!listing) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="text-gray-600 text-lg">Listing not found</div>
+        <button 
+          onClick={() => router.back()}
+          className="mt-4 text-indigo-600 hover:text-indigo-700 font-medium"
+        >
+          Go Back
+        </button>
+      </div>
+    </div>
+  );
 
   return (
-    <section>
-      <h2 className="text-2xl font-semibold mb-4">Edit Listing</h2>
-
-      <form onSubmit={onSubmit} className="rounded-2xl border bg-white p-6 space-y-6">
-        
-        {/* Main fields */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-3">
-            <label className="block text-sm font-medium">Brand *</label>
-            <input className="input" value={brand} onChange={(e) => setBrand(e.target.value)} />
-
-            <label className="block text-sm font-medium">Sub-brand (optional)</label>
-            <input className="input" value={subBrand} onChange={(e) => setSubBrand(e.target.value)} />
-
-            <label className="block text-sm font-medium">Perfume name *</label>
-            <input className="input" value={perfumeName} onChange={(e) => setPerfumeName(e.target.value)} />
-
-            <div>
-              <label className="block text-sm font-medium">Type *</label>
-              <input
-                disabled
-                className="input bg-gray-100 text-gray-500"
-                value={listing.type}
-              />
-            </div>
-          </div>
-
-          {/* Images */}
-          <div className="space-y-3">
-            <label className="block text-sm font-medium">Images *</label>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={onUpload}
-              className="input"
-            />
-
-            {images.length > 0 && (
-              <div className="grid grid-cols-3 gap-2">
-                {images.map((url) => (
-                  <div key={url} className="relative">
-                    <img src={url} className="w-full h-24 object-cover rounded-lg border" />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(url)}
-                      className="absolute top-1 right-1 bg-white/80 p-1 rounded-full"
-                    >
-                      <Trash2 className="h-3 w-3 text-red-600" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to listings
+          </button>
+          <h1 className="text-3xl font-bold text-gray-900">Edit Listing</h1>
+          <p className="text-gray-600 mt-2">Update your perfume listing details</p>
         </div>
 
-        {/* Type-specific section */}
-        {listing.type === "intact" && (
-          <div className="border rounded-lg p-4 space-y-3 bg-gray-50">
-            <input
-              type="number"
-              className="input"
-              placeholder="Bottle size (ml)"
-              value={bottleSize}
-              onChange={(e) => setBottleSize(Number(e.target.value))}
-            />
-            <input
-              type="number"
-              className="input"
-              placeholder="Price"
-              value={price}
-              onChange={(e) => setPrice(Number(e.target.value))}
-            />
-          </div>
-        )}
+        <form onSubmit={onSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          {/* Main Content Grid */}
+          <div className="p-6 md:p-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left Column - Product Details */}
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Information</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Brand *
+                      </label>
+                      <input 
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        value={brand}
+                        onChange={(e) => setBrand(e.target.value)}
+                        placeholder="e.g., Chanel, Dior, Creed"
+                      />
+                    </div>
 
-        {listing.type === "partial" && (
-          <div className="border rounded-lg p-4 space-y-3 bg-gray-50">
-            <input
-              type="number"
-              className="input"
-              placeholder="Amount left (ml)"
-              value={partialLeft}
-              onChange={(e) => setPartialLeft(Number(e.target.value))}
-            />
-            <input
-              type="number"
-              className="input"
-              placeholder="Price"
-              value={price}
-              onChange={(e) => setPrice(Number(e.target.value))}
-            />
-          </div>
-        )}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Sub-brand (optional)
+                      </label>
+                      <input 
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        value={subBrand}
+                        onChange={(e) => setSubBrand(e.target.value)}
+                        placeholder="e.g., Les Exclusifs, Privée"
+                      />
+                    </div>
 
-        {listing.type === "decant" && (
-          <div className="border rounded-lg p-4 space-y-3 bg-gray-50">
-            {decants.map((d, i) => (
-              <div key={i} className="grid grid-cols-12 gap-2">
-                <input
-                  type="number"
-                  className="col-span-5 input"
-                  placeholder="Size (ml)"
-                  value={d.ml}
-                  onChange={(e) =>
-                    setDecants((prev) =>
-                      prev.map((row, idx) =>
-                        idx === i ? { ...row, ml: Number(e.target.value) } : row
-                      )
-                    )
-                  }
-                />
-                <input
-                  type="number"
-                  className="col-span-5 input"
-                  placeholder="Price"
-                  value={d.price}
-                  onChange={(e) =>
-                    setDecants((prev) =>
-                      prev.map((row, idx) =>
-                        idx === i ? { ...row, price: Number(e.target.value) } : row
-                      )
-                    )
-                  }
-                />
-                <button
-                  type="button"
-                  className="col-span-2 border rounded-lg hover:bg-gray-200"
-                  onClick={() =>
-                    setDecants((prev) => prev.filter((_, idx) => idx !== i))
-                  }
-                  disabled={decants.length === 1}
-                >
-                  Remove
-                </button>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Perfume Name *
+                      </label>
+                      <input 
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        value={perfumeName}
+                        onChange={(e) => setPerfumeName(e.target.value)}
+                        placeholder="e.g., Bleu de Chanel, Aventus"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Listing Type
+                      </label>
+                      <div className="px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-600">
+                        {listing.type.charAt(0).toUpperCase() + listing.type.slice(1)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Type-specific Pricing Section */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Pricing & Details</h3>
+                  
+                  {listing.type === "intact" && (
+                    <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Bottle Size (ml) *
+                          </label>
+                          <input
+                            type="number"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                            placeholder="100"
+                            value={bottleSize}
+                            onChange={(e) => setBottleSize(Number(e.target.value))}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Price ($) *
+                          </label>
+                          <input
+                            type="number"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                            placeholder="250"
+                            value={price}
+                            onChange={(e) => setPrice(Number(e.target.value))}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {listing.type === "partial" && (
+                    <div className="space-y-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Amount Left (ml) *
+                          </label>
+                          <input
+                            type="number"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                            placeholder="50"
+                            value={partialLeft}
+                            onChange={(e) => setPartialLeft(Number(e.target.value))}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Price ($) *
+                          </label>
+                          <input
+                            type="number"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                            placeholder="120"
+                            value={price}
+                            onChange={(e) => setPrice(Number(e.target.value))}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {listing.type === "decant" && (
+                    <div className="space-y-4 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Decant Options *
+                      </label>
+                      {decants.map((d, i) => (
+                        <div key={i} className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                          <div className="sm:col-span-5">
+                            <label className="block text-xs text-gray-500 mb-1">Size (ml)</label>
+                            <input
+                              type="number"
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                              placeholder="10"
+                              value={d.ml}
+                              onChange={(e) =>
+                                setDecants((prev) =>
+                                  prev.map((row, idx) =>
+                                    idx === i ? { ...row, ml: Number(e.target.value) } : row
+                                  )
+                                )
+                              }
+                            />
+                          </div>
+                          <div className="sm:col-span-5">
+                            <label className="block text-xs text-gray-500 mb-1">Price ($)</label>
+                            <input
+                              type="number"
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                              placeholder="25"
+                              value={d.price}
+                              onChange={(e) =>
+                                setDecants((prev) =>
+                                  prev.map((row, idx) =>
+                                    idx === i ? { ...row, price: Number(e.target.value) } : row
+                                  )
+                                )
+                              }
+                            />
+                          </div>
+                          <div className="sm:col-span-2">
+                            <button
+                              type="button"
+                              className="w-full px-3 py-3 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              onClick={() =>
+                                setDecants((prev) => prev.filter((_, idx) => idx !== i))
+                              }
+                              disabled={decants.length === 1}
+                            >
+                              <Trash2 className="h-4 w-4 mx-auto" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                      <button
+                        type="button"
+                        onClick={() => setDecants((prev) => [...prev, { ml: 0, price: 0 }])}
+                        className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add Decant Size
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-            ))}
 
-            <button
-              type="button"
-              onClick={() => setDecants((prev) => [...prev, { ml: 0, price: 0 }])}
-              className="mt-2 border rounded-lg px-3 py-1 hover:bg-gray-200 flex items-center gap-1"
-            >
-              <Plus className="h-4 w-4" /> Add size
-            </button>
+              {/* Right Column - Images */}
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Images</h3>
+                  
+                  {/* Image Upload Area */}
+                  <div 
+                    onClick={() => fileRef.current?.click()}
+                    className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition-colors group"
+                  >
+                    <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4 group-hover:text-indigo-500" />
+                    <p className="text-gray-600 font-medium mb-1">Click to upload images</p>
+                    <p className="text-gray-500 text-sm">PNG, JPG, WEBP up to 10MB</p>
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={onUpload}
+                      className="hidden"
+                    />
+                  </div>
+
+                  {/* Image Gallery */}
+                  {images.length > 0 && (
+                    <div className="mt-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Uploaded Images ({images.length})
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        {images.map((url) => (
+                          <div key={url} className="relative group">
+                            <img 
+                              src={url} 
+                              className="w-full h-32 object-cover rounded-lg border border-gray-200 group-hover:opacity-75 transition-opacity"
+                              alt="Product preview"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(url)}
+                              className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {formError && (
+              <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-700 text-sm font-medium">{formError}</p>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors font-medium"
+              >
+                <Save className="h-4 w-4" />
+                {saving ? "Saving Changes..." : "Save Changes"}
+              </button>
+            </div>
           </div>
-        )}
-
-        {formError && <p className="text-red-600">{formError}</p>}
-
-        <button
-          type="submit"
-          disabled={saving}
-          className="mt-4 rounded bg-black px-4 py-2 text-white hover:opacity-90 disabled:opacity-60"
-        >
-          {saving ? "Saving…" : "Save changes"}
-        </button>
-      </form>
-    </section>
+        </form>
+      </div>
+    </div>
   );
 }
