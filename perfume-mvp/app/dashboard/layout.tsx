@@ -23,7 +23,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       <Header /> {/* stays fixed */}
       <div className="flex">
         <DashboardSidebar email={email} />
-        <main className="flex-1 ml-64 h-[calc(100vh-64px)] overflow-y-auto p-6 bg-gray-50 mt-[64px]">
+        <main className="flex-1 ml-64 h-[calc(100vh-64px)] p-6 bg-gray-50">
           {children}
         </main>
       </div>

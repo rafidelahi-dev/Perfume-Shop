@@ -186,7 +186,7 @@ export default function MyListingsPage() {
       if (type === "intact") {
         payload = { ...base, bottle_size_ml: Number(bottleSize), price: Number(singlePrice), partial_left_ml: null, decant_options: [] };
       } else if (type === "partial") {
-        payload = { ...base, partial_left_ml: Number(partialLeft), price: Number(singlePrice), bottle_size_ml: null, decants_options: [] };
+        payload = { ...base, partial_left_ml: Number(partialLeft), price: Number(singlePrice), bottle_size_ml: null, decant_options: [] };
       } else { // type === "decant"
         const cleaned = decants
           .map(d => ({

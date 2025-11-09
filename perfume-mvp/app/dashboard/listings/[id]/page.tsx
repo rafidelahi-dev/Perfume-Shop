@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import { Trash2, Plus, Upload, ArrowLeft, Save } from "lucide-react";
+import { qk } from "@/lib/queries/key";
 
 async function fetchListing(id: string) {
   const { data, error } = await supabase
@@ -39,7 +40,7 @@ export default function EditListingPage() {
   const qc = useQueryClient();
 
   const { data: listing, isLoading, error } = useQuery({
-    queryKey: ["listing", id],
+    queryKey: [qk.uniqueListing, id],
     queryFn: () => fetchListing(id),
   });
 
@@ -48,9 +49,9 @@ export default function EditListingPage() {
   const [subBrand, setSubBrand] = useState("");
   const [perfumeName, setPerfumeName] = useState("");
   const [images, setImages] = useState<string[]>([]);
-  const [price, setPrice] = useState<number | "">("");
-  const [bottleSize, setBottleSize] = useState<number | "">("");
-  const [partialLeft, setPartialLeft] = useState<number | "">("");
+  const [price, setPrice] = useState<string | "">("");
+  const [bottleSize, setBottleSize] = useState<string | "">("");
+  const [partialLeft, setPartialLeft] = useState<string | "">("");
   const [decants, setDecants] = useState<{ ml: string; price: string }[]>([]);
 
   const [saving, setSaving] = useState(false);
@@ -82,13 +83,63 @@ export default function EditListingPage() {
     }
   }, [listing]);
 
+  type Listing = {
+  id: string;
+  brand: string;
+  sub_brand: string | null;
+  perfume_name: string;
+  type: "intact" | "partial" | "decant";
+  images: string[];
+  price?: number | null;
+  bottle_size_ml?: number | null;
+  partial_left_ml?: number | null;
+  decant_options?: { ml: number; price: number }[];
+};
+
   const save = useMutation({
-    mutationFn: (patch: any) => updateListing(id, patch),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["my_listings"] });
-      router.push("/dashboard/listings");
-    },
-  });
+  mutationFn: (patch: any) => updateListing(id, patch),
+
+  // 1) Optimistic update
+  onMutate: async (patch: any) => {
+    await qc.cancelQueries({ queryKey: [qk.uniqueListing, id] });
+    await qc.cancelQueries({ queryKey: qk.userListings });
+
+    const prevDetail = qc.getQueryData<any>([qk.uniqueListing, id]);
+    const prevList = qc.getQueryData<any[]>(qk.userListings);
+
+    // optimistic detail
+    qc.setQueryData<Listing>([qk.uniqueListing, id], (curr) => {
+      if (!curr) return curr;
+      return { ...curr, ...patch };
+    });
+
+    // optimistic list: replace the matching item by id (if present)
+    qc.setQueryData<any[]>(qk.userListings, (curr) => {
+      if (!Array.isArray(curr)) return curr;
+      return curr.map((row) => (row.id === id ? { ...row, ...patch } : row));
+    });
+
+    return { prevDetail, prevList };
+  },
+
+  // 2) Rollback on error
+  onError: (_err, _patch, ctx) => {
+    if (ctx?.prevDetail) qc.setQueryData([qk.uniqueListing, id], ctx.prevDetail);
+    if (ctx?.prevList) qc.setQueryData(qk.userListings, ctx.prevList);
+  },
+
+  onSuccess: () => {
+    // ✅ navigate after the server confirms success
+    router.push("/dashboard/listings");
+  },
+
+  // 3) Final sync
+  onSettled: () => {
+    qc.invalidateQueries({ queryKey: [qk.uniqueListing, id] });
+    qc.invalidateQueries({ queryKey: qk.userListings });
+  },
+});
+
 
   // Upload new images
   async function onUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -304,7 +355,7 @@ export default function EditListingPage() {
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                             placeholder="Bottle size (ml)"
                             value={bottleSize}
-                            onChange={(e) => setBottleSize(Number(e.target.value))}
+                            onChange={(e) => setBottleSize(e.target.value)}
                           />
                         </div>
                         <div>
@@ -316,77 +367,108 @@ export default function EditListingPage() {
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                             placeholder="250"
                             value={price}
-                            onChange={(e) => setPrice(Number(e.target.value))}
+                            onChange={(e) => setPrice(e.target.value)}
                           />
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {listing.type === "decant" && (
-          <div className="space-y-4 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Decant Options *
-            </label>
-            {decants.map((d, i) => (
-              <div key={i} className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                <div className="sm:col-span-5">
-                  <label className="block text-xs text-gray-500 mb-1">Size (ml)</label>
-                  <input
-                    type="number"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                    placeholder="10"
-                    value={d.ml}
-                    onChange={(e) =>
-                      setDecants((prev) =>
-                        prev.map((row, idx) =>
-                          idx === i ? { ...row, ml: e.target.value } : row
-                        )
-                      )
-                    }
-                  />
+                  {listing.type === "partial" && (
+                <div className="space-y-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Amount Left (ml) *
+                      </label>
+                      <input
+                        type="number"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        placeholder="Amount left (ml)"
+                        value={partialLeft}
+                        onChange={(e) => setPartialLeft(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Price ($) *
+                      </label>
+                      <input
+                        type="number"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        placeholder="150"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="sm:col-span-5">
-                  <label className="block text-xs text-gray-500 mb-1">Price ($)</label>
-                  <input
-                    type="number"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                    placeholder="25"
-                    value={d.price}
-                    onChange={(e) =>
-                      setDecants((prev) =>
-                        prev.map((row, idx) =>
-                          idx === i ? { ...row, price: e.target.value } : row
-                        )
-                      )
-                    }
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <button
-                    type="button"
-                    className="w-full px-3 py-3 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() =>
-                      setDecants((prev) => prev.filter((_, idx) => idx !== i))
-                    }
-                    disabled={decants.length === 1}
-                  >
-                    <Trash2 className="h-4 w-4 mx-auto" />
-                  </button>
-                </div>
-              </div>
-            ))}
+              )}
 
-            <button
-              type="button"
-              onClick={() => setDecants((prev) => [...prev, { ml: "", price: "" }])}
-              className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-              Add Decant Size
-            </button>
-          </div>
-        )}
+                  {listing.type === "decant" && (
+                  <div className="space-y-4 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Decant Options *
+                    </label>
+                    {decants.map((d, i) => (
+                      <div key={i} className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                        <div className="sm:col-span-5">
+                          <label className="block text-xs text-gray-500 mb-1">Size (ml)</label>
+                          <input
+                            type="number"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                            placeholder="10"
+                            value={d.ml}
+                            onChange={(e) =>
+                              setDecants((prev) =>
+                                prev.map((row, idx) =>
+                                  idx === i ? { ...row, ml: e.target.value } : row
+                                )
+                              )
+                            }
+                          />
+                        </div>
+                        <div className="sm:col-span-5">
+                          <label className="block text-xs text-gray-500 mb-1">Price ($)</label>
+                          <input
+                            type="number"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                            placeholder="25"
+                            value={d.price}
+                            onChange={(e) =>
+                              setDecants((prev) =>
+                                prev.map((row, idx) =>
+                                  idx === i ? { ...row, price: e.target.value } : row
+                                )
+                              )
+                            }
+                          />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <button
+                            type="button"
+                            className="w-full px-3 py-3 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={() =>
+                              setDecants((prev) => prev.filter((_, idx) => idx !== i))
+                            }
+                            disabled={decants.length === 1}
+                          >
+                            <Trash2 className="h-4 w-4 mx-auto" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={() => setDecants((prev) => [...prev, { ml: "", price: "" }])}
+                      className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Decant Size
+                    </button>
+                  </div>
+                )}
                 </div>
               </div>
 

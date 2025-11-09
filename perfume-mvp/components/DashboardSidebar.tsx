@@ -51,6 +51,7 @@ export function DashboardSidebar({ email }: { email: string | null }) {
           <NavLink href="/dashboard/profile" label="Profile" />
         </nav>
       </div>
+
       <div className="border-t pt-3 text-sm text-gray-600">
         {email && <p className="truncate">{email}</p>}
         <button
