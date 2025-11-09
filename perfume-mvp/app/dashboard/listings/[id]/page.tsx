@@ -51,7 +51,7 @@ export default function EditListingPage() {
   const [price, setPrice] = useState<number | "">("");
   const [bottleSize, setBottleSize] = useState<number | "">("");
   const [partialLeft, setPartialLeft] = useState<number | "">("");
-  const [decants, setDecants] = useState<{ ml: number; price: number }[]>([]);
+  const [decants, setDecants] = useState<{ ml: string; price: string }[]>([]);
 
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -71,7 +71,14 @@ export default function EditListingPage() {
       setPartialLeft(listing.partial_left_ml || "");
       setPrice(listing.price || "");
     } else if (listing.type === "decant") {
-      setDecants(listing.decant_options || []);
+      // Convert existing numbers to strings for the form
+      const decantOptions = listing.decant_options || [];
+      setDecants(
+        decantOptions.map((d: any) => ({
+          ml: d.ml ? d.ml.toString() : "",
+          price: d.price ? d.price.toString() : "",
+        }))
+      );
     }
   }, [listing]);
 
@@ -121,7 +128,12 @@ export default function EditListingPage() {
     }
 
     if (listing.type === "decant") {
-      const valid = decants.filter((d) => d.ml > 0 && d.price > 0);
+      // Convert strings to numbers for validation
+      const valid = decants.filter((d) => {
+        const mlNum = parseFloat(d.ml);
+        const priceNum = parseFloat(d.price);
+        return mlNum > 0 && priceNum > 0;
+      });
       if (!valid.length) return "At least one decant size with price is required";
     }
     return null;
@@ -155,7 +167,11 @@ export default function EditListingPage() {
       patch.price = null;
       patch.bottle_size_ml = null;
       patch.partial_left_ml = null;
-      patch.decant_options = decants;
+      // Convert strings back to numbers for saving
+      patch.decant_options = decants.map((d) => ({
+        ml: parseFloat(d.ml) || 0,
+        price: parseFloat(d.price) || 0,
+      }));
     }
 
     setSaving(true);
@@ -286,7 +302,7 @@ export default function EditListingPage() {
                           <input
                             type="number"
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                            placeholder="100"
+                            placeholder="Bottle size (ml)"
                             value={bottleSize}
                             onChange={(e) => setBottleSize(Number(e.target.value))}
                           />
@@ -307,101 +323,70 @@ export default function EditListingPage() {
                     </div>
                   )}
 
-                  {listing.type === "partial" && (
-                    <div className="space-y-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Amount Left (ml) *
-                          </label>
-                          <input
-                            type="number"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                            placeholder="50"
-                            value={partialLeft}
-                            onChange={(e) => setPartialLeft(Number(e.target.value))}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Price ($) *
-                          </label>
-                          <input
-                            type="number"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                            placeholder="120"
-                            value={price}
-                            onChange={(e) => setPrice(Number(e.target.value))}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
                   {listing.type === "decant" && (
-                    <div className="space-y-4 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Decant Options *
-                      </label>
-                      {decants.map((d, i) => (
-                        <div key={i} className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                          <div className="sm:col-span-5">
-                            <label className="block text-xs text-gray-500 mb-1">Size (ml)</label>
-                            <input
-                              type="number"
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                              placeholder="10"
-                              value={d.ml}
-                              onChange={(e) =>
-                                setDecants((prev) =>
-                                  prev.map((row, idx) =>
-                                    idx === i ? { ...row, ml: Number(e.target.value) } : row
-                                  )
-                                )
-                              }
-                            />
-                          </div>
-                          <div className="sm:col-span-5">
-                            <label className="block text-xs text-gray-500 mb-1">Price ($)</label>
-                            <input
-                              type="number"
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                              placeholder="25"
-                              value={d.price}
-                              onChange={(e) =>
-                                setDecants((prev) =>
-                                  prev.map((row, idx) =>
-                                    idx === i ? { ...row, price: Number(e.target.value) } : row
-                                  )
-                                )
-                              }
-                            />
-                          </div>
-                          <div className="sm:col-span-2">
-                            <button
-                              type="button"
-                              className="w-full px-3 py-3 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                              onClick={() =>
-                                setDecants((prev) => prev.filter((_, idx) => idx !== i))
-                              }
-                              disabled={decants.length === 1}
-                            >
-                              <Trash2 className="h-4 w-4 mx-auto" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+          <div className="space-y-4 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Decant Options *
+            </label>
+            {decants.map((d, i) => (
+              <div key={i} className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                <div className="sm:col-span-5">
+                  <label className="block text-xs text-gray-500 mb-1">Size (ml)</label>
+                  <input
+                    type="number"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                    placeholder="10"
+                    value={d.ml}
+                    onChange={(e) =>
+                      setDecants((prev) =>
+                        prev.map((row, idx) =>
+                          idx === i ? { ...row, ml: e.target.value } : row
+                        )
+                      )
+                    }
+                  />
+                </div>
+                <div className="sm:col-span-5">
+                  <label className="block text-xs text-gray-500 mb-1">Price ($)</label>
+                  <input
+                    type="number"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                    placeholder="25"
+                    value={d.price}
+                    onChange={(e) =>
+                      setDecants((prev) =>
+                        prev.map((row, idx) =>
+                          idx === i ? { ...row, price: e.target.value } : row
+                        )
+                      )
+                    }
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <button
+                    type="button"
+                    className="w-full px-3 py-3 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() =>
+                      setDecants((prev) => prev.filter((_, idx) => idx !== i))
+                    }
+                    disabled={decants.length === 1}
+                  >
+                    <Trash2 className="h-4 w-4 mx-auto" />
+                  </button>
+                </div>
+              </div>
+            ))}
 
-                      <button
-                        type="button"
-                        onClick={() => setDecants((prev) => [...prev, { ml: 0, price: 0 }])}
-                        className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
-                      >
-                        <Plus className="h-4 w-4" />
-                        Add Decant Size
-                      </button>
-                    </div>
-                  )}
+            <button
+              type="button"
+              onClick={() => setDecants((prev) => [...prev, { ml: "", price: "" }])}
+              className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              Add Decant Size
+            </button>
+          </div>
+        )}
                 </div>
               </div>
 

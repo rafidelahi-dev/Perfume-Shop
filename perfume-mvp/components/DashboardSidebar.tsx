@@ -28,7 +28,19 @@ export function DashboardSidebar({ email }: { email: string | null }) {
   };
 
   return (
-    <aside className="w-64 bg-white border-r p-4 flex flex-col justify-between">
+    <aside
+      className="
+        fixed
+        top-[64px]          /* below navbar */
+        left-0
+        h-[calc(100vh-64px)] /* fill screen minus navbar */
+        w-64
+        bg-white
+        border-r
+        p-4
+        flex flex-col justify-between
+      "
+    >
       <div>
         <h1 className="text-lg font-bold mb-4">PerfumeMVP</h1>
         <nav className="space-y-1">

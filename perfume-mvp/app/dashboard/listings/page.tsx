@@ -73,9 +73,10 @@ export default function MyListingsPage() {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const router = useRouter();
+  const [showForm, setShowForm] = useState(false);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["my_listings"],
+    queryKey: qk.userListings,
     queryFn: fetchMyListings,
   });
 
@@ -92,7 +93,7 @@ export default function MyListingsPage() {
   const create = useMutation({
     mutationFn: insertListing,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["my_listings"] });
+      qc.invalidateQueries({ queryKey: qk.userListings });
       // reset form
       setBrand("");
       setSubBrand("");
@@ -141,7 +142,7 @@ export default function MyListingsPage() {
       setFormError(err.message || "Upload failed");
     } finally {
       setUploading(false);
-      e.currentTarget.value = ""; // reset file input
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
 
@@ -231,11 +232,20 @@ export default function MyListingsPage() {
 
   return (
     <section>
-      <h2 className="text-2xl font-semibold mb-4">My Listings</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold">My Listings</h2>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="bg-[#1a1a1a] text-[#f8f7f3] px-6 py-3 rounded-xl hover:opacity-90 transition-opacity font-medium"
+        >
+          {showForm ? "Cancel" : "+ Add New Listing"}
+        </button>
+      </div>
 
-      {/* Form */}
-      <form
-        onSubmit={onSubmit}
+      {showForm && (
+        <form
+        onSubmit={(e) => {
+            onSubmit(e); }}
         className="mb-8 rounded-2xl border border-black/5 bg-white p-5 md:p-6 shadow-sm"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -419,12 +429,38 @@ export default function MyListingsPage() {
           </button>
         </div>
       </form>
+      )}
+
+      {/* Form */}
+      
 
       {/* Listings grid */}
       <div>
         <h3 className="mb-3 text-lg font-semibold">Your listings</h3>
-        {isLoading && <p>Loading…</p>}
-        {error && <p className="text-red-600">Error loading listings.</p>}
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1a1a1a] mb-4"></div>
+            <p className="text-gray-600 font-medium">Loading your listings...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 mb-4">
+              <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-red-800 mb-2">Unable to load listings</h3>
+            <p className="text-red-700 mb-4">There was an error loading your perfume listings.</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700 transition-colors font-medium"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
 
         {data && data.length === 0 && (
           <div className="rounded-xl border border-black/5 bg-white p-6 text-sm text-gray-600">
