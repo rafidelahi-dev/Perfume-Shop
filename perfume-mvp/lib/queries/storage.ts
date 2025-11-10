@@ -5,7 +5,7 @@ export async function uploadToBucket(bucket: string, files: File[]){
     const userId = await getSessionUserId();
     const urls: string[] = [];
     for(const file of files){
-        const ext = file.name.split(".").pop() || "jpg"
+        const ext = file.name.split(".").pop();
         const path = `${userId}/${Date.now()}-${file.name}`;
         const {error} = await supabase.storage.from(bucket).upload(path, file, {
             cacheControl: "3600", 

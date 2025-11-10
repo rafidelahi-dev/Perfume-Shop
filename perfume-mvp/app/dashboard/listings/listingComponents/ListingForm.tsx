@@ -28,14 +28,11 @@ const ListingForm = () => {
     
     const [decants, setDecants] = useState<DecantRow[]>([{ size_ml: "", price: "" }]);
     const [images, setImages] = useState<string[]>([]);
-
-    const router = useRouter();
-    const [searchTerm, setSearchTerm] = useState("");
     const fileInputRef = useRef<HTMLInputElement>(null);
 
 
 
-      function addDecantRow() {
+  function addDecantRow() {
     setDecants((rows) => [...rows, { size_ml: "", price: "" }]);
   }
   function removeDecantRow(idx: number) {
@@ -45,11 +42,11 @@ const ListingForm = () => {
     setDecants((rows) => rows.map((r, i) => (i === idx ? { ...r, [key]: val } : r)));
   }
 
-    const heading = useMemo(() => {
-    if (type === "intact") return "Intact bottle details";
-    if (type === "partial") return "Partial bottle details";
-    return "Decants (one or more sizes)";
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  const heading = useMemo(() => {
+  if (type === "intact") return "Intact bottle details";
+  if (type === "partial") return "Partial bottle details";
+  return "Decants (one or more sizes)";
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type]);
 
     async function onUploadImages(e: React.ChangeEvent<HTMLInputElement>) {
@@ -85,82 +82,82 @@ const ListingForm = () => {
     },
   });
 
-      function validate() {
-        if (!brand.trim()) return "Brand is required.";
-        if (!perfumeName.trim()) return "Perfume name is required.";
-        if (images.length === 0) return "At least one image is required.";
-        if (type === "intact") {
-          if (!bottleSize || bottleSize <= 0) return "Bottle size (ml) is required for Intact.";
-          if (!singlePrice || singlePrice <= 0) return "Price is required.";
+  function validate() {
+    if (!brand.trim()) return "Brand is required.";
+    if (!perfumeName.trim()) return "Perfume name is required.";
+    if (images.length === 0) return "At least one image is required.";
+    if (type === "intact") {
+      if (!bottleSize || bottleSize <= 0) return "Bottle size (ml) is required for Intact.";
+      if (!singlePrice || singlePrice <= 0) return "Price is required.";
+    }
+    if (type === "partial") {
+      if (!partialLeft || partialLeft <= 0) return "Amount left (ml) is required for Partial.";
+      if (!singlePrice || singlePrice <= 0) return "Price is required.";
+    }
+    if (type === "decant") {
+      const valid = decants.filter((d) => d.size_ml && d.price && d.size_ml > 0 && d.price > 0);
+      if (valid.length === 0) return "Add at least one decant size with price.";
+    }
+    return null;
+  }
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setFormError(null);
+    try {
+      const errMsg = validate();
+      if (errMsg) throw new Error(errMsg);
+
+      const base = {
+        brand,
+        sub_brand: subBrand || null,
+        perfume_name: perfumeName,
+        type,
+        images,
+      };
+
+      let payload: any = base;
+
+      if (type === "intact") {
+        payload = { ...base, bottle_size_ml: Number(bottleSize), price: Number(singlePrice), partial_left_ml: null, decant_options: [] };
+      } else if (type === "partial") {
+        payload = { ...base, partial_left_ml: Number(partialLeft), price: Number(singlePrice), bottle_size_ml: null, decant_options: [] };
+      } else { // type === "decant"
+        const cleaned = decants
+          .map(d => ({
+            ml: d.size_ml === "" ? null : Number(d.size_ml),
+            price: d.price === "" ? null : Number(d.price),
+          }))
+          .filter(d => typeof d.ml === "number" && d.ml > 0 && typeof d.price === "number" && d.price > 0);
+
+        if (cleaned.length === 0) {
+          throw new Error("Add at least one decant size with a positive price.");
         }
-        if (type === "partial") {
-          if (!partialLeft || partialLeft <= 0) return "Amount left (ml) is required for Partial.";
-          if (!singlePrice || singlePrice <= 0) return "Price is required.";
-        }
-        if (type === "decant") {
-          const valid = decants.filter((d) => d.size_ml && d.price && d.size_ml > 0 && d.price > 0);
-          if (valid.length === 0) return "Add at least one decant size with price.";
-        }
-        return null;
+
+        payload = {
+          ...base,
+          type: "decant",
+          decant_options: cleaned,   // <— IMPORTANT: use 'decant_options'
+          price: null,               
+          bottle_size_ml: null,
+          partial_left_ml: null,
+        };
       }
 
-    async function onSubmit(e: React.FormEvent) {
-      e.preventDefault();
-      setSaving(true);
-      setFormError(null);
-      try {
-        const errMsg = validate();
-        if (errMsg) throw new Error(errMsg);
-  
-        const base = {
-          brand,
-          sub_brand: subBrand || null,
-          perfume_name: perfumeName,
-          type,
-          images,
-        };
-  
-        let payload: any = base;
-  
-        if (type === "intact") {
-          payload = { ...base, bottle_size_ml: Number(bottleSize), price: Number(singlePrice), partial_left_ml: null, decant_options: [] };
-        } else if (type === "partial") {
-          payload = { ...base, partial_left_ml: Number(partialLeft), price: Number(singlePrice), bottle_size_ml: null, decant_options: [] };
-        } else { // type === "decant"
-          const cleaned = decants
-            .map(d => ({
-              ml: d.size_ml === "" ? null : Number(d.size_ml),
-              price: d.price === "" ? null : Number(d.price),
-            }))
-            .filter(d => typeof d.ml === "number" && d.ml > 0 && typeof d.price === "number" && d.price > 0);
-  
-          if (cleaned.length === 0) {
-            throw new Error("Add at least one decant size with a positive price.");
-          }
-  
-          payload = {
-            ...base,
-            type: "decant",
-            decant_options: cleaned,   // <— IMPORTANT: use 'decant_options'
-            price: null,               
-            bottle_size_ml: null,
-            partial_left_ml: null,
-          };
-        }
-  
-        // right before: await create.mutateAsync(payload);
-        console.log("INSERT listings payload:", JSON.stringify(payload, null, 2));
-  
-  
-        await create.mutateAsync(payload);
-  
-        if (fileInputRef.current) fileInputRef.current.value = "";
-      } catch (err: any) {
-        setFormError(err.message || "Failed to create listing");
-      } finally {
-        setSaving(false);
-      }
+      // right before: await create.mutateAsync(payload);
+      console.log("INSERT listings payload:", JSON.stringify(payload, null, 2));
+
+
+      await create.mutateAsync(payload);
+
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch (err: any) {
+      setFormError(err.message || "Failed to create listing");
+    } finally {
+      setSaving(false);
     }
+  }
 
   return (
     <>

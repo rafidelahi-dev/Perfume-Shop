@@ -1,7 +1,7 @@
 "use client";
 
 import { useState} from "react";
-import ListingForm from "./listingComponents/listingForm";
+import ListingForm from "./listingComponents/ListingForm";
 import { ListingGrid } from "./listingComponents/ListingGrid";
 
 
