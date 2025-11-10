@@ -40,7 +40,7 @@ export default function EditListingPage() {
   const qc = useQueryClient();
 
   const { data: listing, isLoading, error } = useQuery({
-    queryKey: [qk.uniqueListing, id],
+    queryKey: [qk.uniqueListing(id)],
     queryFn: () => fetchListing(id),
   });
 
@@ -101,14 +101,14 @@ export default function EditListingPage() {
 
   // 1) Optimistic update
   onMutate: async (patch: any) => {
-    await qc.cancelQueries({ queryKey: [qk.uniqueListing, id] });
+    await qc.cancelQueries({ queryKey: [qk.uniqueListing(id)] });
     await qc.cancelQueries({ queryKey: qk.userListings });
 
-    const prevDetail = qc.getQueryData<any>([qk.uniqueListing, id]);
+    const prevDetail = qc.getQueryData<any>([qk.uniqueListing(id)]);
     const prevList = qc.getQueryData<any[]>(qk.userListings);
 
     // optimistic detail
-    qc.setQueryData<Listing>([qk.uniqueListing, id], (curr) => {
+    qc.setQueryData<Listing>([qk.uniqueListing(id)], (curr) => {
       if (!curr) return curr;
       return { ...curr, ...patch };
     });
@@ -124,7 +124,7 @@ export default function EditListingPage() {
 
   // 2) Rollback on error
   onError: (_err, _patch, ctx) => {
-    if (ctx?.prevDetail) qc.setQueryData([qk.uniqueListing, id], ctx.prevDetail);
+    if (ctx?.prevDetail) qc.setQueryData([qk.uniqueListing(id)], ctx.prevDetail);
     if (ctx?.prevList) qc.setQueryData(qk.userListings, ctx.prevList);
   },
 
@@ -135,7 +135,7 @@ export default function EditListingPage() {
 
   // 3) Final sync
   onSettled: () => {
-    qc.invalidateQueries({ queryKey: [qk.uniqueListing, id] });
+    qc.invalidateQueries({ queryKey: [qk.uniqueListing(id)] });
     qc.invalidateQueries({ queryKey: qk.userListings });
   },
 });

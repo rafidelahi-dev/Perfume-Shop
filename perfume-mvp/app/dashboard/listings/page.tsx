@@ -74,11 +74,24 @@ export default function MyListingsPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { data, isLoading, error } = useQuery({
     queryKey: qk.userListings,
     queryFn: fetchMyListings,
   });
+
+  const filteredListings = useMemo(() => {
+    if (!data) return [];
+    const lower = searchTerm.toLowerCase();
+    return data.filter(
+      (l: any) =>
+        l.brand?.toLowerCase().includes(lower) ||
+        l.sub_brand?.toLowerCase().includes(lower) ||
+        l.perfume_name?.toLowerCase().includes(lower)
+    );
+  }, [data, searchTerm]);
+
 
     // create the mutation *inside* the component
   const destroy = useMutation({
@@ -241,6 +254,13 @@ export default function MyListingsPage() {
           {showForm ? "Cancel" : "+ Add New Listing"}
         </button>
       </div>
+
+
+      <div className="mb-4">
+      <input type="text" placeholder="Search from your list..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+      className="w-full md:w-1/2 rounded-xl border border-black/10 bg-white px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"></input>
+      </div>
+
 
       {showForm && (
         <form
@@ -436,7 +456,6 @@ export default function MyListingsPage() {
 
       {/* Listings grid */}
       <div>
-        <h3 className="mb-3 text-lg font-semibold">Your listings</h3>
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1a1a1a] mb-4"></div>
@@ -468,9 +487,9 @@ export default function MyListingsPage() {
           </div>
         )}
 
-        {data && data.length > 0 && (
+        {filteredListings && filteredListings.length > 0 ? (
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.map((l: any) => {
+            {filteredListings.map((l: any) => {
               // 👇 compute a single “from” price for decants (fallback to l.price if needed)
               const fromPrice =
                 typeof l.min_price === "number"
@@ -552,8 +571,13 @@ export default function MyListingsPage() {
               );
             })}
           </ul>
-        )}
-
+          ) : (
+            <div className="rounded-xl border border-black/5 bg-white p-6 text-sm text-gray-600">
+              {searchTerm
+                ? `No listings found matching “${searchTerm}”.`
+                : "You have no listings yet. Add one using the form above."}
+            </div>
+          )}
       </div>
     </section>
   );
