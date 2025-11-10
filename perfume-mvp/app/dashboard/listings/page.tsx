@@ -3,56 +3,12 @@
 import { useState, useMemo, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
-import { deleteMyListing } from "@/lib/queries/listings";
+import { deleteMyListing, fetchMyListings, insertListing } from "@/lib/queries/listings";
 import { qk } from "@/lib/queries/key";
 import { useRouter } from "next/navigation";
+import { uploadToBucket } from "@/lib/queries/storage";
 
 type DecantRow = { size_ml: number | ""; price: number | "" };
-
-async function getUserId() {
-  const { data } = await supabase.auth.getUser();
-  const user = data.user;
-  if (!user) throw new Error("Not authenticated");
-  return user.id;
-}
-
-async function fetchMyListings() {
-  const userId = await getUserId();
-  const { data, error } = await supabase
-    .from("listings")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
-  if (error) throw error;
-  return data ?? [];
-}
-
-async function uploadImage(file: File, userId: string) {
-  // Fallback extension if the file has no extension in its name
-  const original = file.name || "image";
-  const parts = original.split(".");
-  const ext = parts.length > 1 ? parts.pop() : "jpg"; // default to jpg
-  const path = `${userId}/${Date.now()}.${ext}`;
-
-  const { error: upErr } = await supabase.storage
-    .from("listing-images")
-    .upload(path, file, { cacheControl: "3600", upsert: true });
-
-  if (upErr) {
-    // This is the place that threw "row-level security policy" before
-    throw upErr;
-  }
-
-  const { data } = supabase.storage.from("listing-images").getPublicUrl(path);
-  return data.publicUrl;
-}
-
-async function insertListing(values: any) {
-  const userId = await getUserId();
-  const payload = { user_id: userId, ...values };
-  const { error } = await supabase.from("listings").insert(payload);
-  if (error) throw error;
-}
 
 export default function MyListingsPage() {
   const qc = useQueryClient();
@@ -143,14 +99,8 @@ export default function MyListingsPage() {
     setUploading(true);
     setFormError(null);
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      const userId = userData.user?.id!;
-      const urls: string[] = [];
-      for (const f of files) {
-        const url = await uploadImage(f, userId);
-        urls.push(url);
-      }
-      setImages((prev) => [...prev, ...urls]);
+      const urls = await uploadToBucket("listing-images", files)
+      setImages((prev) => [...prev, ...urls])
     } catch (err: any) {
       setFormError(err.message || "Upload failed");
     } finally {
