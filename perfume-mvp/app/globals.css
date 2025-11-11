@@ -5,7 +5,6 @@
 /* --- Warm luxury base --- */
 html, body {
   height: 100%;
-  background-color: #f9f6ef;  /* warm ivory */
   color: #1a1a1a;             /* deep charcoal */
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Inter, Roboto, "Helvetica Neue", Arial;
 }
