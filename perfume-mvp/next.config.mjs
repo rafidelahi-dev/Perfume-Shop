@@ -17,6 +17,9 @@ const nextConfig = {
         ]
       : [],
   },
+  experimental: {
+    optimizePackageImports: ["@supabase/supabase-js"], // merged from next.config.ts
+  },
 };
 
 export default nextConfig;
