@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
+import { Toaster } from "sonner";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [client] = useState(() => new QueryClient({
@@ -15,5 +16,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       },
     },
   }));
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  return <QueryClientProvider client={client}>
+      {children}
+      {/* Toast portal */}
+      <Toaster richColors position="top-center" />
+    </QueryClientProvider>;
 }

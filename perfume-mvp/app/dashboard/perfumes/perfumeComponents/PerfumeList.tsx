@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Sparkles, Trash2 } from "lucide-react";
+import Skeleton from "@/components/ui/Skeleton";
 
 export type Perfume = {
   id: string;
@@ -45,8 +46,8 @@ export default function PerfumeList({
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div className="h-7 w-44 rounded bg-black/10" />
-          <div className="h-9 w-28 rounded-full bg-black/10" />
+            <Skeleton className="h-7 w-44 skeleton-shimmer"/>
+            <Skeleton className="h-9 w-28 rounded-full skeleton-shimmer" />
         </div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
