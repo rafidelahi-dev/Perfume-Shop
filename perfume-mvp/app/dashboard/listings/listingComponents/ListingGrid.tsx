@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import React from 'react'
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -6,14 +6,32 @@ import { qk } from '@/lib/queries/key';
 import { fetchMyListings, deleteMyListing } from '@/lib/queries/listings';
 import { toast } from 'sonner';
 import Image from 'next/image';
+import { supabase } from '@/lib/supabaseClient';
 
 export const ListingGrid = () => {
+    const [userId, setUserId] = useState<string | null>(null);
+
+    useEffect(() => {
+      const fetchUser = async () => {
+        const { data } = await supabase.auth.getUser();
+        setUserId(data.user?.id || null);
+      };
+      fetchUser();
+
+      const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUserId(session?.user?.id || null);
+      });
+
+      return () => listener.subscription.unsubscribe();
+    }, []);
+
     const [searchTerm, setSearchTerm] = useState("");
     const qc = useQueryClient();
     const router = useRouter();
     const { data, isLoading, error } = useQuery({
-    queryKey: qk.userListings,
+    queryKey: qk.userListings(userId),
     queryFn: fetchMyListings,
+    enabled: !!userId,
     });
 
     const filteredListings = useMemo(() => {
@@ -30,7 +48,7 @@ export const ListingGrid = () => {
     const destroy = useMutation({
         mutationFn: (id: string) => deleteMyListing(id), // or your local delete function
         onSuccess: () => {
-        qc.invalidateQueries({ queryKey: qk.userListings }); // or ["my_listings"]
+        qc.invalidateQueries({ queryKey: qk.userListings(userId) }); // or ["my_listings"]
         toast.success("Listing deleted successfully!");
         },
     });
@@ -39,6 +57,15 @@ export const ListingGrid = () => {
     const ok = window.confirm("Delete this listing permanently?");
     if (!ok) return;
     destroy.mutate(id); // your delete mutation
+    }
+
+    if (userId === null) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1a1a1a] mb-4"></div>
+          <p className="text-gray-600 font-medium">Checking user session...</p>
+        </div>
+      );
     }
 
 

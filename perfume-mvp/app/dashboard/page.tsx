@@ -4,16 +4,33 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchMyPerfumes } from "@/lib/queries/userPerfumes";
 import { fetchMyListings } from "@/lib/queries/listings";
 import { useRouter } from "next/navigation";
+import { qk } from "@/lib/queries/key";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function DashboardOverview() {
+  const [userId, setUserId] = useState<string | null>(null);
+  useEffect(() => {
+      const fetchUser = async () => {
+        const { data } = await supabase.auth.getUser();
+        setUserId(data.user?.id || null);
+      };
+      fetchUser();
+  
+      const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUserId(session?.user?.id || null);
+      });
+  
+      return () => listener.subscription.unsubscribe();
+    }, []);
   const router = useRouter();
   const perfumesQuery = useQuery({
-    queryKey: ["my_perfumes_count"],
+    queryKey: qk.dashboardPerfumeStats(userId),
     queryFn: fetchMyPerfumes,
   });
 
   const listingsQuery = useQuery({
-    queryKey: ["my_listings_count"],
+    queryKey: qk.dashboardListingStats(userId),
     queryFn: fetchMyListings,
   });
 

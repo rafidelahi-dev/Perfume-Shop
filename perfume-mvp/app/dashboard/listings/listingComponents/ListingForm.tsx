@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useState, useRef, useMemo } from 'react';   
 import { uploadToBucket } from "@/lib/queries/storage";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -6,6 +6,7 @@ import { insertListing } from "@/lib/queries/listings";
 import { toast } from 'sonner';
 import { qk } from '@/lib/queries/key'; 
 import Image from 'next/image';
+import { supabase } from '@/lib/supabaseClient';
 
 
 const ListingForm = () => {
@@ -13,13 +14,13 @@ const ListingForm = () => {
     const [uploading, setUploading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
-      const qc = useQueryClient();
+    const qc = useQueryClient();
 
     type DecantRow = { size_ml: number | ""; price: number | "" }; 
 
     // form state
     const [brand, setBrand] = useState("");
-    
+    const [userId, setUserId] = useState<string | null>(null);
     const [perfumeName, setPerfumeName] = useState("");
     const [type, setType] = useState<"intact" | "partial" | "decant">("intact");
 
@@ -31,6 +32,19 @@ const ListingForm = () => {
     const [images, setImages] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    useEffect(() => {
+      const fetchUser = async () => {
+        const { data } = await supabase.auth.getUser();
+        setUserId(data.user?.id || null);
+      };
+      fetchUser();
+
+      const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUserId(session?.user?.id || null);
+      });
+
+      return () => listener.subscription.unsubscribe();
+    }, []);
 
 
   function addDecantRow() {
@@ -71,7 +85,7 @@ const ListingForm = () => {
   const create = useMutation({
     mutationFn: insertListing,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: qk.userListings });
+      qc.invalidateQueries({ queryKey: qk.userListings(userId) });
       // reset form
       setBrand("");
       setSubBrand("");

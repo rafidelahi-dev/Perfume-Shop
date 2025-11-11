@@ -13,15 +13,11 @@ import {
 } from "@/lib/queries/profile";
 import { uploadToBucket } from "@/lib/queries/storage";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function ProfilePage() {
   const router = useRouter();
   const qc = useQueryClient();
-
-  const { data: profile, isLoading, error } = useQuery({
-    queryKey: qk.profile,
-    queryFn: fetchMyProfile,
-  });
 
   const [form, setForm] = useState<Partial<Profile>>({});
   const [pwd, setPwd] = useState({ newPwd: "", confirmPwd: "" });
@@ -29,6 +25,12 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [pwdSaving, setPwdSaving] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const { data: profile, isLoading, error } = useQuery({
+    queryKey: qk.profile(userId),
+    queryFn: fetchMyProfile,
+  });
+
 
   useEffect(() => {
     if (profile) {
@@ -44,6 +46,20 @@ export default function ProfilePage() {
       });
     }
   }, [profile]);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUserId(data.user?.id || null);
+    };
+    fetchUser();
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id || null);
+    });
+
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   const onAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -74,13 +90,16 @@ export default function ProfilePage() {
     }
   };
 
+  
+  
+
   async function onSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     
     try {
       await updateMyProfile(form);
-      await qc.invalidateQueries({ queryKey: qk.profile });
+      await qc.invalidateQueries({ queryKey: qk.profile(userId) });
       toast.success("Profile updated successfully");
     } catch (e: any) {
       toast.error(e.message || "Failed to update profile");

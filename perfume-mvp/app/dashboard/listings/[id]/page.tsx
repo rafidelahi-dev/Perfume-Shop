@@ -42,7 +42,7 @@ export default function EditListingPage() {
   const qc = useQueryClient();
 
   const { data: listing, isLoading, error } = useQuery({
-    queryKey: [qk.uniqueListing(id)],
+    queryKey: [qk.listingById(id)],
     queryFn: () => fetchListing(id),
   });
 
@@ -55,7 +55,7 @@ export default function EditListingPage() {
   const [bottleSize, setBottleSize] = useState<string | "">("");
   const [partialLeft, setPartialLeft] = useState<string | "">("");
   const [decants, setDecants] = useState<{ ml: string; price: string }[]>([]);
-
+  const [userId, setUserId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -85,6 +85,20 @@ export default function EditListingPage() {
     }
   }, [listing]);
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUserId(data.user?.id || null);
+    };
+    fetchUser();
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id || null);
+    });
+
+    return () => listener.subscription.unsubscribe();
+  }, []);
+
   type Listing = {
   id: string;
   brand: string;
@@ -103,20 +117,20 @@ export default function EditListingPage() {
 
   // 1) Optimistic update
   onMutate: async (patch: any) => {
-    await qc.cancelQueries({ queryKey: [qk.uniqueListing(id)] });
-    await qc.cancelQueries({ queryKey: qk.userListings });
+    await qc.cancelQueries({ queryKey: [qk.listingById(id)] });
+    await qc.cancelQueries({ queryKey: qk.userListings(userId) });
 
-    const prevDetail = qc.getQueryData<any>([qk.uniqueListing(id)]);
-    const prevList = qc.getQueryData<any[]>(qk.userListings);
+    const prevDetail = qc.getQueryData<any>([qk.listingById(id)]);
+    const prevList = qc.getQueryData<any[]>(qk.userListings(userId));
 
     // optimistic detail
-    qc.setQueryData<Listing>([qk.uniqueListing(id)], (curr) => {
+    qc.setQueryData<Listing>([qk.listingById(id)], (curr) => {
       if (!curr) return curr;
       return { ...curr, ...patch };
     });
 
     // optimistic list: replace the matching item by id (if present)
-    qc.setQueryData<any[]>(qk.userListings, (curr) => {
+    qc.setQueryData<any[]>(qk.userListings(userId), (curr) => {
       if (!Array.isArray(curr)) return curr;
       return curr.map((row) => (row.id === id ? { ...row, ...patch } : row));
     });
@@ -126,8 +140,8 @@ export default function EditListingPage() {
 
   // 2) Rollback on error
   onError: (_err, _patch, ctx) => {
-    if (ctx?.prevDetail) qc.setQueryData([qk.uniqueListing(id)], ctx.prevDetail);
-    if (ctx?.prevList) qc.setQueryData(qk.userListings, ctx.prevList);
+    if (ctx?.prevDetail) qc.setQueryData([qk.listingById(id)], ctx.prevDetail);
+    if (ctx?.prevList) qc.setQueryData(qk.userListings(userId), ctx.prevList);
   },
 
   onSuccess: () => {
@@ -138,8 +152,8 @@ export default function EditListingPage() {
 
   // 3) Final sync
   onSettled: () => {
-    qc.invalidateQueries({ queryKey: [qk.uniqueListing(id)] });
-    qc.invalidateQueries({ queryKey: qk.userListings });
+    qc.invalidateQueries({ queryKey: [qk.listingById(id)] });
+    qc.invalidateQueries({ queryKey: qk.userListings(userId) });
   },
 });
 

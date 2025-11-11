@@ -1,6 +1,6 @@
 "use client";
 
-import { useState} from "react";
+import { useEffect, useState} from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { qk } from "@/lib/queries/key";
 import {
@@ -14,6 +14,7 @@ import PerfumeForm from "./perfumeComponents/PerfumeForm";
 import PerfumeList from "./perfumeComponents/PerfumeList";
 import EditPerfume from "./perfumeComponents/EditPerfume";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabaseClient";
 
 type FormState = {
   brand: string;
@@ -43,10 +44,25 @@ export default function MyPerfumesPage() {
     null
   );
   const [showForm, setShowForm] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null); 
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUserId(data.user?.id || null);
+    };
+    fetchUser();
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id || null);
+    });
+
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   // ---------- React Query ----------
   const { data, isLoading, error } = useQuery({
-    queryKey: qk.userPerfumes,
+    queryKey: qk.userPerfumes(userId),
     queryFn: fetchMyPerfumes,
   });
 
@@ -63,7 +79,7 @@ export default function MyPerfumesPage() {
   const create = useMutation({
     mutationFn: insertMyPerfumes,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: qk.userPerfumes });
+      qc.invalidateQueries({ queryKey: qk.userPerfumes(userId) });
       setForm({ brand: "", sub_brand: "", name: "", images: [] });
       toast.success("Perfume added successfully!");
   },
@@ -73,7 +89,7 @@ export default function MyPerfumesPage() {
   const destroy = useMutation({
     mutationFn: (id: string) => deleteMyPerfume({ id }),
     onSuccess: () => {
-    qc.invalidateQueries({ queryKey: qk.userPerfumes });
+    qc.invalidateQueries({ queryKey: qk.userPerfumes(userId) });
     toast.success("Perfume deleted.");
   },
   onError: (error: any) => toast.error(error?.message || "Delete failed"),
@@ -82,7 +98,7 @@ export default function MyPerfumesPage() {
   const update = useMutation({
     mutationFn: updateMyPerfume,
     onSuccess: () => {
-    qc.invalidateQueries({ queryKey: qk.userPerfumes });
+    qc.invalidateQueries({ queryKey: qk.userPerfumes(userId) });
     setEditing(null);
     toast.success("Perfume updated successfully!");
   },
