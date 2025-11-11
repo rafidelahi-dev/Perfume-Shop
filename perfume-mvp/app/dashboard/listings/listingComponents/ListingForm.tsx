@@ -3,8 +3,9 @@ import { useState, useRef, useMemo } from 'react';
 import { uploadToBucket } from "@/lib/queries/storage";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { insertListing } from "@/lib/queries/listings";
-import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { qk } from '@/lib/queries/key'; 
+import Image from 'next/image';
 
 
 const ListingForm = () => {
@@ -57,8 +58,10 @@ const ListingForm = () => {
     try {
       const urls = await uploadToBucket("listing-images", files)
       setImages((prev) => [...prev, ...urls])
+      toast.success("Images uploaded!");
     } catch (err: any) {
       setFormError(err.message || "Upload failed");
+      toast.error(err.message || "Upload failed");
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -79,6 +82,7 @@ const ListingForm = () => {
       setSinglePrice("");
       setDecants([{ size_ml: "", price: "" }]);
       setImages([]);
+      toast.success("Listing added successfully!");
     },
   });
 
@@ -232,7 +236,15 @@ const ListingForm = () => {
                 {images.map((src) => (
                   <div key={src} className="aspect-square overflow-hidden rounded-xl border">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={src} alt="" className="h-full w-full object-cover" />
+                    <div className="relative h-full w-full overflow-hidden rounded-xl">
+                      <Image
+                        src={src}
+                        alt=""
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      />
+                    </div>
                   </div>
                 ))}
               </div>

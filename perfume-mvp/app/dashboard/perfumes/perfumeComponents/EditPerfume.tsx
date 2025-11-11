@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { X, Plus } from "lucide-react";
 import { uploadToBucket } from "@/lib/queries/storage";
 import { toast } from "sonner";
+import Image from "next/image";
 
 type EditForm = {
   id: string;
@@ -104,12 +105,16 @@ export default function EditPerfume({
             <div className="grid grid-cols-3 gap-2">
               {editing.images.map((url, idx) => (
                 <div key={idx} className="relative rounded-lg overflow-hidden border">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={url}
-                    alt=""
-                    className="aspect-square w-full object-cover"
-                  />
+                  <div className="relative aspect-square w-full">
+                    <Image
+                      src={url}
+                      alt={`Listing image ${idx + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                  </div>
+
                   <button
                     type="button"
                     onClick={() => removeEditingImage(idx)}
@@ -120,6 +125,7 @@ export default function EditPerfume({
                   </button>
                 </div>
               ))}
+
             </div>
           ) : (
             <p className="text-sm text-gray-600">No images yet.</p>

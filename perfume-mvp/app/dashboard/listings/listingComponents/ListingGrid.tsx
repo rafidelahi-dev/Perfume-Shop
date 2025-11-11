@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { qk } from '@/lib/queries/key';
 import { fetchMyListings, deleteMyListing } from '@/lib/queries/listings';
+import { toast } from 'sonner';
+import Image from 'next/image';
 
 export const ListingGrid = () => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -29,6 +31,7 @@ export const ListingGrid = () => {
         mutationFn: (id: string) => deleteMyListing(id), // or your local delete function
         onSuccess: () => {
         qc.invalidateQueries({ queryKey: qk.userListings }); // or ["my_listings"]
+        toast.success("Listing deleted successfully!");
         },
     });
   
@@ -78,7 +81,13 @@ export const ListingGrid = () => {
                 >
                   {l.images?.[0] && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={l.images[0]} alt="" className="h-40 w-full object-cover" />
+                    <Image
+                      src={l.images[0]}
+                      alt={`${l.brand ?? ""} ${l.perfume_name ?? ""}`}
+                      width={800}
+                      height={600}
+                      className="w-full h-40 object-cover rounded-t-xl"
+                    />
                   )}
                   <div className="p-4">
                     <div className="text-xs uppercase tracking-wide text-gray-500">

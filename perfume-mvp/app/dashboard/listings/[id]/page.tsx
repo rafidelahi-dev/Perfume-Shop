@@ -6,6 +6,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import { Trash2, Plus, Upload, ArrowLeft, Save } from "lucide-react";
 import { qk } from "@/lib/queries/key";
+import { toast } from "sonner";
+import Image from "next/image";
 
 async function fetchListing(id: string) {
   const { data, error } = await supabase
@@ -131,6 +133,7 @@ export default function EditListingPage() {
   onSuccess: () => {
     // ✅ navigate after the server confirms success
     router.push("/dashboard/listings");
+    toast.success("Listing updated successfully!");
   },
 
   // 3) Final sync
@@ -154,6 +157,7 @@ export default function EditListingPage() {
         urls.push(url);
       }
       setImages((prev) => [...prev, ...urls]);
+      toast.success("Images uploaded!");
     } finally {
       if (fileRef.current) fileRef.current.value = "";
     }
@@ -161,6 +165,7 @@ export default function EditListingPage() {
 
   function removeImage(url: string) {
     setImages((prev) => prev.filter((i) => i !== url));
+    toast.success("Image removed");
   }
 
   function validate() {
@@ -504,11 +509,16 @@ export default function EditListingPage() {
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                         {images.map((url) => (
                           <div key={url} className="relative group">
-                            <img 
-                              src={url} 
-                              className="w-full h-32 object-cover rounded-lg border border-gray-200 group-hover:opacity-75 transition-opacity"
-                              alt="Product preview"
-                            />
+                            <div className="relative w-full h-32 overflow-hidden rounded-lg border border-gray-200">
+                              <Image
+                                src={url}
+                                alt="Product preview"
+                                fill
+                                className="object-cover transition-opacity group-hover:opacity-75"
+                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                              />
+                            </div>
+
                             <button
                               type="button"
                               onClick={() => removeImage(url)}

@@ -22,7 +22,7 @@ export async function getUserProfile() {
         profile: null,
     }
 
-    const {data: profile} = await supabase.from("profiles").select("username, display_name").eq("id", user.id).single();
+    const {data: profile} = await supabase.from("profiles").select("username, display_name, avatar_url").eq("id", user.id).single();
 
     return {
         user,

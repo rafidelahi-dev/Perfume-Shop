@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Sparkles, Trash2 } from "lucide-react";
 import Skeleton from "@/components/ui/Skeleton";
+import Image from "next/image";
 
 export type Perfume = {
   id: string;
@@ -100,12 +101,13 @@ export default function PerfumeList({
               key={p.id}
               className="group rounded-2xl border border-black/5 bg-white overflow-hidden shadow-sm"
             >
-              <div className="relative aspect-[4/3] bg-gradient-to-br from-amber-50 to-rose-50">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+              <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-gradient-to-br from-amber-50 to-rose-50">
+                <Image
                   src={p.images?.[0] || ""}
                   alt={`${p.brand} ${p.name}`}
-                  className="h-full w-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 />
               </div>
               <div className="p-4">

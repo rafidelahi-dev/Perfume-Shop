@@ -1,86 +1,26 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabaseClient";
-
-type Profile = {
-  id: string;
-  email?: string; // not in table, but we’ll derive from session
-  username: string | null;
-  display_name: string | null;
-  avatar_url: string | null;
-  contact_link: string | null;      // existing field
-  messenger_link: string | null;    // new
-  whatsapp_number: string | null;   // new
-  website: string | null;           // new
-  location: string | null;          // new
-  bio: string | null;
-};
-
-async function getSessionUser() {
-  const { data, error } = await supabase.auth.getSession();
-  if (error) throw error;
-  const user = data.session?.user || null;
-  if (!user) throw new Error("Not authenticated");
-  return user;
-}
-
-async function fetchProfile(): Promise<Profile> {
-  const user = await getSessionUser();
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-  if (error) throw error;
-  return { ...data, email: user.email } as Profile;
-}
-
-async function updateProfile(patch: Partial<Profile>) {
-  const user = await getSessionUser();
-  const payload = {
-    display_name: patch.display_name ?? null,
-    avatar_url: patch.avatar_url ?? null,
-    contact_link: patch.contact_link ?? null,
-    messenger_link: patch.messenger_link ?? null,
-    whatsapp_number: patch.whatsapp_number ?? null,
-    website: patch.website ?? null,
-    location: patch.location ?? null,
-    bio: patch.bio ?? null,
-  };
-  const { error } = await supabase.from("profiles").update(payload).eq("id", user.id);
-  if (error) throw error;
-}
-
-async function updatePassword(newPassword: string) {
-  const { error } = await supabase.auth.updateUser({ password: newPassword });
-  if (error) throw error;
-}
-
-async function uploadAvatar(file: File): Promise<string> {
-  const user = await getSessionUser();
-  const ext = file.name.split(".").pop();
-  const path = `avatars/${user.id}/${Date.now()}.${ext}`;
-  const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, {
-    cacheControl: "3600",
-    upsert: true,
-  });
-  if (upErr) throw upErr;
-
-  // Public URL (bucket is public for MVP)
-  const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-  return data.publicUrl;
-}
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { qk } from "@/lib/queries/key";
+import {
+  fetchMyProfile,
+  updateMyProfile,
+  changeMyPassword,
+  type Profile,
+} from "@/lib/queries/profile";
+import { uploadToBucket } from "@/lib/queries/storage";
+import { toast } from "sonner";
 
 export default function ProfilePage() {
   const router = useRouter();
   const qc = useQueryClient();
+
   const { data: profile, isLoading, error } = useQuery({
-    queryKey: ["profile"],
-    queryFn: fetchProfile,
+    queryKey: qk.profile,
+    queryFn: fetchMyProfile,
   });
 
   const [form, setForm] = useState<Partial<Profile>>({});
@@ -107,84 +47,79 @@ export default function ProfilePage() {
     }
   }, [profile]);
 
-  const onAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImgUploading(true);
-    setErrMsg(null);
-    try {
-      const url = await uploadAvatar(file);
-      setForm((f) => ({ ...f, avatar_url: url }));
-      setMsg("Avatar uploaded. Click Save to apply.");
-    } catch (e: any) {
-      setErrMsg(e.message || "Upload failed");
-    } finally {
-      setImgUploading(false);
-    }
-  };
+const onAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  setImgUploading(true);
+  setErrMsg(null);
 
-  const onSave = async (e: React.FormEvent) => {
+  try {
+    // Reuse shared upload helper
+    const [url] = await uploadToBucket("avatars", [file]);
+    setForm((f) => ({ ...f, avatar_url: url }));
+    toast.success("Avatar uploaded");
+  } catch (e: any) {
+    toast.error(e.message || "Failed to upload avatar");
+  } finally {
+    setImgUploading(false);
+    e.target.value = "";
+  }
+};
+
+
+  async function onSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    setMsg(null); setErrMsg(null);
+    setMsg(null);
+    setErrMsg(null);
     try {
-      await updateProfile(form);
-      await qc.invalidateQueries({ queryKey: ["profile"] });
-      setMsg("Profile updated");
+      await updateMyProfile(form);
+      await qc.invalidateQueries({ queryKey: qk.profile });
+      toast.success("Profile updated");
     } catch (e: any) {
       setErrMsg(e.message || "Failed to update profile");
     } finally {
       setSaving(false);
     }
-  };
+  }
 
-  const onChangePassword = async (e: React.FormEvent) => {
+  async function onChangePassword(e: React.FormEvent) {
     e.preventDefault();
     setPwdSaving(true);
-    setMsg(null); setErrMsg(null);
+    setMsg(null);
+    setErrMsg(null);
     try {
-      if (!pwd.newPwd || pwd.newPwd !== pwd.confirmPwd) {
-        throw new Error("Passwords do not match");
-      }
-      await updatePassword(pwd.newPwd);
-      setMsg("Password updated");
+      if (!pwd.newPwd || pwd.newPwd !== pwd.confirmPwd) throw new Error("Passwords do not match");
+      await changeMyPassword(pwd.newPwd);
+      toast.success("Password updated");
       setPwd({ newPwd: "", confirmPwd: "" });
     } catch (e: any) {
       setErrMsg(e.message || "Failed to update password");
     } finally {
       setPwdSaving(false);
     }
-  };
+  }
 
-  const onDeleteAccount = async () => {
+  async function onDeleteAccount() {
     if (!confirm("This will permanently delete your account and data. Continue?")) return;
     setDeleteLoading(true);
-    setMsg(null); setErrMsg(null);
+    setMsg(null);
+    setErrMsg(null);
     try {
-      // Get current session access token to prove identity to the server
-      const { data } = await supabase.auth.getSession();
-      const token = data.session?.access_token;
-      if (!token) throw new Error("No active session");
-
-      const res = await fetch("/api/account/delete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) {
-        const t = await res.text();
-        throw new Error(t || "Account deletion failed");
-      }
-      // Sign out locally and redirect to login
-      await supabase.auth.signOut();
+      const res = await fetch("/api/account/delete", { method: "POST" });
+      if (!res.ok) throw new Error((await res.text()) || "Account deletion failed");
       router.replace("/(auth)/login");
     } catch (e: any) {
       setErrMsg(e.message || "Failed to delete account");
     } finally {
       setDeleteLoading(false);
     }
-  };
+  }
 
-  if (isLoading) return <div>Loading profile…</div>;
+  if (isLoading) return <div className="flex flex-col items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1a1a1a] mb-4"></div>
+            <p className="text-gray-600 font-medium">Loading your listings...</p>
+          </div>;
   if (error) return <div className="text-red-600">Failed to load profile.</div>;
   if (!profile) return null;
 
@@ -192,7 +127,6 @@ export default function ProfilePage() {
     <section>
       <h2 className="text-2xl font-semibold mb-6">My Profile</h2>
 
-      {/* Profile card */}
       <form onSubmit={onSave} className="rounded-lg border bg-white p-6 space-y-4 max-w-2xl">
         <div className="flex items-center gap-4">
           <div className="relative h-20 w-20 overflow-hidden rounded-full bg-gray-100">
@@ -329,7 +263,7 @@ export default function ProfilePage() {
         </button>
       </form>
 
-      {/* Danger zone: delete account */}
+      {/* Danger zone */}
       <div className="mt-6 rounded-lg border bg-white p-6 max-w-2xl">
         <h3 className="text-lg font-semibold text-red-600">Danger zone</h3>
         <p className="text-sm text-gray-600 mt-1">

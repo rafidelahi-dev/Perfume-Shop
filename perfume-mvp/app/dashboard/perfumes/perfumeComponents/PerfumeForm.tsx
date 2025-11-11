@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useRef } from "react";
 
 export default function PerfumeForm({
@@ -69,11 +70,19 @@ export default function PerfumeForm({
           {form.images.length > 0 && (
             <div className="grid grid-cols-3 gap-2">
               {form.images.map((url: string, i: number) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={i} src={url} alt="" className="aspect-square w-full object-cover rounded-xl border" />
+                <div key={i} className="relative aspect-square overflow-hidden rounded-xl border">
+                  <Image
+                    src={url}
+                    alt={`Uploaded image ${i + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 33vw, (max-width: 1024px) 20vw, 15vw"
+                  />
+                </div>
               ))}
             </div>
           )}
+
         </div>
       </div>
 
