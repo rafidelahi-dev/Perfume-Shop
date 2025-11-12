@@ -77,20 +77,26 @@ export default function PerfumesPage() {
 
   // --- Derived filtered data ---
   const filteredPerfumes = useMemo(() => {
+  const min = filters.priceMin ?? -Infinity;
+  const max = filters.priceMax ?? +Infinity;
+
   return listings.filter((item) => {
     const brandMatch = filters.brand
       ? item.brand?.toLowerCase().includes(filters.brand.toLowerCase())
       : true;
 
+    const searchTarget = `${item.perfume_name ?? ""} ${item.sub_brand ?? ""} ${item.brand ?? ""}`.toLowerCase();
     const searchMatch = filters.q
-      ? `${item.perfume_name ?? ""} ${item.sub_brand ?? ""}`
-          .toLowerCase()
-          .includes(filters.q.toLowerCase())
+      ? searchTarget.includes(filters.q.toLowerCase())
       : true;
 
-    return brandMatch && searchMatch;
+    const priceNum = Number(item.price);
+    const priceMatch = priceNum >= min && priceNum <= max;
+
+    return brandMatch && searchMatch && priceMatch;
   });
-}, [listings, filters.brand, filters.q]);
+}, [listings, filters.brand, filters.q, filters.priceMin, filters.priceMax]);
+
 
   return (
     <div className="min-h-screen">
@@ -111,6 +117,18 @@ export default function PerfumesPage() {
           </p>
         </div>
       </section>
+
+      <div className="mx-auto max-w-3xl -mt-10 px-4">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-black/30" />
+          <input
+            className="w-full rounded-2xl border border-black/10 bg-white/90 px-12 py-4 shadow-sm outline-none ring-2 ring-transparent transition focus:border-[#d4af37] focus:ring-[#d4af37]/20"
+            placeholder="Search perfumes by name, brand, or sub-brand..."
+            value={filters.q}
+            onChange={(e) => setFilters({ q: e.target.value })}
+          />
+        </div>
+      </div>
 
       {/* Filters */}
       <div className="mx-auto max-w-7xl px-4 py-10">
@@ -170,20 +188,53 @@ export default function PerfumesPage() {
                   />
                 </div>
               </div>
-
-              {/* General Search */}
-              <div className="relative">
+              {/* Price Range */}
+              <div>
                 <label className="mb-2 block text-sm font-medium text-[#1a1a1a]">
-                  Search fragrances
+                  Price Range (USD)
                 </label>
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-black/30" />
+                <div className="flex items-center gap-3">
                   <input
-                    className="w-full rounded-2xl border border-black/10 bg-white/90 px-12 py-3 outline-none ring-2 ring-transparent transition focus:border-[#d4af37] focus:ring-[#d4af37]/20"
-                    placeholder="Notes, name, mood..."
-                    value={filters.q}
-                    onChange={(e) => setFilters({ q: e.target.value })}
+                    type="number"
+                    placeholder="Min"
+                    value={filters.priceMin ?? ""}
+                    onChange={(e) =>
+                      setFilters({
+                        priceMin: e.target.value === "" ? null : Number(e.target.value),
+                      })
+                    }
+                    className="w-full rounded-2xl border border-black/10 bg-white/90 px-4 py-3 outline-none ring-2 ring-transparent transition focus:border-[#d4af37] focus:ring-[#d4af37]/20"
                   />
+                  <span className="text-[#888]">–</span>
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    value={filters.priceMax ?? ""}
+                    onChange={(e) =>
+                      setFilters({
+                        priceMax: e.target.value === "" ? null : Number(e.target.value),
+                      })
+                    }
+                    className="w-full rounded-2xl border border-black/10 bg-white/90 px-4 py-3 outline-none ring-2 ring-transparent transition focus:border-[#d4af37] focus:ring-[#d4af37]/20"
+                  />
+                </div>
+
+                {/* Quick presets */}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {[
+                    { label: "Under $50", min: null, max: 50 },
+                    { label: "$50–$100", min: 50, max: 100 },
+                    { label: "$100–$200", min: 100, max: 200 },
+                    { label: "Over $200", min: 200, max: null },
+                  ].map((p) => (
+                    <button
+                      key={p.label}
+                      onClick={() => setFilters({ priceMin: p.min, priceMax: p.max })}
+                      className="rounded-full border border-[#d4af37]/30 bg-[#fffaf2] px-3 py-1 text-xs hover:bg-[#f7eeda]"
+                    >
+                      {p.label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
@@ -203,11 +254,11 @@ export default function PerfumesPage() {
                       </button>
                     </span>
                   )}
-                  {filters.q && (
+                  {(filters.priceMin !== null || filters.priceMax !== null) && (
                     <span className="inline-flex items-center gap-2 rounded-full border border-[#d4af37]/30 bg-[#d4af37]/10 px-4 py-2 text-sm">
-                      Search: {filters.q}
+                      Price: {filters.priceMin ?? 0} – {filters.priceMax ?? "∞"}
                       <button
-                        onClick={() => setFilters({ q: "" })}
+                        onClick={() => setFilters({ priceMin: null, priceMax: null })}
                         className="hover:text-[#d4af37]"
                       >
                         <X className="h-4 w-4" />
