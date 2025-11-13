@@ -516,7 +516,7 @@ export default function ProfilePage() {
                   Deleting...
                 </span>
               ) : (
-                "Delete Account"
+                "Delete Account Permanantly"
               )}
             </button>
           </div>
