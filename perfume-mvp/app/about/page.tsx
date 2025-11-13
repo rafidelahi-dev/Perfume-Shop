@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 export default function AboutPage() {
   return (
@@ -18,7 +19,7 @@ export default function AboutPage() {
         </p>
         <div className="relative w-full h-64 rounded-3xl overflow-hidden shadow-lg">
           <Image
-            src="/about/hero.jpg"
+            src="/About/bangladesh.jpg"
             alt="Perfume bottles"
             fill
             className="object-cover"
@@ -91,7 +92,7 @@ export default function AboutPage() {
       {/* IMAGE SECTION */}
       <section className="relative w-full h-72 rounded-3xl overflow-hidden shadow-lg">
         <Image
-          src="/about/community.jpg"
+          src="/About/community1.jpg"
           alt="Fragrance community"
           fill
           className="object-cover"
@@ -128,12 +129,12 @@ export default function AboutPage() {
           Explore new scents, share your collection, and connect with perfume
           lovers around the world.
         </p>
-        <a
+        <Link
           href="/perfumes"
           className="inline-block rounded-full bg-[#1a1a1a] text-white px-8 py-3 text-sm hover:opacity-90"
         >
           Explore the Collection
-        </a>
+        </Link>
       </section>
     </div>
   );
