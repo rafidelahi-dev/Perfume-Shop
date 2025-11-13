@@ -4,8 +4,8 @@ import "./globals.css";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
-  title: "Perfume Share",
-  description: "Discover, decant & deal — the modern fragrance marketplace.",
+  title: "Cloud PerfumeBD",
+  description: "Discover, decant & deal — the new age fragrance marketplace.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
