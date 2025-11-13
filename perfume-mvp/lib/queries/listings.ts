@@ -8,7 +8,7 @@ export async function fetchMyListings(){
     return data ?? [];
 }
 
-export async function insertListing(values: Record<string, any>){
+export async function insertListing(values: Record<string, unknown>){
     const userId = await getSessionUserId();
     const {error} = await supabase.from("listings").insert({"user_id": userId, ...values})
     if(error) throw error;

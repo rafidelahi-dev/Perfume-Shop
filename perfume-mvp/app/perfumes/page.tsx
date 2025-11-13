@@ -289,7 +289,7 @@ export default function PerfumesPage() {
             </div>
 
             {/* Active Filter Tags */}
-            { hasActiveFilters ? (
+            {hasActiveFilters && (
               <div className="mt-6 border-t border-black/5 pt-6">
                 <div className="flex flex-wrap gap-2">
                   {filters.brand && (
@@ -303,28 +303,37 @@ export default function PerfumesPage() {
                       </button>
                     </span>
                   )}
-                  {filters.priceMin !== null || filters.priceMax !== null ? (
+
+                  {(filters.priceMin !== null || filters.priceMax !== null) && (
                     <span className="inline-flex items-center gap-2 rounded-full border border-[#d4af37]/30 bg-[#d4af37]/10 px-4 py-2 text-sm">
                       Price: {filters.priceMin ?? 0} – {filters.priceMax ?? "∞"}
                       <button
-                        onClick={() => setFilters({ priceMin: null, priceMax: null })}
+                        onClick={() =>
+                          setFilters({ priceMin: null, priceMax: null })
+                        }
                         className="hover:text-[#d4af37]"
                       >
                         <X className="h-4 w-4" />
                       </button>
                     </span>
-                  ) : null}
-                  {(filters.types?.length ?? 0) > 0 ? (
+                  )}
+
+                  {(filters.types?.length ?? 0) > 0 && (
                     <span className="inline-flex items-center gap-2 rounded-full border border-[#d4af37]/30 bg-[#d4af37]/10 px-4 py-2 text-sm">
-                      Type: {(filters.types ?? []).map(t => t[0].toUpperCase() + t.slice(1)).join(", ")}
-                      <button onClick={() => setFilters({ types: [] })} className="hover:text-[#d4af37]">
+                      Type: {(filters.types ?? [])
+                        .map((t) => t[0].toUpperCase() + t.slice(1))
+                        .join(", ")}
+                      <button
+                        onClick={() => setFilters({ types: [] })}
+                        className="hover:text-[#d4af37]"
+                      >
                         <X className="h-4 w-4" />
                       </button>
                     </span>
-                  ) : null}
+                  )}
                 </div>
               </div>
-            ) : null}
+            )}
           </div>
         )}
 
