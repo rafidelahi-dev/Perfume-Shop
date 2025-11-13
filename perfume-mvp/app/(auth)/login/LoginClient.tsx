@@ -1,28 +1,26 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 
-export default function LoginClient() {
+type LoginClientProps = {
+  nextPath: string;
+};
+
+export default function LoginClient({ nextPath }: LoginClientProps) {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [oauthLoading, setOauthLoading] = useState<"google" | "facebook" | null>(null);
+  const [oauthLoading, setOauthLoading] =
+    useState<"google" | "facebook" | null>(null);
 
-  const router = useRouter();
-  const search = useSearchParams();
-
-  // Ensure /next path is clean
-  const nextPath = useMemo(() => {
-    const raw = search.get("next");
-    if (!raw) return "/dashboard";
-    return raw.startsWith("/") ? raw : `/${raw}`;
-  }, [search]);
-
-  // If already logged in → redirect
+  // If already logged in, redirect to nextPath
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) router.replace(nextPath);
@@ -34,11 +32,18 @@ export default function LoginClient() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    if (error) setError(error.message);
-    else router.replace(nextPath);
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
 
+    router.replace(nextPath);
     setLoading(false);
   }
 
@@ -71,19 +76,18 @@ export default function LoginClient() {
         <input
           className="w-full border rounded p-2"
           placeholder="Email"
-          type="email"
-          required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          type="email"
+          required
         />
-
         <input
           className="w-full border rounded p-2"
           placeholder="Password"
           type="password"
-          required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
 
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -113,7 +117,6 @@ export default function LoginClient() {
             ? "Connecting to Google…"
             : "Continue with Google"}
         </button>
-
         <button
           onClick={() => signInWithOAuth("facebook")}
           disabled={oauthLoading === "facebook"}

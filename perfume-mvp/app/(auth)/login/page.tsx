@@ -2,16 +2,28 @@
 import { Suspense } from "react";
 import LoginClient from "./LoginClient";
 
-export default function LoginPage() {
+type PageProps = {
+  searchParams?: { next?: string };
+};
+
+export default function LoginPage({ searchParams }: PageProps) {
+  const rawNext = searchParams?.next;
+
+  // Ensure a safe path (must start with "/")
+  const nextPath =
+    typeof rawNext === "string" && rawNext.startsWith("/")
+      ? rawNext
+      : "/dashboard";
+
   return (
     <Suspense
       fallback={
-        <div className="flex items-center justify-center py-20">
-          <p className="text-gray-600 text-sm">Loading login…</p>
+        <div className="flex justify-center py-10">
+          <p className="text-gray-500">Loading login…</p>
         </div>
       }
     >
-      <LoginClient />
+      <LoginClient nextPath={nextPath} />
     </Suspense>
   );
 }
