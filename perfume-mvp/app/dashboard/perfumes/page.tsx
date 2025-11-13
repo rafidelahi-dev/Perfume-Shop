@@ -79,14 +79,6 @@ export default function MyPerfumesPage() {
   });
 
   // (Currently not used in UI, but typed properly now)
-  const filtered = (data ?? []).filter((p) => {
-    const q = searchTerm.toLowerCase();
-    return (
-      p.brand?.toLowerCase().includes(q) ||
-      (p.sub_brand ?? "").toLowerCase().includes(q) ||
-      p.name.toLowerCase().includes(q)
-    );
-  });
 
   // ---------- Mutations ----------
   const create = useMutation<void, Error, FormState>({

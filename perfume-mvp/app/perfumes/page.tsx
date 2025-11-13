@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import Header from "@/components/Header";
 import PerfumeGrid from "./components/PerfumeGrid";
 import { useUiStore } from "@/stores/useUiStore";
 import { Sparkles, Filter, X, Search } from "lucide-react";
-import Link from "next/link";
 
 type SellerProfile = {
   display_name: string | null;
@@ -87,14 +86,6 @@ export default function PerfumesPage() {
   return Number(p.price ?? NaN);
 }
 
-function typeBadge(p: PerfumeListing) {
-  const t = (p.type ?? "").toLowerCase();
-  if (t === "decant") return p.decant_ml ? `Decant • ${p.decant_ml} ml` : "Decant";
-  if (t === "partial") return p.partial_left_ml ? `Partial • ${p.partial_left_ml} ml left` : "Partial";
-  if (t === "full") return "Full bottle";
-  if (t === "intact") return "Intact";
-  return null;
-}
 
 
   // --- Derived filtered data ---
@@ -294,7 +285,7 @@ function typeBadge(p: PerfumeListing) {
             </div>
 
             {/* Active Filter Tags */}
-            {(filters.brand || filters.q) && (
+            {filters.brand || filters.q ? (
               <div className="mt-6 border-t border-black/5 pt-6">
                 <div className="flex flex-wrap gap-2">
                   {filters.brand && (
@@ -308,7 +299,7 @@ function typeBadge(p: PerfumeListing) {
                       </button>
                     </span>
                   )}
-                  {(filters.priceMin !== null || filters.priceMax !== null) && (
+                  {filters.priceMin !== null || filters.priceMax !== null ? (
                     <span className="inline-flex items-center gap-2 rounded-full border border-[#d4af37]/30 bg-[#d4af37]/10 px-4 py-2 text-sm">
                       Price: {filters.priceMin ?? 0} – {filters.priceMax ?? "∞"}
                       <button
@@ -318,18 +309,18 @@ function typeBadge(p: PerfumeListing) {
                         <X className="h-4 w-4" />
                       </button>
                     </span>
-                  )}
-                  {(filters.types?.length ?? 0) > 0 && (
+                  ) : null}
+                  {(filters.types?.length ?? 0) > 0 ? (
                     <span className="inline-flex items-center gap-2 rounded-full border border-[#d4af37]/30 bg-[#d4af37]/10 px-4 py-2 text-sm">
                       Type: {(filters.types ?? []).map(t => t[0].toUpperCase() + t.slice(1)).join(", ")}
                       <button onClick={() => setFilters({ types: [] })} className="hover:text-[#d4af37]">
                         <X className="h-4 w-4" />
                       </button>
                     </span>
-                  )}
+                  ) : null}
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         )}
 

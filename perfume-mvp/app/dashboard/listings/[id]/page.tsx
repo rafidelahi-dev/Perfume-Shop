@@ -6,7 +6,6 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
-  UseMutateFunction,
 } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import { Trash2, Plus, Upload, ArrowLeft, Save } from "lucide-react";

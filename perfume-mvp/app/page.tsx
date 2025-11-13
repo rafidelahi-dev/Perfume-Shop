@@ -10,22 +10,25 @@ export default function Home() {
   const [currentBg, setCurrentBg] = useState(0);
 
    // Array of background images with different color variations
-  const backgroundImages = [
-    "/Background/1.png", 
-    "/Background/2.png", 
-    "/Background/6.png",
-    "/Background/3.png", 
-    "/Background/4.png", 
-    "/Background/5.png", 
-     
-  ];
+// Move this OUTSIDE the component so it's stable
+const backgroundImages = [
+  "/Background/1.png",
+  "/Background/2.png",
+  "/Background/6.png",
+  "/Background/3.png",
+  "/Background/4.png",
+  "/Background/5.png",
+];
+
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentBg((prev) => (prev + 1) % backgroundImages.length)
-    }, 3000)
-    return () => clearInterval(interval);
-  }, [])
+  const interval = setInterval(() => {
+    setCurrentBg((prev) => (prev + 1) % backgroundImages.length);
+  }, 3000);
+
+  return () => clearInterval(interval);
+}, []); // this is now valid
+
 
 
   return (
@@ -62,7 +65,7 @@ export default function Home() {
           </h1>
           
           <p className="mt-6 text-xl text-[#444] max-w-2xl mx-auto leading-relaxed font-light">
-            Curate, decant, and share exceptional fragrances from the world's most discerning perfume collectors.
+            {"Curate, decant, and share exceptional fragrances from the world's most discerning perfume collectors."}
           </p>
           
           <div className="mt-12 flex flex-wrap justify-center gap-6">

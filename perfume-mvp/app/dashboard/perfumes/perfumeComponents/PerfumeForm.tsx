@@ -14,8 +14,8 @@ type PerfumeFormProps = {
   setForm: (form: PerfumeFormState) => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  createMsg?: string;
-  createErr?: string;
+  createMsg?: string | null;
+  createErr?: string | null;
   saving: boolean;
   upLoading: boolean;
 };

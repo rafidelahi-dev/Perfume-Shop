@@ -1,4 +1,3 @@
-import { get } from "http";
 import { supabase } from "../supabaseClient";
 import { getSessionUserId } from "./auth";
 

@@ -30,7 +30,7 @@ export type PerfumeListing = {
 type PerfumeGridProps = {
   perfumes: PerfumeListing[];
   isLoading: boolean;
-  error: any;
+  error: unknown | null;
 };
 
 // ✅ Use min_price for decants; otherwise normal price
@@ -63,11 +63,12 @@ export default function PerfumeGrid({
   error,
 }: PerfumeGridProps) {
   if (error)
+  { const message = error instanceof Error ? error.message : "Failed to load perfumes";
     return (
       <p className="text-center text-red-600">
-        Failed to load perfumes: {error.message}
+        Failed to load perfumes: {message}
       </p>
-    );
+    );}
 
   if (isLoading)
     return (

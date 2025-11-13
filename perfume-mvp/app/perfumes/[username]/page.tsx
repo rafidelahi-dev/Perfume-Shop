@@ -25,9 +25,9 @@ export default async function SellerListingsPage({ params }: Props) {
   if (pErr || !profile) redirect("/perfumes"); // fallback
 
   // Get seller's active listings
-  const { data: listings, error: lErr } = await supabase
+  const { data: listings } = await supabase
     .from("listings")
-    .select("id, brand, name, sub_brand, price, type, decant_ml, min_price, images")
+    .select("id, brand, perfume_name, sub_brand, price, type, decant_ml, min_price, images")
     .eq("user_id", profile.id)
     .eq("is_active", true)
     .order("created_at", { ascending: false });

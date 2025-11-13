@@ -30,7 +30,7 @@ interface ListingGridProps {
   emptyText?: string;
 }
 
-export const ListingGrid: React.FC<ListingGridProps> = () => {
+export const ListingGrid: React.FC<ListingGridProps> = ({ listings, emptyText }) => {
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export const ListingGrid: React.FC<ListingGridProps> = () => {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm] = useState("");
   const qc = useQueryClient();
   const router = useRouter();
 
