@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { qk } from "@/lib/queries/key";
 import {
@@ -11,7 +11,9 @@ import {
 } from "@/lib/queries/userPerfumes";
 import { uploadToBucket } from "@/lib/queries/storage";
 import PerfumeForm from "./perfumeComponents/PerfumeForm";
-import PerfumeList from "./perfumeComponents/PerfumeList";
+import PerfumeList, {
+  type Perfume as PerfumeRow,
+} from "./perfumeComponents/PerfumeList";
 import EditPerfume from "./perfumeComponents/EditPerfume";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
@@ -22,6 +24,10 @@ type FormState = {
   name: string;
   images: string[];
 };
+
+// This is what we EXPECT from user_perfumes table for this page.
+// It matches the Perfume type used by PerfumeList.
+type UserPerfume = PerfumeRow;
 
 export default function MyPerfumesPage() {
   const qc = useQueryClient();
@@ -44,7 +50,7 @@ export default function MyPerfumesPage() {
     null
   );
   const [showForm, setShowForm] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null); 
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -53,57 +59,75 @@ export default function MyPerfumesPage() {
     };
     fetchUser();
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserId(session?.user?.id || null);
-    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUserId(session?.user?.id || null);
+      }
+    );
 
     return () => listener.subscription.unsubscribe();
   }, []);
 
   // ---------- React Query ----------
-  const { data, isLoading, error } = useQuery({
+  const {
+    data,
+    isLoading,
+    error,
+  } = useQuery<UserPerfume[], Error>({
     queryKey: qk.userPerfumes(userId),
     queryFn: fetchMyPerfumes,
   });
 
-  const filtered = (data ?? []).filter((p: any) => {
+  // (Currently not used in UI, but typed properly now)
+  const filtered = (data ?? []).filter((p) => {
     const q = searchTerm.toLowerCase();
     return (
       p.brand?.toLowerCase().includes(q) ||
-      p.sub_brand?.toLowerCase().includes(q) ||
-      p.name?.toLowerCase().includes(q)
+      (p.sub_brand ?? "").toLowerCase().includes(q) ||
+      p.name.toLowerCase().includes(q)
     );
   });
 
   // ---------- Mutations ----------
-  const create = useMutation({
-    mutationFn: insertMyPerfumes,
+  const create = useMutation<void, Error, FormState>({
+    mutationFn: (input) =>
+      insertMyPerfumes({
+        brand: input.brand,
+        sub_brand: input.sub_brand ?? undefined,
+        name: input.name,
+        images: input.images,
+      }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.userPerfumes(userId) });
       setForm({ brand: "", sub_brand: "", name: "", images: [] });
       toast.success("Perfume added successfully!");
-  },
-  onError: (error: any) => toast.error(error?.message || "Error adding perfume"),
-});
+    },
+    onError: (error) =>
+      toast.error(error.message || "Error adding perfume"),
+  });
 
-  const destroy = useMutation({
-    mutationFn: (id: string) => deleteMyPerfume({ id }),
+  const destroy = useMutation<void, Error, string>({
+    mutationFn: (id) => deleteMyPerfume({ id }),
     onSuccess: () => {
-    qc.invalidateQueries({ queryKey: qk.userPerfumes(userId) });
-    toast.success("Perfume deleted.");
-  },
-  onError: (error: any) => toast.error(error?.message || "Delete failed"),
-});
+      qc.invalidateQueries({ queryKey: qk.userPerfumes(userId) });
+      toast.success("Perfume deleted.");
+    },
+    onError: (error) => toast.error(error.message || "Delete failed"),
+  });
 
-  const update = useMutation({
+  const update = useMutation<
+    void,
+    Error,
+    { id: string; brand: string; sub_brand?: string | null; name: string; images: string[] }
+  >({
     mutationFn: updateMyPerfume,
     onSuccess: () => {
-    qc.invalidateQueries({ queryKey: qk.userPerfumes(userId) });
-    setEditing(null);
-    toast.success("Perfume updated successfully!");
-  },
-  onError: (error: any) => toast.error(error?.message || "Update failed"),
-});
+      qc.invalidateQueries({ queryKey: qk.userPerfumes(userId) });
+      setEditing(null);
+      toast.success("Perfume updated successfully!");
+    },
+    onError: (error) => toast.error(error.message || "Update failed"),
+  });
 
   // ---------- Upload ----------
   async function onUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -115,8 +139,9 @@ export default function MyPerfumesPage() {
       const urls = await uploadToBucket("user-perfumes", files);
       setForm((f) => ({ ...f, images: [...f.images, ...urls] }));
       toast.success("Images uploaded!");
-    } catch (e: any) {
-      toast.success("Images Uploaded")
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : null;
+      toast.error(error?.message || "Image upload failed");
     } finally {
       setUpLoading(false);
       e.currentTarget.value = "";
@@ -132,7 +157,6 @@ export default function MyPerfumesPage() {
     return null;
   }
 
-
   // ---------- Create Perfume ----------
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -145,7 +169,7 @@ export default function MyPerfumesPage() {
     create.mutate(
       {
         brand: form.brand,
-        sub_brand: form.sub_brand ?? undefined,
+        sub_brand: form.sub_brand ?? null,
         name: form.name,
         images: form.images,
       },
@@ -186,31 +210,52 @@ export default function MyPerfumesPage() {
       <div>
         <h3 className="mb-3 text-lg font-semibold">Your collection</h3>
 
-        {isLoading && <div className="flex flex-col items-center justify-center py-12">
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1a1a1a] mb-4"></div>
-            <p className="text-gray-600 font-medium">Loading your listings...</p>
-          </div>}
-        {error && <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+            <p className="text-gray-600 font-medium">
+              Loading your listings...
+            </p>
+          </div>
+        )}
+
+        {error && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 mb-4">
-              <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="h-6 w-6 text-red-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-red-800 mb-2">Unable to load listings</h3>
-            <p className="text-red-700 mb-4">There was an error loading your perfume listings.</p>
+            <h3 className="text-lg font-semibold text-red-800 mb-2">
+              Unable to load listings
+            </h3>
+            <p className="text-red-700 mb-4">
+              There was an error loading your perfume listings.
+            </p>
             <button
               onClick={() => window.location.reload()}
               className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700 transition-colors font-medium"
             >
               Try Again
             </button>
-          </div>}
+          </div>
+        )}
 
         <PerfumeList
-          items={(data ?? []) as any}          // or type to Perfume if your query is typed
+          items={data ?? []}
           isLoading={isLoading}
           error={error}
-          onEdit={(item) => setEditing(item)}  // you can open your edit modal later
+          onEdit={(item) => setEditing(item)}
           onDelete={(id) => destroy.mutate(id)}
         />
 
@@ -225,7 +270,6 @@ export default function MyPerfumesPage() {
             editErr={editErr}
             setEditErr={setEditErr}
           />
-
         )}
       </div>
     </section>

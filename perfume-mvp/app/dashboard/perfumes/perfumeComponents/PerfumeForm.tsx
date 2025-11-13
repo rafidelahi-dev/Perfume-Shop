@@ -2,6 +2,24 @@
 import Image from "next/image";
 import { useRef } from "react";
 
+type PerfumeFormState = {
+  brand: string;
+  sub_brand?: string | null;
+  name: string;
+  images: string[];
+};
+
+type PerfumeFormProps = {
+  form: PerfumeFormState;
+  setForm: (form: PerfumeFormState) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  createMsg?: string;
+  createErr?: string;
+  saving: boolean;
+  upLoading: boolean;
+};
+
 export default function PerfumeForm({
   form,
   setForm,
@@ -11,9 +29,8 @@ export default function PerfumeForm({
   createErr,
   saving,
   upLoading,
-}: any) {
+}: PerfumeFormProps) {
   const fileRef = useRef<HTMLInputElement>(null);
-  
 
   return (
     <form
@@ -24,7 +41,9 @@ export default function PerfumeForm({
         {/* Left column */}
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1a]">Brand *</label>
+            <label className="block text-sm font-medium text-[#1a1a1a]">
+              Brand *
+            </label>
             <input
               className="mt-1 w-full rounded-lg border border-black/10 bg-[#f8f7f3] px-3 py-2"
               value={form.brand}
@@ -34,16 +53,20 @@ export default function PerfumeForm({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1a]">Sub-brand</label>
+            <label className="block text-sm font-medium text-[#1a1a1a]">
+              Sub-brand
+            </label>
             <input
               className="mt-1 w-full rounded-lg border border-black/10 bg-[#f8f7f3] px-3 py-2"
-              value={form.sub_brand || ""}
+              value={form.sub_brand ?? ""}
               onChange={(e) => setForm({ ...form, sub_brand: e.target.value })}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1a]">Perfume name *</label>
+            <label className="block text-sm font-medium text-[#1a1a1a]">
+              Perfume name *
+            </label>
             <input
               className="mt-1 w-full rounded-lg border border-black/10 bg-[#f8f7f3] px-3 py-2"
               value={form.name}
@@ -69,8 +92,11 @@ export default function PerfumeForm({
           />
           {form.images.length > 0 && (
             <div className="grid grid-cols-3 gap-2">
-              {form.images.map((url: string, i: number) => (
-                <div key={i} className="relative aspect-square overflow-hidden rounded-xl border">
+              {form.images.map((url, i) => (
+                <div
+                  key={i}
+                  className="relative aspect-square overflow-hidden rounded-xl border"
+                >
                   <Image
                     src={url}
                     alt={`Uploaded image ${i + 1}`}
@@ -82,12 +108,15 @@ export default function PerfumeForm({
               ))}
             </div>
           )}
-
         </div>
       </div>
 
-      {createErr && <p className="mt-4 text-sm text-red-600">{createErr}</p>}
-      {createMsg && <p className="mt-4 text-sm text-green-700">{createMsg}</p>}
+      {createErr && (
+        <p className="mt-4 text-sm text-red-600">{createErr}</p>
+      )}
+      {createMsg && (
+        <p className="mt-4 text-sm text-green-700">{createMsg}</p>
+      )}
 
       <div className="mt-4">
         <button

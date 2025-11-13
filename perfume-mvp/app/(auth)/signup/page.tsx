@@ -52,7 +52,7 @@ export default function SignupPage() {
     setError(null);
 
     // 1. Try signing up
-    const { data: signRes, error: signErr } = await supabase.auth.signUp({ email, password });
+    const { error: signErr } = await supabase.auth.signUp({ email, password });
     if (signErr) {
       console.error("signUp error:", signErr); // <-- check browser console
       setError(signErr.message);

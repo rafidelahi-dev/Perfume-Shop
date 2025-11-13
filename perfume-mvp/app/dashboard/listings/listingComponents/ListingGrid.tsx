@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,9 +9,24 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 
-// 🧩 Add props interface
+// 🔹 Shape of a listing as used in this component
+export interface Listing {
+  id: string;
+  brand: string | null;
+  sub_brand?: string | null;
+  perfume_name: string | null;
+  type: string | null;
+  min_price?: number | null;
+  price: number | null;
+  bottle_size_ml?: number | null;
+  partial_left_ml?: number | null;
+  decant_options?: { ml: number; price: number }[] | null;
+  images?: string[] | null;
+}
+
+// 🔹 Props (currently not used, but kept if you want to reuse later)
 interface ListingGridProps {
-  listings?: any[];
+  listings?: Listing[];
   emptyText?: string;
 }
 
@@ -25,9 +40,11 @@ export const ListingGrid: React.FC<ListingGridProps> = () => {
     };
     fetchUser();
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserId(session?.user?.id || null);
-    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUserId(session?.user?.id || null);
+      }
+    );
 
     return () => listener.subscription.unsubscribe();
   }, []);
@@ -36,21 +53,29 @@ export const ListingGrid: React.FC<ListingGridProps> = () => {
   const qc = useQueryClient();
   const router = useRouter();
 
-  const { data, isLoading, error } = useQuery({
+  const {
+    data,
+    isLoading,
+    error,
+  } = useQuery<Listing[], unknown>({
     queryKey: qk.userListings(userId),
     queryFn: fetchMyListings,
     enabled: !!userId,
   });
 
-  const filteredListings = useMemo(() => {
+  const filteredListings: Listing[] = useMemo(() => {
     if (!data) return [];
     const lower = searchTerm.toLowerCase();
-    return data.filter(
-      (l: any) =>
-        l.brand?.toLowerCase().includes(lower) ||
-        l.sub_brand?.toLowerCase().includes(lower) ||
-        l.perfume_name?.toLowerCase().includes(lower)
-    );
+    return data.filter((l) => {
+      const brand = l.brand ?? "";
+      const sub = l.sub_brand ?? "";
+      const name = l.perfume_name ?? "";
+      return (
+        brand.toLowerCase().includes(lower) ||
+        sub.toLowerCase().includes(lower) ||
+        name.toLowerCase().includes(lower)
+      );
+    });
   }, [data, searchTerm]);
 
   const destroy = useMutation({
@@ -86,6 +111,8 @@ export const ListingGrid: React.FC<ListingGridProps> = () => {
   }
 
   if (error) {
+    const message =
+      error instanceof Error ? error.message : "Unknown error occurred.";
     return (
       <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 mb-4">
@@ -107,7 +134,7 @@ export const ListingGrid: React.FC<ListingGridProps> = () => {
           Unable to load listings
         </h3>
         <p className="text-red-700 mb-4">
-          There was an error loading your perfume listings.
+          There was an error loading your perfume listings: {message}
         </p>
         <button
           onClick={() => window.location.reload()}
@@ -123,7 +150,7 @@ export const ListingGrid: React.FC<ListingGridProps> = () => {
     <div>
       {filteredListings && filteredListings.length > 0 ? (
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredListings.map((l: any) => {
+          {filteredListings.map((l) => {
             const fromPrice =
               typeof l.min_price === "number"
                 ? Number(l.min_price)
@@ -157,7 +184,9 @@ export const ListingGrid: React.FC<ListingGridProps> = () => {
                       {l.type}
                     </span>
                     <button
-                      onClick={() => router.push(`/dashboard/listings/${l.id}`)}
+                      onClick={() =>
+                        router.push(`/dashboard/listings/${l.id}`)
+                      }
                       className="ml-2 rounded-full border px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50"
                     >
                       Edit
@@ -187,7 +216,10 @@ export const ListingGrid: React.FC<ListingGridProps> = () => {
                         )}
                     </div>
                   ) : (
-                    <DecantBlock options={l.decant_options} fromPrice={fromPrice} />
+                    <DecantBlock
+                      options={l.decant_options ?? undefined}
+                      fromPrice={fromPrice}
+                    />
                   )}
                 </div>
               </li>

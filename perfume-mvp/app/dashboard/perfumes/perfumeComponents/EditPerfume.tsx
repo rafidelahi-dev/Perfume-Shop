@@ -1,10 +1,16 @@
 "use client";
 
-import { useRef } from "react";
+import Image from "next/image";
 import { X, Plus } from "lucide-react";
 import { uploadToBucket } from "@/lib/queries/storage";
 import { toast } from "sonner";
-import Image from "next/image";
+import {
+  useRef,
+  type Dispatch,
+  type SetStateAction,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 
 type EditForm = {
   id: string;
@@ -14,10 +20,22 @@ type EditForm = {
   images: string[];
 };
 
+// ✅ Minimal shape of the mutation object we need
+type UpdateMutation = {
+  mutate: (input: {
+    id: string;
+    brand: string;
+    sub_brand: string | null;
+    name: string;
+    images: string[];
+  }) => void;
+  isPending: boolean;
+};
+
 type Props = {
   editing: EditForm | null;
-  setEditing: React.Dispatch<React.SetStateAction<EditForm | null>>;
-  update: any;                     // react-query mutation for update
+  setEditing: Dispatch<SetStateAction<EditForm | null>>;
+  update: UpdateMutation; // 👈 no more any
   editMsg: string | null;
   setEditMsg: (v: string | null) => void;
   editErr: string | null;
@@ -38,42 +56,43 @@ export default function EditPerfume({
   if (!editing) return null;
 
   // Handle image upload
-  async function onEditUpload(e: React.ChangeEvent<HTMLInputElement>) {
-  const files = Array.from(e.target.files || []);
-  if (!files.length) return;
+  async function onEditUpload(e: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
 
-  try {
-    const urls = await uploadToBucket("user-perfumes", files);
-    setEditing((prev) =>
-      prev
-        ? { ...prev, images: [...(prev.images || []), ...urls] }
-        : prev
-    );
-    toast.success("Images uploaded!");
-  } catch (err: any) {
-    toast.error(err?.message || "Upload Failed")
-  } finally {
-    if (editFileRef.current) editFileRef.current.value = "";
+    try {
+      const urls = await uploadToBucket("user-perfumes", files);
+      setEditing((prev) =>
+        prev ? { ...prev, images: [...(prev.images || []), ...urls] } : prev
+      );
+      toast.success("Images uploaded!");
+    } catch (err: unknown) {
+      // 👇 safer than `any`
+      if (err instanceof Error) {
+        toast.error(err.message || "Upload failed");
+      } else {
+        toast.error("Upload failed");
+      }
+    } finally {
+      if (editFileRef.current) editFileRef.current.value = "";
+    }
   }
-}
-
 
   function removeEditingImage(idx: number) {
-  setEditing((prev) =>
-    prev
-      ? { ...prev, images: prev.images.filter((_, i) => i !== idx) }
-      : prev
-  );
-  toast.success("Image removed (Remember to save changes!)");
-}
+    setEditing((prev) =>
+      prev
+        ? { ...prev, images: prev.images.filter((_, i) => i !== idx) }
+        : prev
+    );
+    toast.success("Image removed (Remember to save changes!)");
+  }
 
-
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setEditMsg(null);
     setEditErr(null);
 
-    if(!editing) return;
+    if (!editing) return;
 
     update.mutate({
       id: editing.id,
@@ -100,11 +119,16 @@ export default function EditPerfume({
 
         {/* Existing images */}
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Current images</label>
+          <label className="block text-sm font-medium mb-2">
+            Current images
+          </label>
           {editing.images?.length ? (
             <div className="grid grid-cols-3 gap-2">
               {editing.images.map((url, idx) => (
-                <div key={idx} className="relative rounded-lg overflow-hidden border">
+                <div
+                  key={idx}
+                  className="relative rounded-lg overflow-hidden border"
+                >
                   <div className="relative aspect-square w-full">
                     <Image
                       src={url}
@@ -125,7 +149,6 @@ export default function EditPerfume({
                   </button>
                 </div>
               ))}
-
             </div>
           ) : (
             <p className="text-sm text-gray-600">No images yet.</p>
@@ -134,7 +157,9 @@ export default function EditPerfume({
 
         {/* Add new images */}
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Add more images</label>
+          <label className="block text-sm font-medium mb-2">
+            Add more images
+          </label>
           <div className="flex items-center gap-3">
             <input
               ref={editFileRef}
@@ -167,7 +192,9 @@ export default function EditPerfume({
             <input
               className="mt-1 w-full rounded-lg border border-black/10 bg-[#f8f7f3] px-3 py-2"
               value={editing.brand}
-              onChange={(e) => setEditing({ ...editing, brand: e.target.value })}
+              onChange={(e) =>
+                setEditing({ ...editing, brand: e.target.value })
+              }
               required
             />
           </div>
@@ -177,7 +204,9 @@ export default function EditPerfume({
             <input
               className="mt-1 w-full rounded-lg border border-black/10 bg-[#f8f7f3] px-3 py-2"
               value={editing.sub_brand || ""}
-              onChange={(e) => setEditing({ ...editing, sub_brand: e.target.value })}
+              onChange={(e) =>
+                setEditing({ ...editing, sub_brand: e.target.value })
+              }
             />
           </div>
 
@@ -186,7 +215,9 @@ export default function EditPerfume({
             <input
               className="mt-1 w-full rounded-lg border border-black/10 bg-[#f8f7f3] px-3 py-2"
               value={editing.name}
-              onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+              onChange={(e) =>
+                setEditing({ ...editing, name: e.target.value })
+              }
               required
             />
           </div>
