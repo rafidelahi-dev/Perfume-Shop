@@ -6,10 +6,6 @@ import Header from "@/components/Header";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-export default function Home() {
-  const [currentBg, setCurrentBg] = useState(0);
-
-   // Array of background images with different color variations
 // Move this OUTSIDE the component so it's stable
 const backgroundImages = [
   "/Background/1.png",
@@ -20,6 +16,9 @@ const backgroundImages = [
   "/Background/5.png",
 ];
 
+
+export default function Home() {
+  const [currentBg, setCurrentBg] = useState(0);
 
   useEffect(() => {
   const interval = setInterval(() => {

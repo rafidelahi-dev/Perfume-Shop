@@ -45,7 +45,6 @@ export default function MyPerfumesPage() {
   const [createErr, setCreateErr] = useState<string | null>(null);
   const [editMsg, setEditMsg] = useState<string | null>(null);
   const [editErr, setEditErr] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
   const [editing, setEditing] = useState<FormState & { id: string } | null>(
     null
   );

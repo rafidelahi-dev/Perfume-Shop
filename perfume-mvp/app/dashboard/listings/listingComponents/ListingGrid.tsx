@@ -30,7 +30,7 @@ interface ListingGridProps {
   emptyText?: string;
 }
 
-export const ListingGrid: React.FC<ListingGridProps> = ({ listings, emptyText }) => {
+export const ListingGrid: React.FC<ListingGridProps> = () => {
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {

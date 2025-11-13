@@ -77,7 +77,13 @@ export default function PerfumesPage() {
   const filters = useUiStore((s) => s.filters);
   const setFilters = useUiStore((s) => s.setFilters);
   const reset = useUiStore((s) => s.resetFilters);
-
+  
+  const hasActiveFilters =
+    Boolean(filters.brand) ||
+    filters.priceMin !== null ||
+    filters.priceMax !== null ||
+    (filters.types?.length ?? 0) > 0 ||
+    Boolean(filters.q);
 
   function effectivePrice(p: PerfumeListing) {
   if ((p.type ?? "").toLowerCase() === "decant" && p.min_price != null) {
@@ -85,8 +91,6 @@ export default function PerfumesPage() {
   }
   return Number(p.price ?? NaN);
 }
-
-
 
   // --- Derived filtered data ---
   const filteredPerfumes = useMemo(() => {
@@ -285,7 +289,7 @@ export default function PerfumesPage() {
             </div>
 
             {/* Active Filter Tags */}
-            {filters.brand || filters.q ? (
+            { hasActiveFilters ? (
               <div className="mt-6 border-t border-black/5 pt-6">
                 <div className="flex flex-wrap gap-2">
                   {filters.brand && (
