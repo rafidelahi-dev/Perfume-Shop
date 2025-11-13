@@ -47,7 +47,6 @@ export function DashboardSidebar({ email }: { email: string | null }) {
           <NavLink href="/dashboard" label="Overview" />
           <NavLink href="/dashboard/perfumes" label="My Perfumes" />
           <NavLink href="/dashboard/listings" label="My Listings" />
-          <NavLink href="/dashboard/favorites" label="Favorites" />
           <NavLink href="/dashboard/profile" label="Profile" />
         </nav>
       </div>

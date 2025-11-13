@@ -19,6 +19,15 @@ const eslintConfig = [
       "build/**",
       "next-env.d.ts",
     ],
+    rules: {
+      // turn off specific rules you don’t like
+      "react/no-unescaped-entities": "off",
+      "@next/next/no-page-custom-font": "off",
+
+      // optional: if you want to be more chill while finishing MVP
+      // "@typescript-eslint/no-explicit-any": "off",
+      // "@typescript-eslint/no-unused-expressions": "off",
+    },
   },
 ];
 
