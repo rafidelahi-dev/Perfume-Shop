@@ -289,7 +289,7 @@ export default function PerfumesPage() {
             </div>
 
             {/* Active Filter Tags */}
-            {hasActiveFilters && (
+            {hasActiveFilters ? (
               <div className="mt-6 border-t border-black/5 pt-6">
                 <div className="flex flex-wrap gap-2">
                   {filters.brand && (
@@ -333,7 +333,7 @@ export default function PerfumesPage() {
                   )}
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         )}
 
