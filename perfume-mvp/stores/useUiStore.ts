@@ -2,7 +2,14 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-type Filters = { brand: string; q: string; priceMin: number | null; priceMax: number | null };
+type Filters = {
+  brand: string;
+  q: string;
+  priceMin: number | null;
+  priceMax: number | null;
+  types: string[]; // NEW: ['intact','full','partial','decant']
+};
+
 type UiState = {
   isFilterOpen: boolean;
   toggleFilter: () => void;
@@ -16,14 +23,11 @@ export const useUiStore = create<UiState>()(
     (set) => ({
       isFilterOpen: false,
       toggleFilter: () => set((s) => ({ isFilterOpen: !s.isFilterOpen })),
-      filters: { brand: "", q: "", priceMin: null, priceMax: null },
+      filters: { brand: "", q: "", priceMin: null, priceMax: null, types: [] }, // NEW
       setFilters: (f) => set((s) => ({ filters: { ...s.filters, ...f } })),
       resetFilters: () =>
-        set({ filters: { brand: "", q: "", priceMin: null, priceMax: null } }),
+        set({ filters: { brand: "", q: "", priceMin: null, priceMax: null, types: [] } }), // NEW
     }),
-    {
-      name: "ui-store-v1",
-      partialize: (s) => ({ filters: s.filters }),
-    }
+    { name: "ui-store-v1", partialize: (s) => ({ filters: s.filters }) }
   )
 );

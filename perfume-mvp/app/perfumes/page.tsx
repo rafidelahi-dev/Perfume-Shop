@@ -7,10 +7,12 @@ import Header from "@/components/Header";
 import PerfumeGrid from "./components/PerfumeGrid";
 import { useUiStore } from "@/stores/useUiStore";
 import { Sparkles, Filter, X, Search } from "lucide-react";
+import Link from "next/link";
 
 type SellerProfile = {
   display_name: string | null;
   avatar_url?: string | null;
+  username: string | null;
 };
 
 export type PerfumeListing = {
@@ -21,6 +23,8 @@ export type PerfumeListing = {
   price: number | null;        // price/min_price are numeric in DB
   min_price?: number | null;
   type?: string | null;        // intact/full/partial/decant
+  bottle_type?: string | null;
+  decant_ml?: number | null;
   bottle_size_ml?: number | null;
   partial_left_ml?: number | null;
   decant_options?: unknown;    // jsonb if you use it
@@ -47,7 +51,7 @@ async function fetchPerfumes(): Promise<PerfumeListing[]> {
       partial_left_ml,
       decant_options,
       images,
-      profiles:profiles!listings_user_id_fkey ( display_name, avatar_url )
+      profiles:profiles!listings_user_id_fkey ( display_name, avatar_url, username, contact_link, messenger_link, whatsapp_number  )
     `)
     .order("created_at", { ascending: false });
 
@@ -75,10 +79,29 @@ export default function PerfumesPage() {
   const setFilters = useUiStore((s) => s.setFilters);
   const reset = useUiStore((s) => s.resetFilters);
 
+
+  function effectivePrice(p: PerfumeListing) {
+  if ((p.type ?? "").toLowerCase() === "decant" && p.min_price != null) {
+    return Number(p.min_price);
+  }
+  return Number(p.price ?? NaN);
+}
+
+function typeBadge(p: PerfumeListing) {
+  const t = (p.type ?? "").toLowerCase();
+  if (t === "decant") return p.decant_ml ? `Decant • ${p.decant_ml} ml` : "Decant";
+  if (t === "partial") return p.partial_left_ml ? `Partial • ${p.partial_left_ml} ml left` : "Partial";
+  if (t === "full") return "Full bottle";
+  if (t === "intact") return "Intact";
+  return null;
+}
+
+
   // --- Derived filtered data ---
   const filteredPerfumes = useMemo(() => {
   const min = filters.priceMin ?? -Infinity;
   const max = filters.priceMax ?? +Infinity;
+  const typeSet = new Set((filters.types ?? []).map(t => t.toLowerCase()));
 
   return listings.filter((item) => {
     const brandMatch = filters.brand
@@ -86,16 +109,20 @@ export default function PerfumesPage() {
       : true;
 
     const searchTarget = `${item.perfume_name ?? ""} ${item.sub_brand ?? ""} ${item.brand ?? ""}`.toLowerCase();
-    const searchMatch = filters.q
-      ? searchTarget.includes(filters.q.toLowerCase())
-      : true;
+    const searchMatch = filters.q ? searchTarget.includes(filters.q.toLowerCase()) : true;
 
-    const priceNum = Number(item.price);
-    const priceMatch = priceNum >= min && priceNum <= max;
+    // type filter: if none selected => all pass; else must include
+    const typeVal = (item.type ?? "").toLowerCase();
+    const typeMatch = typeSet.size === 0 ? true : typeSet.has(typeVal);
 
-    return brandMatch && searchMatch && priceMatch;
+    // price filter: use effective price (min_price for decants, otherwise price)
+    const p = effectivePrice(item);
+    const priceMatch = !Number.isNaN(p) && p >= min && p <= max;
+
+    return brandMatch && searchMatch && typeMatch && priceMatch;
   });
-}, [listings, filters.brand, filters.q, filters.priceMin, filters.priceMax]);
+}, [listings, filters.brand, filters.q, filters.priceMin, filters.priceMax, filters.types]);
+
 
 
   return (
@@ -237,6 +264,33 @@ export default function PerfumesPage() {
                   ))}
                 </div>
               </div>
+              {/* Listing type */}
+              <div>
+                <label className="mb-2 block text-sm font-medium text-[#1a1a1a]">Listing type</label>
+                <div className="flex flex-wrap gap-2">
+                  {["intact", "partial", "decant"].map((t) => {
+                    const active = (filters.types ?? []).includes(t);
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => {
+                          const set = new Set(filters.types ?? []);
+                          active ? set.delete(t) : set.add(t);
+                          setFilters({ types: Array.from(set) });
+                        }}
+                        className={`rounded-full px-3 py-1 text-xs border ${
+                          active
+                            ? "border-[#d4af37] bg-[#fff6dc] text-[#1a1a1a]"
+                            : "border-[#d4af37]/30 bg-[#fffaf2] hover:bg-[#f7eeda]"
+                        }`}
+                      >
+                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
             {/* Active Filter Tags */}
@@ -261,6 +315,14 @@ export default function PerfumesPage() {
                         onClick={() => setFilters({ priceMin: null, priceMax: null })}
                         className="hover:text-[#d4af37]"
                       >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </span>
+                  )}
+                  {(filters.types?.length ?? 0) > 0 && (
+                    <span className="inline-flex items-center gap-2 rounded-full border border-[#d4af37]/30 bg-[#d4af37]/10 px-4 py-2 text-sm">
+                      Type: {(filters.types ?? []).map(t => t[0].toUpperCase() + t.slice(1)).join(", ")}
+                      <button onClick={() => setFilters({ types: [] })} className="hover:text-[#d4af37]">
                         <X className="h-4 w-4" />
                       </button>
                     </span>
