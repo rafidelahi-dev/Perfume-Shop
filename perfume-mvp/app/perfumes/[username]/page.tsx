@@ -5,32 +5,38 @@ import { ListingGrid } from "@/app/dashboard/listings/listingComponents/ListingG
 import Header from "@/components/Header";
 
 
-type Props = { params: { username: string } };
+type Params = { username: string };
 
-export default async function SellerListingsPage({ params }: Props) {
-  const supabase = createServerSupabase();
+export default async function SellerListingsPage(
+  props: { params: Promise<Params> }
+) {
+  const { username } = await props.params;   // ✅ await params
+  const supabase = await createServerSupabase();
 
   // Ensure auth (if not using middleware)
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
-    redirect(`/login?next=/perfumes/${params.username}`);
+    redirect(`/login?next=/perfumes/${username}`);
   }
 
   // Get profile by username
   const { data: profile, error: pErr } = await supabase
     .from("profiles")
     .select("id, username, display_name, avatar_url, contact_link, bio")
-    .eq("username", params.username)
+    .eq("username", username)
     .single();
+    console.log(profile)
   if (pErr || !profile) redirect("/perfumes"); // fallback
 
   // Get seller's active listings
-  const { data: listings } = await supabase
+  const { data: listings, error: lErr } = await supabase
     .from("listings")
-    .select("id, brand, perfume_name, sub_brand, price, type, decant_ml, min_price, images")
+    .select("id, brand, perfume_name, sub_brand, price, type, min_price, images")
     .eq("user_id", profile.id)
-    .eq("is_active", true)
     .order("created_at", { ascending: false });
+
+  console.log("LISTINGS ERROR:", lErr);
+  console.log("LISTINGS DATA:", listings);
 
   return (
     <div className="min-h-screen">
