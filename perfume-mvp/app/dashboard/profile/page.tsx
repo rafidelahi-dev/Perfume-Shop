@@ -159,7 +159,7 @@ export default function ProfilePage() {
       }
 
       toast.success("Account deleted successfully");
-      router.replace("/(auth)/login");
+      router.replace("/login");
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to delete account";

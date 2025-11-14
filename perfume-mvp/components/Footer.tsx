@@ -28,7 +28,6 @@ const Footer = () => {
 
   const socialLinks = [
     { icon: Facebook, href: 'https://facebook.com', label: 'Facebook' },
-    { icon: Twitter, href: 'https://twitter.com', label: 'Twitter' },
     { icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
     { icon: Mail, href: 'mailto:hello@perfumeshare.com', label: 'Email' }
   ]
@@ -43,9 +42,9 @@ const Footer = () => {
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center space-x-2 mb-4">
               <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">PS</span>
+                <span className="text-white font-bold text-sm">CP</span>
               </div>
-              <span className="text-xl font-serif font-semibold">PerfumeShare</span>
+              <span className="text-xl font-serif font-semibold">Cloud PerfumeBD</span>
             </Link>
             <p className="text-gray-300 text-sm leading-relaxed mb-6">
               The premier destination for fragrance enthusiasts to discover, exchange, 

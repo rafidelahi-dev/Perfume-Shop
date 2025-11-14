@@ -1,4 +1,4 @@
-// app/(auth)/signup/page.tsx
+// app//signup/page.tsx
 import { Suspense } from "react";
 import SignupClient from "./SignupClient";
 

@@ -13,7 +13,7 @@ export default async function SellerListingsPage({ params }: Props) {
   // Ensure auth (if not using middleware)
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
-    redirect(`/(auth)/login?next=/perfumes/${params.username}`);
+    redirect(`/login?next=/perfumes/${params.username}`);
   }
 
   // Get profile by username
