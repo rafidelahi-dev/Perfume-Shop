@@ -15,6 +15,11 @@ export default function Header() {
 
   const { loading, isAuthenticated, displayName, avatarUrl } = useAuthProfile(); // ⬅️ get avatarUrl
   const [open, setOpen] = useState(false);
+  const safeAvatar =
+  avatarUrl && avatarUrl !== "null" && avatarUrl.trim() !== ""
+    ? avatarUrl
+    : "/noimageuser.jpg";
+
 
   async function logout() {
     await supabase.auth.signOut();
@@ -47,8 +52,6 @@ export default function Header() {
 
   // Small component for a professional “user chip”
   function UserChip() {
-    // fallback image (local) if avatar missing
-    const fallback = "/avatar-fallback.png"; // add any simple silhouette to /public
     return (
       <Link
         href="/dashboard/profile"
@@ -56,7 +59,7 @@ export default function Header() {
       >
         <div className="relative h-7 w-7 overflow-hidden rounded-full bg-gray-200">
           <Image
-            src={avatarUrl || fallback}
+            src={safeAvatar}
             alt={displayName || "User avatar"}
             fill
             sizes="28px"
@@ -95,7 +98,7 @@ export default function Header() {
           {isAuthenticated ? (
             <>
               <NavLink href="/dashboard" label="Dashboard" />
-              <UserChip /> {/* ⬅️ avatar + name */}
+              <UserChip /> 
               <button
                 onClick={logout}
                 className="ml-2 rounded-full border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
@@ -134,14 +137,13 @@ export default function Header() {
 
             {isAuthenticated ? (
               <>
-                {/* A tiny avatar beside “Profile” link for mobile */}
                 <Link
                   href="/dashboard/profile"
                   className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-gray-100"
                 >
                   <div className="relative h-7 w-7 overflow-hidden rounded-full bg-gray-200">
                     <Image
-                      src={avatarUrl || "/avatar-fallback.png"}
+                      src={safeAvatar}
                       alt={displayName || "User avatar"}
                       fill
                       sizes="28px"

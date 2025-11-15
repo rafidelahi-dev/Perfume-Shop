@@ -14,6 +14,7 @@ import {
 import { uploadToBucket } from "@/lib/queries/storage";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -26,6 +27,8 @@ export default function ProfilePage() {
   const [pwdSaving, setPwdSaving] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const {
     data: profile,
@@ -143,31 +146,48 @@ export default function ProfilePage() {
     }
   }
 
-  async function onDeleteAccount() {
-    const confirmed = window.confirm(
-      "This will permanently delete your account and all associated data. This action cannot be undone. Are you sure you want to continue?"
-    );
-    if (!confirmed) return;
+  // 🔹 Called when user clicks the "Delete my account" button
+  function openDeleteModal() {
+    setDeleteError(null);
+    setDeleteModalOpen(true);
+  }
 
+  // 🔹 Called when user confirms inside the modal
+  async function handleConfirmDelete() {
     setDeleteLoading(true);
+    setDeleteError(null);
 
     try {
-      const res = await fetch("/api/account/delete", { method: "POST" });
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Account deletion failed");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setDeleteError("You are not logged in.");
+        setDeleteLoading(false);
+        return;
       }
 
-      toast.success("Account deleted successfully");
-      router.replace("/login");
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to delete account";
-      toast.error(message);
+      const res = await fetch("/api/account/delete", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Failed to delete account.");
+      }
+
+      // Clean up client session and redirect
+      await supabase.auth.signOut();
+      setDeleteModalOpen(false);
+      router.replace("/"); // or "/login"
+    } catch (err: any) {
+      setDeleteError(err.message || "Unexpected error.");
     } finally {
       setDeleteLoading(false);
     }
   }
+
 
   if (isLoading)
     return (
@@ -486,42 +506,35 @@ export default function ProfilePage() {
       </div>
 
       {/* Danger Zone */}
-      <div className="bg-white rounded-xl border border-red-200 shadow-sm overflow-hidden mb-16">
-        <div className="px-6 py-4 border-b border-red-200 bg-gradient-to-r from-red-50 to-red-100/30">
-          <h2 className="text-xl font-semibold text-red-900">Danger Zone</h2>
-          <p className="text-sm text-red-700 mt-1">
-            Irreversible and destructive actions
+      <div className="mt-8 border-t pt-4">
+        <p className="text-sm font-semibold text-red-700 mb-2">Danger Zone</p>
+        {deleteError && (
+          <p className="mb-2 text-sm text-red-600">
+            {deleteError}
           </p>
-        </div>
-
-        <div className="p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="space-y-1">
-              <h3 className="font-medium text-red-900">Delete Account</h3>
-              <p className="text-sm text-red-700 max-w-2xl">
-                Permanently delete your account, profile, listings, favorites,
-                and all personal data. This action cannot be undone and you will
-                lose access to all your information.
-              </p>
-            </div>
-
-            <button
-              onClick={onDeleteAccount}
-              disabled={deleteLoading}
-              className="px-6 py-2.5 border border-red-600 text-red-600 font-medium rounded-lg hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap flex-shrink-0"
-            >
-              {deleteLoading ? (
-                <span className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-                  Deleting...
-                </span>
-              ) : (
-                "Delete Account Permanantly"
-              )}
-            </button>
-          </div>
-        </div>
+        )}
+        <button
+          type="button"
+          onClick={openDeleteModal}
+          className="rounded-md bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+        >
+          Delete my account
+        </button>
       </div>
+
+      {/* 🔻 Confirmation modal */}
+      <ConfirmDialog
+        open={deleteModalOpen}
+        onCancel={() => {
+          if (!deleteLoading) setDeleteModalOpen(false);
+        }}
+        onConfirm={handleConfirmDelete}
+        loading={deleteLoading}
+        title="Delete your account?"
+        description="This will permanently delete your account, perfumes, listings, and all associated data. This action cannot be undone."
+        confirmLabel="Yes, delete it"
+        cancelLabel="Cancel"
+      />
     </div>
   );
 }
