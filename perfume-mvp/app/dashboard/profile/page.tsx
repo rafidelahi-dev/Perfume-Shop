@@ -1,3 +1,4 @@
+// app/dashboard/profile/page.tsx (with mobile improvements)
 "use client";
 
 import Image from "next/image";
@@ -146,13 +147,11 @@ export default function ProfilePage() {
     }
   }
 
-  // 🔹 Called when user clicks the "Delete my account" button
   function openDeleteModal() {
     setDeleteError(null);
     setDeleteModalOpen(true);
   }
 
-  // 🔹 Called when user confirms inside the modal
   async function handleConfirmDelete() {
     setDeleteLoading(true);
     setDeleteError(null);
@@ -177,10 +176,9 @@ export default function ProfilePage() {
         throw new Error(text || "Failed to delete account.");
       }
 
-      // Clean up client session and redirect
       await supabase.auth.signOut();
       setDeleteModalOpen(false);
-      router.replace("/"); // or "/login"
+      router.replace("/");
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Unexpected error.";
@@ -189,7 +187,6 @@ export default function ProfilePage() {
       setDeleteLoading(false);
     }
   }
-
 
   if (isLoading)
     return (
@@ -201,7 +198,7 @@ export default function ProfilePage() {
 
   if (error)
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-2xl">
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-2xl mx-4 lg:mx-auto">
         <div className="flex items-center gap-3 text-red-800">
           <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center">
             <span className="text-sm">!</span>
@@ -217,19 +214,19 @@ export default function ProfilePage() {
   if (!profile) return null;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-16">
+    <div className="max-w-4xl mx-auto space-y-8 pb-16 px-4 lg:px-0">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
-        <p className="text-gray-600">
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Profile Settings</h1>
+        <p className="text-gray-600 text-sm lg:text-base">
           Manage your account information and preferences
         </p>
       </div>
 
       {/* Profile Information */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100/30">
-          <h2 className="text-xl font-semibold text-gray-900">
+        <div className="px-4 lg:px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100/30">
+          <h2 className="text-lg lg:text-xl font-semibold text-gray-900">
             Profile Information
           </h2>
           <p className="text-sm text-gray-600 mt-1">
@@ -237,11 +234,11 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        <form onSubmit={onSave} className="p-6 space-y-8">
+        <form onSubmit={onSave} className="p-4 lg:p-6 space-y-6 lg:space-y-8">
           {/* Avatar Section */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-4 bg-gray-50 rounded-lg">
-            <div className="flex-shrink-0">
-              <div className="relative h-24 w-24 overflow-hidden rounded-full border-4 border-white shadow-lg">
+          <div className="flex flex-col sm:flex-row items-start gap-4 lg:gap-6 p-4 bg-gray-50 rounded-lg">
+            <div className="flex-shrink-0 mx-auto sm:mx-0">
+              <div className="relative h-20 w-20 lg:h-24 lg:w-24 overflow-hidden rounded-full border-4 border-white shadow-lg">
                 {form.avatar_url ? (
                   <Image
                     src={form.avatar_url}
@@ -252,18 +249,18 @@ export default function ProfilePage() {
                   />
                 ) : (
                   <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 text-gray-500">
-                    <span className="text-sm font-medium">No avatar</span>
+                    <span className="text-xs font-medium">No avatar</span>
                   </div>
                 )}
                 {imgUploading && (
                   <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-4 lg:h-6 w-4 lg:w-6 border-b-2 border-white"></div>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="flex-1 space-y-2">
+            <div className="flex-1 space-y-2 text-center sm:text-left">
               <h3 className="font-medium text-gray-900">Profile Picture</h3>
               <p className="text-sm text-gray-600">JPG, PNG or WebP. Max 5MB.</p>
               <label className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm">
@@ -293,9 +290,9 @@ export default function ProfilePage() {
           </div>
 
           {/* Form Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-4 lg:gap-6 lg:grid-cols-2">
             {/* Read-only fields */}
-            <div className="space-y-2">
+            <div className="space-y-2 lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700">
                 Email
               </label>
@@ -306,7 +303,7 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700">
                 Username
               </label>
@@ -374,7 +371,7 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div className="md:col-span-2 space-y-2">
+            <div className="space-y-2 lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700">
                 Contact Link
               </label>
@@ -388,7 +385,7 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div className="md:col-span-2 space-y-2">
+            <div className="space-y-2 lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700">
                 Location
               </label>
@@ -402,7 +399,7 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div className="md:col-span-2 space-y-2">
+            <div className="space-y-2 lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700">
                 Bio
               </label>
@@ -428,10 +425,10 @@ export default function ProfilePage() {
             <button
               type="submit"
               disabled={saving}
-              className="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+              className="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
             >
               {saving ? (
-                <span className="flex items-center gap-2">
+                <span className="flex items-center justify-center gap-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   Saving Changes...
                 </span>
@@ -445,16 +442,16 @@ export default function ProfilePage() {
 
       {/* Change Password */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100/30">
-          <h2 className="text-xl font-semibold text-gray-900">Security</h2>
+        <div className="px-4 lg:px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100/30">
+          <h2 className="text-lg lg:text-xl font-semibold text-gray-900">Security</h2>
           <p className="text-sm text-gray-600 mt-1">
             Update your password to keep your account secure
           </p>
         </div>
 
-        <form onSubmit={onChangePassword} className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
+        <form onSubmit={onChangePassword} className="p-4 lg:p-6 space-y-6">
+          <div className="grid grid-cols-1 gap-4 lg:gap-6 lg:grid-cols-2">
+            <div className="space-y-2 lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700">
                 New Password
               </label>
@@ -471,7 +468,7 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700">
                 Confirm Password
               </label>
@@ -492,10 +489,10 @@ export default function ProfilePage() {
             <button
               type="submit"
               disabled={pwdSaving || !pwd.newPwd || !pwd.confirmPwd}
-              className="px-6 py-2.5 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+              className="w-full sm:w-auto px-6 py-2.5 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
             >
               {pwdSaving ? (
-                <span className="flex items-center gap-2">
+                <span className="flex items-center justify-center gap-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   Updating Password...
                 </span>
@@ -508,7 +505,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Danger Zone */}
-      <div className="mt-8 border-t pt-4">
+      <div className="mt-8 border-t pt-4 text-center sm:text-left">
         <p className="text-sm font-semibold text-red-700 mb-2">Danger Zone</p>
         {deleteError && (
           <p className="mb-2 text-sm text-red-600">
@@ -518,13 +515,13 @@ export default function ProfilePage() {
         <button
           type="button"
           onClick={openDeleteModal}
-          className="rounded-md bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+          className="w-full sm:w-auto rounded-md bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
         >
           Delete my account
         </button>
       </div>
 
-      {/* 🔻 Confirmation modal */}
+      {/* Confirmation modal */}
       <ConfirmDialog
         open={deleteModalOpen}
         onCancel={() => {
