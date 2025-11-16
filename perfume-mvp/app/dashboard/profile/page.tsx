@@ -181,8 +181,10 @@ export default function ProfilePage() {
       await supabase.auth.signOut();
       setDeleteModalOpen(false);
       router.replace("/"); // or "/login"
-    } catch (err: any) {
-      setDeleteError(err.message || "Unexpected error.");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Unexpected error.";
+      setDeleteError(message);
     } finally {
       setDeleteLoading(false);
     }
