@@ -44,7 +44,7 @@ export default async function ListingDetailPage({ params }: Props) {
   return (
     <div className="min-h-screen">
       <Header />
-      <section className="mx-auto max-w-6xl px-4 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <section className="mx-auto max-w-6xl px-4 pb-8 pt-20 grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Images */}
         <div className="space-y-3">
           {(listing.images ?? []).length ? (

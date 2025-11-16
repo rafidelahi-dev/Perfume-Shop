@@ -57,7 +57,7 @@ export default async function SellerListingsPage({
   return (
     <div className="min-h-screen">
       <Header />
-      <section className="mx-auto max-w-6xl px-4 py-8">
+      <section className="mx-auto max-w-6xl px-4 pb-8 pt-20">
         <div className="mb-6 flex items-center gap-4">
           {profile.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
