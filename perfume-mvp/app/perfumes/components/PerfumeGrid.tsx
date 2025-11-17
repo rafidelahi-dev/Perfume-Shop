@@ -54,7 +54,7 @@ function typeBadge(p: PerfumeListing) {
   return null;
 }
 
-// -----------------------------
+
 // Component
 // -----------------------------
 export default function PerfumeGrid({
