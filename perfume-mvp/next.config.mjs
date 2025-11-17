@@ -4,21 +4,37 @@
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseHostname = supabaseUrl ? new URL(supabaseUrl).hostname : undefined;
 
+// Build remotePatterns array
+const remotePatterns = [];
+
+if (supabaseHostname) {
+  remotePatterns.push({
+    protocol: "https",
+    hostname: supabaseHostname,
+    pathname: "/storage/v1/object/public/**",
+  });
+}
+
+// Add Google avatar host
+remotePatterns.push({
+  protocol: "https",
+  hostname: "lh3.googleusercontent.com",
+  pathname: "/**",
+});
+
+// Add Facebook avatar host
+remotePatterns.push({
+  protocol: "https",
+  hostname: "platform-lookaside.fbsbx.com",
+  pathname: "/**",
+});
+
 const nextConfig = {
   images: {
-    // Use remotePatterns so we can also restrict the path
-    remotePatterns: supabaseHostname
-      ? [
-          {
-            protocol: "https",
-            hostname: supabaseHostname,
-            pathname: "/storage/v1/object/public/**",
-          },
-        ]
-      : [],
+    remotePatterns,
   },
   experimental: {
-    optimizePackageImports: ["@supabase/supabase-js"], // merged from next.config.ts
+    optimizePackageImports: ["@supabase/supabase-js"],
   },
 };
 

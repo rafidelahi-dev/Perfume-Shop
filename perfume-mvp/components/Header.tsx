@@ -15,6 +15,11 @@ export default function Header() {
 
   const { loading, isAuthenticated, displayName, avatarUrl } = useAuthProfile(); // ⬅️ get avatarUrl
   const [open, setOpen] = useState(false);
+  const safeAvatar =
+  avatarUrl && avatarUrl !== "null" && avatarUrl.trim() !== ""
+    ? avatarUrl
+    : "/noimageuser.jpg";
+
 
   async function logout() {
     await supabase.auth.signOut();
@@ -47,8 +52,6 @@ export default function Header() {
 
   // Small component for a professional “user chip”
   function UserChip() {
-    // fallback image (local) if avatar missing
-    const fallback = "/avatar-fallback.png"; // add any simple silhouette to /public
     return (
       <Link
         href="/dashboard/profile"
@@ -56,7 +59,7 @@ export default function Header() {
       >
         <div className="relative h-7 w-7 overflow-hidden rounded-full bg-gray-200">
           <Image
-            src={avatarUrl || fallback}
+            src={safeAvatar}
             alt={displayName || "User avatar"}
             fill
             sizes="28px"
@@ -71,7 +74,7 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-black/5 bg-[#f8f7f3]/80 backdrop-blur-md">
+    <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-40">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
@@ -95,7 +98,7 @@ export default function Header() {
           {isAuthenticated ? (
             <>
               <NavLink href="/dashboard" label="Dashboard" />
-              <UserChip /> {/* ⬅️ avatar + name */}
+              <UserChip /> 
               <button
                 onClick={logout}
                 className="ml-2 rounded-full border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
@@ -134,14 +137,13 @@ export default function Header() {
 
             {isAuthenticated ? (
               <>
-                {/* A tiny avatar beside “Profile” link for mobile */}
                 <Link
                   href="/dashboard/profile"
                   className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-gray-100"
                 >
                   <div className="relative h-7 w-7 overflow-hidden rounded-full bg-gray-200">
                     <Image
-                      src={avatarUrl || "/avatar-fallback.png"}
+                      src={safeAvatar}
                       alt={displayName || "User avatar"}
                       fill
                       sizes="28px"

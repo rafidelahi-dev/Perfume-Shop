@@ -7,29 +7,8 @@ import Header from "@/components/Header";
 import PerfumeGrid from "./components/PerfumeGrid";
 import { useUiStore } from "@/stores/useUiStore";
 import { Sparkles, Filter, X, Search } from "lucide-react";
+import type { PerfumeListing, SellerProfile } from "@/types/perfume";
 
-type SellerProfile = {
-  display_name: string | null;
-  avatar_url?: string | null;
-  username: string | null;
-};
-
-export type PerfumeListing = {
-  id: string;
-  brand: string | null;
-  perfume_name: string | null; // <-- matches your table
-  sub_brand?: string | null;
-  price: number | null;        // price/min_price are numeric in DB
-  min_price?: number | null;
-  type?: string | null;        // intact/full/partial/decant
-  bottle_type?: string | null;
-  decant_ml?: number | null;
-  bottle_size_ml?: number | null;
-  partial_left_ml?: number | null;
-  decant_options?: unknown;    // jsonb if you use it
-  images?: string[] | null;    // text[]
-  profiles?: SellerProfile | null;
-};
 
 type RawListing = Omit<PerfumeListing, "profiles"> & {
   profiles?: SellerProfile[] | SellerProfile | null;
@@ -40,6 +19,7 @@ async function fetchPerfumes(): Promise<PerfumeListing[]> {
     .from("listings")
     .select(`
       id,
+      perfume_id,
       brand,
       perfume_name,
       sub_brand,
@@ -153,7 +133,7 @@ export default function PerfumesPage() {
       </div>
 
       {/* Filters */}
-      <div className="mx-auto max-w-7xl px-4 py-10">
+      <div className="mx-auto max-w-[110rem] px-4 py-10">
         <div className="mb-8 flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
           <div>
             <h2 className="mb-1 text-3xl font-light text-[#1a1a1a]">

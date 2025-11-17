@@ -3,29 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import DecantOptions from "./DecantOptions";
+import { supabase } from "@/lib/supabaseClient";
+import type { PerfumeListing, SellerProfile } from "@/types/perfume";
 
-type SellerProfile = {
-  display_name: string | null;
-  avatar_url?: string | null;
-  username: string | null;
-};
-
-export type PerfumeListing = {
-  id: string;
-  brand: string | null;
-  perfume_name: string | null;
-  sub_brand?: string | null;
-  price: number | null;
-  min_price?: number | null;
-  type?: string | null;
-  bottle_type?: string | null;
-  decant_ml?: number | null;
-  bottle_size_ml?: number | null;
-  partial_left_ml?: number | null;
-  decant_options?: unknown;
-  images?: string[] | null;
-  profiles?: SellerProfile | null;
-};
 
 type PerfumeGridProps = {
   perfumes: PerfumeListing[];
@@ -54,7 +34,33 @@ function typeBadge(p: PerfumeListing) {
   return null;
 }
 
+async function registerPerfumeClick(perfumeId?: string | null) {
+  console.log("➡️ registerPerfumeClick called with perfumeId:", perfumeId);
 
+  if (!perfumeId) {
+    console.warn("⚠️ No perfumeId provided — click not counted.");
+    return;
+  }
+
+  try {
+    const { data, error } = await supabase.rpc("increment_perfume_click", {
+      p_perfume_id: perfumeId,
+    });
+
+    console.log("📡 RPC Response:", { data, error });
+
+    if (error) {
+      console.error("❌ RPC increment_perfume_click failed:", error);
+    } else {
+      console.log("✅ Click registered successfully!");
+    }
+  } catch (err) {
+    console.error("🔥 Unexpected error (network or client):", err);
+  }
+}
+
+
+// -----------------------------
 // Component
 // -----------------------------
 export default function PerfumeGrid({
@@ -89,6 +95,9 @@ export default function PerfumeGrid({
       </p>
     );
 
+    
+
+
   return (
     <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {perfumes.map((p) => {
@@ -101,6 +110,7 @@ export default function PerfumeGrid({
             <Link
               href={`/perfumes/${p?.profiles?.username}/${p.id}`}
               prefetch={false}
+              onClick={() => registerPerfumeClick(p.perfume_id)}
               className="block group rounded-2xl border border-black/5 bg-white/80 backdrop-blur-sm overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
             >
               {/* ---------------- Image ---------------- */}
