@@ -39,10 +39,8 @@ const gradientClasses = [
 ];
 
 export default function TrendingSection() {
-    const { data: perfumes = [],
-        isLoading, 
-        error 
-    } = useQuery({queryKey: ['trendingPerfumes'],
+    const { data: perfumes = [], isLoading, error 
+        } = useQuery({queryKey: ['trendingPerfumes'],
         queryFn: fetchTrendingPerfumes,
         staleTime: 60_000,
     })

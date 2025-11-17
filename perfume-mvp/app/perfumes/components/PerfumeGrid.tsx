@@ -35,14 +35,30 @@ function typeBadge(p: PerfumeListing) {
 }
 
 async function registerPerfumeClick(perfumeId?: string | null) {
-      if (!perfumeId) return;
-      try {
-        // Fire-and-forget: we don't await for UI navigation
-        supabase.rpc("increment_perfume_click", { p_perfume_id: perfumeId });
-      } catch {
-        // ignore errors – never block navigation because of analytics
-      }
+  console.log("➡️ registerPerfumeClick called with perfumeId:", perfumeId);
+
+  if (!perfumeId) {
+    console.warn("⚠️ No perfumeId provided — click not counted.");
+    return;
+  }
+
+  try {
+    const { data, error } = await supabase.rpc("increment_perfume_click", {
+      p_perfume_id: perfumeId,
+    });
+
+    console.log("📡 RPC Response:", { data, error });
+
+    if (error) {
+      console.error("❌ RPC increment_perfume_click failed:", error);
+    } else {
+      console.log("✅ Click registered successfully!");
     }
+  } catch (err) {
+    console.error("🔥 Unexpected error (network or client):", err);
+  }
+}
+
 
 // -----------------------------
 // Component
