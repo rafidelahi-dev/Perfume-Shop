@@ -20,6 +20,8 @@ type PerfumeScoreRow = {
   last_clicked_at: string | null;
 }
 
+type TabType = "now" | "week" | "month" | "brands";
+
 async function fetchTrendingPerfumes(): Promise<PerfumeScoreRow[]>{
   const { data, error} = await supabase
   .from("perfume_score")
@@ -82,7 +84,7 @@ const gradientClasses = [
 ];
 
 export default function TrendingSection() {
-    const [tab, setTab] = useState<"now" | "week" | "month" | "brands">("now");
+    const [tab, setTab] = useState<TabType>("now");
     const { data: perfumes = [], isLoading, error 
         } = useQuery({queryKey: ['trendingPerfumes'],
         queryFn: fetchTrendingPerfumes,
@@ -128,7 +130,7 @@ return (
                 ].map(t => (
                     <button
                     key={t.key}
-                    onClick={() => setTab(t.key as any)}
+                    onClick={() => setTab(t.key as TabType)}
                     className={`pb-3 px-4 text-sm font-medium transition-all border-b-2 ${
                         tab === t.key
                         ? "border-[#d4af37] text-[#111]"
