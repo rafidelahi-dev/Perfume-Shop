@@ -22,6 +22,7 @@ const backgroundImages = [
 
 export default function Home() {
   const [currentBg, setCurrentBg] = useState(0);
+  
 
   useEffect(() => {
   const interval = setInterval(() => {
