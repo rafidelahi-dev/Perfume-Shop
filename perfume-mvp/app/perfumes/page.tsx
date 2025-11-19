@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import Header from "@/components/Header";
@@ -8,6 +8,7 @@ import PerfumeGrid from "./components/PerfumeGrid";
 import { useUiStore } from "@/stores/useUiStore";
 import { Sparkles, Filter, X, Search } from "lucide-react";
 import type { PerfumeListing, SellerProfile } from "@/types/perfume";
+import { useSearchParams } from "next/navigation";
 
 
 type RawListing = Omit<PerfumeListing, "profiles"> & {
@@ -57,6 +58,14 @@ export default function PerfumesPage() {
   const filters = useUiStore((s) => s.filters);
   const setFilters = useUiStore((s) => s.setFilters);
   const reset = useUiStore((s) => s.resetFilters);
+  const params = useSearchParams();
+
+  useEffect(() => {
+    const q = params.get("q");
+    const brand = params.get("brand");
+    if(q) setFilters({q});
+    if(brand) setFilters({brand});
+  }, []);
   
   const hasActiveFilters =
     Boolean(filters.brand) ||

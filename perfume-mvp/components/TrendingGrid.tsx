@@ -66,10 +66,10 @@ export default function TrendingGrid({ perfumes }: { perfumes: PerfumeScoreRow[]
                   <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-8 h-24 bg-gradient-to-b from-gray-300 to-gray-500 rounded-sm" />
                 </div>
               )}
-
-              <button className="absolute top-4 right-4 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110">
+              {/* 
+              Future Plan: <button className="absolute top-4 right-4 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110">
                 <span className="text-lg">♥</span>
-              </button>
+              </button> */}
             </div>
 
             {/* Content */}
@@ -108,16 +108,10 @@ export default function TrendingGrid({ perfumes }: { perfumes: PerfumeScoreRow[]
 
               <div className="flex gap-3">
                 <Link
-                  href="/perfumes"
-                  className="flex-1 rounded-xl border border-[#1a1a1a] px-4 py-3 text-sm font-medium text-center hover:bg-[#eae8e1] transition-all"
-                >
-                  Details
-                </Link>
-                <Link
-                  href="/perfumes"
-                  className="flex-1 rounded-xl bg-[#1a1a1a] px-4 py-3 text-sm font-medium text-center text-white hover:opacity-90 transition-all"
-                >
-                  Explore Listings
+                    href={`/perfumes?name=${encodeURIComponent(p.perfume_name)}&brand=${encodeURIComponent(p.brand ?? "")}`}
+                    className="flex-1 rounded-xl border border-[#1a1a1a] px-4 py-3 text-sm font-medium text-center hover:bg-[#eae8e1] transition-all"
+                    >
+                    View all available options
                 </Link>
               </div>
             </div>

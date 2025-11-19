@@ -2,7 +2,6 @@
 
 // app/page.tsx
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { useQuery } from "@tanstack/react-query";
@@ -149,53 +148,6 @@ return (
             >
                 View all collections
             </Link>
-            </div>
-            {/* --- Tabs Switcher --- */}
-
-            <div className="flex gap-4 mb-10">
-            <button
-                onClick={() => setTab("now")}
-                className={`px-4 py-2 rounded-full text-sm ${
-                tab === "now"
-                    ? "bg-[#1a1a1a] text-white"
-                    : "bg-white/60 text-[#444] border border-black/10"
-                }`}
-            >
-                Now
-            </button>
-
-            <button
-                onClick={() => setTab("week")}
-                className={`px-4 py-2 rounded-full text-sm ${
-                tab === "week"
-                    ? "bg-[#1a1a1a] text-white"
-                    : "bg-white/60 text-[#444] border border-black/10"
-                }`}
-            >
-                This Week
-            </button>
-
-            <button
-                onClick={() => setTab("month")}
-                className={`px-4 py-2 rounded-full text-sm ${
-                tab === "month"
-                    ? "bg-[#1a1a1a] text-white"
-                    : "bg-white/60 text-[#444] border border-black/10"
-                }`}
-            >
-                This Month
-            </button>
-
-            <button
-                onClick={() => setTab("brands")}
-                className={`px-4 py-2 rounded-full text-sm ${
-                tab === "brands"
-                    ? "bg-[#1a1a1a] text-white"
-                    : "bg-white/60 text-[#444] border border-black/10"
-                }`}
-            >
-                Brands
-            </button>
             </div>
 
 
