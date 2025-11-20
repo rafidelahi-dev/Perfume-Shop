@@ -108,9 +108,9 @@ export default function TrendingGrid({ perfumes }: { perfumes: PerfumeScoreRow[]
 
               <div className="flex gap-3">
                 <Link
-                    href={`/perfumes?name=${encodeURIComponent(p.perfume_name)}&brand=${encodeURIComponent(p.brand ?? "")}`}
+                    href={`/perfumes?q=${encodeURIComponent(p.perfume_name)}&brand=${encodeURIComponent(p.brand ?? "")}`}
                     className="flex-1 rounded-xl border border-[#1a1a1a] px-4 py-3 text-sm font-medium text-center hover:bg-[#eae8e1] transition-all"
-                    >
+                >
                     View all available options
                 </Link>
               </div>

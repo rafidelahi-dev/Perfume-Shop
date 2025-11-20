@@ -31,12 +31,13 @@ async function fetchPerfumes(): Promise<PerfumeListing[]> {
       partial_left_ml,
       decant_options,
       images,
-      profiles:profiles!listings_user_id_fkey ( display_name, avatar_url, username, contact_link, messenger_link, whatsapp_number  )
+      profiles:user_id ( display_name, avatar_url, username, contact_link, messenger_link, whatsapp_number )
     `)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
 
+  // ... rest of the logic remains the same
   const rows = (data as RawListing[]) ?? [];
 
   // Normalize profiles (array -> single object)
@@ -59,29 +60,6 @@ export default function PerfumesPage() {
   const setFilters = useUiStore((s) => s.setFilters);
   const reset = useUiStore((s) => s.resetFilters);
   const params = useSearchParams();
-
-  useEffect(() => {
-    const q = params.get("q");
-    const brand = params.get("brand");
-    if(q) setFilters({q});
-    if(brand) setFilters({brand});
-  }, []);
-  
-  const hasActiveFilters =
-    Boolean(filters.brand) ||
-    filters.priceMin !== null ||
-    filters.priceMax !== null ||
-    (filters.types?.length ?? 0) > 0 ||
-    Boolean(filters.q);
-
-  function effectivePrice(p: PerfumeListing) {
-  if ((p.type ?? "").toLowerCase() === "decant" && p.min_price != null) {
-    return Number(p.min_price);
-  }
-  return Number(p.price ?? NaN);
-}
-
-  // --- Derived filtered data ---
   const filteredPerfumes = useMemo(() => {
   const min = filters.priceMin ?? -Infinity;
   const max = filters.priceMax ?? +Infinity;
@@ -89,7 +67,7 @@ export default function PerfumesPage() {
 
   return listings.filter((item) => {
     const brandMatch = filters.brand
-      ? item.brand?.toLowerCase().includes(filters.brand.toLowerCase())
+      ? item.brand?.trim().toLowerCase().includes(filters.brand.trim().toLowerCase())
       : true;
 
     const searchTarget = `${item.perfume_name ?? ""} ${item.sub_brand ?? ""} ${item.brand ?? ""}`.toLowerCase();
@@ -107,7 +85,48 @@ export default function PerfumesPage() {
   });
 }, [listings, filters.brand, filters.q, filters.priceMin, filters.priceMax, filters.types]);
 
+  useEffect(() => {
+  const q = params.get("q") ?? "";
+  const brand = params.get("brand") ?? "";
 
+  if (!q && !brand) {
+      if (filters.q !== "" || filters.brand !== "") {
+          reset();
+      }
+      return; 
+  }
+  
+  if (q !== filters.q || brand !== filters.brand) {
+      setFilters({
+          q: q,
+          brand: brand
+      });
+  }
+
+}, [params, setFilters, reset, filters]);
+
+
+  useEffect(() => {
+  console.log("🔍 Current Filters:", filters);
+  console.log("🧪 Listings fetched:", listings.length);
+  console.log("🎯 Filtered Perfumes:", filteredPerfumes.length);
+}, [filters, listings, filteredPerfumes]);
+
+
+  
+  const hasActiveFilters =
+    Boolean(filters.brand) ||
+    filters.priceMin !== null ||
+    filters.priceMax !== null ||
+    (filters.types?.length ?? 0) > 0 ||
+    Boolean(filters.q);
+
+  function effectivePrice(p: PerfumeListing) {
+  if ((p.type ?? "").toLowerCase() === "decant" && p.min_price != null) {
+    return Number(p.min_price);
+  }
+  return Number(p.price ?? NaN);
+}
 
   return (
     <div className="min-h-screen">

@@ -30,6 +30,9 @@ export default function ProfilePage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [showWhatsappOtp, setShowWhatsappOtp] = useState(false);
+  const [whatsappOtp, setWhatsappOtp] = useState("");
+
 
   const {
     data: profile,
@@ -45,7 +48,7 @@ export default function ProfilePage() {
     if (profile) {
       setForm({
         display_name: profile.display_name ?? "",
-        contact_link: profile.contact_link ?? "",
+        contact_number: profile.contact_number ?? "",
         messenger_link: profile.messenger_link ?? "",
         whatsapp_number: profile.whatsapp_number ?? "",
         website: profile.website ?? "",
@@ -213,6 +216,22 @@ export default function ProfilePage() {
 
   if (!profile) return null;
 
+  async function handleVerifyContactNumber() {
+    try {
+      toast.info("Sending OTP to your number…");
+
+      // 🔥 Later this will call your OTP verification API
+      // const { data, error } = await supabase.rpc("send_contact_otp", {
+      //   phone: form.contact_number
+      // });
+
+      toast.success("OTP sent! Verification popup coming soon.");
+    } catch (err) {
+      toast.error("Failed to send verification OTP.");
+    }
+  }
+
+
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-16 px-4 lg:px-0">
       {/* Header */}
@@ -305,7 +324,7 @@ export default function ProfilePage() {
 
             <div className="space-y-2 lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700">
-                Username
+                Username *people can search you by this name
               </label>
               <input
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all"
@@ -317,7 +336,7 @@ export default function ProfilePage() {
             {/* Editable fields */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
-                Display Name
+                Display Name *This will reflect on the dashboard
               </label>
               <input
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
@@ -331,7 +350,7 @@ export default function ProfilePage() {
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
-                Website
+                Website *your perfume website or your personal website
               </label>
               <input
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
@@ -357,37 +376,61 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2"> 
+              <label 
+              className="block text-sm font-medium text-gray-700"> 
+              WhatsApp Number 
+              </label> 
+              <input 
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
+              value={form.whatsapp_number ?? ""} 
+              onChange={(e) => setForm({ ...form, whatsapp_number: e.target.value }) } 
+              placeholder="+8801XXXXXXXXX" />
+            </div>
+
+
+            <div className="space-y-2 lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700">
-                WhatsApp Number
+                Contact Number
               </label>
-              <input
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                value={form.whatsapp_number ?? ""}
-                onChange={(e) =>
-                  setForm({ ...form, whatsapp_number: e.target.value })
-                }
-                placeholder="+8801XXXXXXXXX"
-              />
+
+              <div className="flex items-center gap-3">
+                {/* Number input */}
+                <input
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none 
+                            focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  value={form.contact_number ?? ""}
+                  onChange={(e) =>
+                    setForm({ ...form, contact_number: e.target.value })
+                  }
+                  placeholder="+8801XXXXXXXXX"
+                />
+
+                {/* Verify button */}
+                {!profile.phone_verified ? (
+                  <button
+                    type="button"
+                    onClick={() => handleVerifyContactNumber()}
+                    className="px-4 py-2 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 
+                              text-sm shadow-sm whitespace-nowrap"
+                  >
+                    Verify
+                  </button>
+                ) : (
+                  <span className="px-4 py-2 rounded-lg text-sm bg-green-100 text-green-700">
+                    Verified
+                  </span>
+                )}
+              </div>
+
+              <p className="text-xs text-gray-500">
+                Your number will be used for buyer communication.
+              </p>
             </div>
 
             <div className="space-y-2 lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700">
-                Contact Link
-              </label>
-              <input
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                value={form.contact_link ?? ""}
-                onChange={(e) =>
-                  setForm({ ...form, contact_link: e.target.value })
-                }
-                placeholder="whatsapp://send?phone=..."
-              />
-            </div>
-
-            <div className="space-y-2 lg:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Location
+                Location *Please mention where you are selling from
               </label>
               <input
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
@@ -401,7 +444,7 @@ export default function ProfilePage() {
 
             <div className="space-y-2 lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700">
-                Bio
+                Bio *Tell us something about yourself that we can share with others
               </label>
               <textarea
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
