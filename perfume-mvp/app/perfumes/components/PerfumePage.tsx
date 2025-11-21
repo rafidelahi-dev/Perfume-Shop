@@ -31,11 +31,12 @@ async function fetchPerfumes(): Promise<PerfumeListing[]> {
       partial_left_ml,
       decant_options,
       images,
-      profiles:profiles!listings_user_id_fkey (
+      profiles:profiles!inner (
+        id,
+        username,
         display_name,
         avatar_url,
-        username,
-        contact_link,
+        contact_number,
         messenger_link,
         whatsapp_number
     )
