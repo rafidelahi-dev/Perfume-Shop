@@ -159,7 +159,7 @@ export default function SignupClient() {
 
         <input
           className="w-full border rounded p-2"
-          placeholder="Contact link (WhatsApp / Telegram URL)"
+          placeholder="Contact Number"
           value={contactLink}
           onChange={(e) => setContactLink(e.target.value)}
         />

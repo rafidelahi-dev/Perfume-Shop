@@ -21,7 +21,6 @@ function AuthWatcher() {
         queryClient.clear(); // Clears all cached queries + mutations
       } else {
         console.log("✅ User logged in:", session.user.email);
-        // Optional: refresh queries to reflect new user's data
         queryClient.invalidateQueries();
       }
     });

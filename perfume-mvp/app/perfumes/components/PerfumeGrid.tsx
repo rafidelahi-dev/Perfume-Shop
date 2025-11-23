@@ -70,11 +70,7 @@ export default function PerfumeGrid({
 }: PerfumeGridProps) {
   if (error)
   { const message = error instanceof Error ? error.message : "Failed to load perfumes";
-    return (
-      <p className="text-center text-red-600">
-        Failed to load perfumes: {message}
-      </p>
-    );}
+    }
 
   if (isLoading)
     return (
