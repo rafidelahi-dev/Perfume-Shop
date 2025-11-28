@@ -25,7 +25,7 @@ export default async function SellerListingsPage({
   // Get profile by username
   const { data: profile, error: pErr } = await supabase
     .from("profiles")
-    .select("id, username, display_name, avatar_url, contact_link, bio")
+    .select("id, username, display_name, avatar_url, contact_number, bio")
     .eq("username", username)
     .single();
 

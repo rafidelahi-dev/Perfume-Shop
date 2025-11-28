@@ -19,7 +19,7 @@ export default async function ListingDetailPage({ params }: Props) {
   // Find seller by username
   const { data: profile, error: pErr } = await supabase
     .from("profiles")
-    .select("id, username, display_name, avatar_url, contact_link, whatsapp_number, messenger_link, bio")
+    .select("id, username, display_name, avatar_url, contact_number, whatsapp_number, messenger_link, bio")
     .eq("username", username)
     .single();
   if (pErr || !profile) redirect("/perfumes");
@@ -112,8 +112,8 @@ export default async function ListingDetailPage({ params }: Props) {
                   Messenger
                 </a>
               )}
-              {profile.contact_link && (
-                <a href={profile.contact_link} target="_blank" rel="noreferrer"
+              {profile.contact_number && (
+                <a href={profile.contact_number} target="_blank" rel="noreferrer"
                   className="rounded-full bg-gray-900 text-white px-3 py-1.5 text-sm">
                   Contact
                 </a>

@@ -43,7 +43,7 @@ async function fetchPerfumes(): Promise<PerfumeListing[]> {
     `)
     .order("created_at", { ascending: false });
 
-  if (error) throw error;
+  if (error) { console.log("this is the error: ", error )};
 
   const rows = (data as RawListing[]) ?? [];
 

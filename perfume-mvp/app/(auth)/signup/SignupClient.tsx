@@ -14,7 +14,7 @@ export default function SignupClient() {
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [contactLink, setContactLink] = useState(""); // optional
+  const [contactNumber, setContactNumber] = useState(""); // optional
   const [agree, setAgree] = useState(false);
 
   const [checking, setChecking] = useState(false);
@@ -66,7 +66,7 @@ export default function SignupClient() {
           username,
           full_name: fullName,
           display_name: displayName,
-          contact_link: contactLink,
+          contact_number: contactNumber,
         },
       },
     });
@@ -160,8 +160,8 @@ export default function SignupClient() {
         <input
           className="w-full border rounded p-2"
           placeholder="Contact Number"
-          value={contactLink}
-          onChange={(e) => setContactLink(e.target.value)}
+          value={contactNumber}
+          onChange={(e) => setContactNumber(e.target.value)}
         />
 
         <label className="flex items-center gap-2 text-sm">
