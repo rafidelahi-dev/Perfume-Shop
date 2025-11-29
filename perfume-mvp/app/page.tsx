@@ -38,7 +38,7 @@ export default function Home() {
     <>
     <Header/>
       {/* Enhanced Hero Section with Background */}
-      <section className="relative w-full overflow-hidden rounded-none min-h-[85vh] flex items-center justify-center">
+      <section className="relative w-full overflow-hidden rounded-none min-h-[85vh] flex items-center justify-center pb-10">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           {backgroundImages.map((bg, index) => (
@@ -62,7 +62,7 @@ export default function Home() {
 
         <div className="relative z-10 mx-auto max-w-6xl text-center px-6 sm:px-12">
 
-          <h1 className="text-5xl font-light tracking-tight text-[#111] sm:text-6xl lg:text-7xl mb-6">
+          <h1 className="text-5xl font-light tracking-tight text-[#111] sm:text-6xl lg:text-7xl mb-6 pt-16 lg:pt-0">
             Discover Your
             <span className="block mt-2 font-serif italic text-[#d4af37]">Signature Scent</span>
           </h1>

@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useQuery } from "@tanstack/react-query";
 import TrendingGrid from "./TrendingGrid";
 import TrendingBrands from "./TrendingBrands";
+import "../app/globals.css";
 
 type PerfumeScoreRow = {
   id: string;
@@ -111,45 +112,47 @@ return (
     <section className="py-20 px-6 sm:px-12 bg-gradient-to-b from-white/50 to-[#f8f7f3]">
         <div className="mx-auto max-w-[110rem] px-4">
             {/* Header */}
-            <div className="flex items-end justify-between mb-16">
-            <div>
-                <h2 className="text-3xl font-light text-[#111] mb-4">
+            <div className="mb-10 md:mb-16 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div className="flex-1">
+                <h2 className="text-2xl md:text-3xl font-light text-[#111] mb-2 md:mb-4">
                 Trending Now
                 </h2>
-                <p className="text-[#666] font-light">
+                <p className="text-sm md:text-base text-[#666] font-light">
                 Discover what the community is loving this season
                 </p>
-                {/* Tabs */}
-                <div className="mt-10 flex gap-4 border-b border-black/10">
-                {[
-                    { key: "now", label: "Trending Now" },
-                    { key: "week", label: "This Week" },
-                    { key: "month", label: "This Month" },
-                    { key: "brands", label: "Top Brands" }
-                ].map(t => (
-                    <button
-                    key={t.key}
-                    onClick={() => setTab(t.key as TabType)}
-                    className={`pb-3 px-4 text-sm font-medium transition-all border-b-2 ${
-                        tab === t.key
-                        ? "border-[#d4af37] text-[#111]"
-                        : "border-transparent text-[#666] hover:text-[#111]"
-                    }`}
-                    >
-                    {t.label}
-                    </button>
-                ))}
-                </div>
 
+                {/* Tabs */}
+                <div className="mt-6 md:mt-10 flex gap-3 md:gap-4 border-b border-black/10">
+                    <div className="tab-scroll flex gap-3 md:gap-4 overflow-x-auto">
+                        {[
+                            { key: "now", label: "Trending Now" },
+                            { key: "week", label: "This Week" },
+                            { key: "month", label: "This Month" },
+                            { key: "brands", label: "Top Brands" },
+                        ].map((t) => (
+                            <button
+                            key={t.key}
+                            onClick={() => setTab(t.key as TabType)}
+                            className={`pb-3 px-3 md:px-4 text-xs md:text-sm font-medium whitespace-nowrap transition-all border-b-2 ${
+                                tab === t.key
+                                ? "border-[#d4af37] text-[#111]"
+                                : "border-transparent text-[#666] hover:text-[#111]"
+                            }`}
+                            >
+                            {t.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
             </div>
+
             <Link
                 href="/perfumes"
-                className="text-sm text-[#666] hover:text-[#111] border-b border-transparent hover:border-[#111] transition-all pb-1"
+                className="self-start md:self-end text-xs md:text-sm text-[#666] hover:text-[#111] border-b border-transparent hover:border-[#111] transition-all pb-1"
             >
                 View all collections
             </Link>
             </div>
-
 
             {/* Loading state */}
             {isLoading && (

@@ -1,12 +1,13 @@
 "use client";
 
+import Footer from "@/components/Footer";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function AboutPage() {
   return (
+    <>
     <div className="max-w-5xl mx-auto px-6 py-16 space-y-16">
-
       {/* HERO SECTION */}
       <section className="text-center space-y-6">
         <h1 className="text-4xl font-semibold text-[#1a1a1a]">
@@ -137,5 +138,7 @@ export default function AboutPage() {
         </Link>
       </section>
     </div>
+    <Footer/>
+    </>
   );
 }
