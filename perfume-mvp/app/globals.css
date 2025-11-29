@@ -93,6 +93,21 @@ html {
   background: #b8941f;
 }
 
+/* Mobile view trending scrool bar. Thin scrollbar ONLY for tabs */
+.tab-scroll::-webkit-scrollbar {
+  height: 2px;
+}
+
+@media (max-width: 768px) {
+  .tab-scroll::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+
+
+
+
 /* Enhanced focus states */
 button:focus-visible,
 a:focus-visible {
