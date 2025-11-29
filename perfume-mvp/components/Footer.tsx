@@ -16,14 +16,14 @@ const Footer = () => {
     { href: '/help-center', label: 'Help Center' },
     /*{ href: '/shipping-info', label: 'Shipping Information' },
     { href: '/returns', label: 'Returns & Exchanges' },*/
-    { href: '/contact', label: 'Contact Us' }
+    { href: '/contact-us', label: 'Contact Us' }
   ]
 
   const policyLinks = [
-    { href: '/privacy', label: 'Privacy Policy' },
+    { href: '/privacy-policy', label: 'Privacy Policy' },
     { href: '/terms', label: 'Terms of Service' },
-    { href: '/cookie-policy', label: 'Cookie Policy' },
-    { href: '/accessibility', label: 'Accessibility' }
+    /*{ href: '/cookie-policy', label: 'Cookie Policy' },
+    { href: '/accessibility', label: 'Accessibility' }*/
   ]
 
   const socialLinks = [
