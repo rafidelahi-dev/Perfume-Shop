@@ -50,6 +50,7 @@ export default function ProfilePage() {
         display_name: profile.display_name ?? "",
         contact_number: profile.contact_number ?? "",
         messenger_link: profile.messenger_link ?? "",
+        facebook_link: profile.facebook_link ?? "",
         whatsapp_number: profile.whatsapp_number ?? "",
         website: profile.website ?? "",
         location: profile.location ?? "",
@@ -254,7 +255,6 @@ export default function ProfilePage() {
         </div>
 
         <form onSubmit={onSave} className="p-4 lg:p-6 space-y-6 lg:space-y-8">
-          {/* Avatar Section */}
           <div className="flex flex-col sm:flex-row items-start gap-4 lg:gap-6 p-4 bg-gray-50 rounded-lg">
             <div className="flex-shrink-0 mx-auto sm:mx-0">
               <div className="relative h-20 w-20 lg:h-24 lg:w-24 overflow-hidden rounded-full border-4 border-white shadow-lg">
@@ -364,6 +364,23 @@ export default function ProfilePage() {
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
+                Facebook Link
+              </label>
+              <input
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                value={form.facebook_link ?? ""}
+                onChange={(e) =>
+                  setForm({ ...form, facebook_link: e.target.value })
+                }
+                placeholder="https://www.facebook.com/your.profile"
+              />
+              <p className="text-xs text-gray-500">
+                Your Facebook profile or page (optional).
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
                 Messenger Link
               </label>
               <input
@@ -375,6 +392,8 @@ export default function ProfilePage() {
                 placeholder="https://m.me/yourname"
               />
             </div>
+
+
 
             <div className="space-y-2"> 
               <label 

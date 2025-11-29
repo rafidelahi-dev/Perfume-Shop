@@ -8,13 +8,18 @@ import { supabase } from "@/lib/supabaseClient";
 export default function SignupClient() {
   const router = useRouter();
 
+  // required
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [username, setUsername] = useState("");
-  const [fullName, setFullName] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [contactNumber, setContactNumber] = useState(""); // optional
+
+  // optional (can edit later in profile)
+  const [fullName, setFullName] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
+  const [facebookLink, setFacebookLink] = useState("");
+  const [messengerLink, setMessengerLink] = useState("");
+
   const [agree, setAgree] = useState(false);
 
   const [checking, setChecking] = useState(false);
@@ -25,9 +30,12 @@ export default function SignupClient() {
     useState<"google" | "facebook" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Username normalization directly in onChange (no useMemo/useEffect loop)
+  // username normalization
   function handleUsernameChange(raw: string) {
-    const normalized = raw.toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 20);
+    const normalized = raw
+      .toLowerCase()
+      .replace(/[^a-z0-9_]/g, "")
+      .slice(0, 20);
     setUsername(normalized);
     setUsernameOk(null);
   }
@@ -58,15 +66,26 @@ export default function SignupClient() {
       return;
     }
 
+    if (usernameOk === false) {
+      setError("That username is already taken.");
+      setLoading(false);
+      return;
+    }
+
     const { error: signErr } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
+          // required core profile data
           username,
-          full_name: fullName,
           display_name: displayName,
+
+          // optional extra info (can be empty string)
+          full_name: fullName,
           contact_number: contactNumber,
+          facebook_link: facebookLink,
+          messenger_link: messengerLink,
         },
       },
     });
@@ -78,7 +97,6 @@ export default function SignupClient() {
       return;
     }
 
-    // On success – send them to perfumes (you can later make this respect ?next=)
     router.push("/perfumes");
     setLoading(false);
   }
@@ -106,6 +124,7 @@ export default function SignupClient() {
       <h2 className="text-xl font-semibold mb-4">Create account</h2>
 
       <form onSubmit={onSubmit} className="space-y-3">
+        {/* REQUIRED FIELDS */}
         <input
           className="w-full border rounded p-2"
           placeholder="Email"
@@ -145,6 +164,23 @@ export default function SignupClient() {
 
         <input
           className="w-full border rounded p-2"
+          placeholder="Display name (shown publicly)"
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+          required
+        />
+
+        {/* SEPARATOR */}
+        <div className="pt-3 mt-2 border-t border-gray-200">
+          <p className="mb-2 text-xs text-gray-500">
+            The fields below are optional and can be changed later from your
+            profile.
+          </p>
+        </div>
+
+        {/* OPTIONAL FIELDS */}
+        <input
+          className="w-full border rounded p-2"
           placeholder="Full name"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
@@ -152,16 +188,23 @@ export default function SignupClient() {
 
         <input
           className="w-full border rounded p-2"
-          placeholder="Display name (shown publicly)"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
+          placeholder="Contact number"
+          value={contactNumber}
+          onChange={(e) => setContactNumber(e.target.value)}
         />
 
         <input
           className="w-full border rounded p-2"
-          placeholder="Contact Number"
-          value={contactNumber}
-          onChange={(e) => setContactNumber(e.target.value)}
+          placeholder="Facebook profile/page link (optional)"
+          value={facebookLink}
+          onChange={(e) => setFacebookLink(e.target.value)}
+        />
+
+        <input
+          className="w-full border rounded p-2"
+          placeholder="Messenger chat link (e.g. https://m.me/username)"
+          value={messengerLink}
+          onChange={(e) => setMessengerLink(e.target.value)}
         />
 
         <label className="flex items-center gap-2 text-sm">

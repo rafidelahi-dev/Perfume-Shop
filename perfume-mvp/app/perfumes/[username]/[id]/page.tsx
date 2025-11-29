@@ -19,7 +19,7 @@ export default async function ListingDetailPage({ params }: Props) {
   // Find seller by username
   const { data: profile, error: pErr } = await supabase
     .from("profiles")
-    .select("id, username, display_name, avatar_url, contact_number, whatsapp_number, messenger_link, bio")
+    .select("id, username, display_name, avatar_url, contact_number, whatsapp_number, messenger_link, facebook_link, bio")
     .eq("username", username)
     .single();
   if (pErr || !profile) redirect("/perfumes");
@@ -36,6 +36,13 @@ export default async function ListingDetailPage({ params }: Props) {
     .eq("user_id", profile.id)
     .single();
   if (lErr || !listing) redirect(`/perfumes/${username}`);
+
+  const hasAnyContact =
+  !!profile.whatsapp_number ||
+  !!profile.messenger_link ||
+  !!profile.facebook_link ||
+  !!profile.contact_number;
+
 
   const isDecant = (listing.type ?? "").toLowerCase() === "decant";
   const priceToShow =
@@ -95,6 +102,15 @@ export default async function ListingDetailPage({ params }: Props) {
               </div>
             </div>
 
+
+            {!hasAnyContact && (
+              <div className="mt-3 bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm px-3 py-2 rounded-lg">
+                This seller hasn’t added any contact details yet.  
+                <br />
+                Please be cautious and avoid making commitments without proper verification.
+              </div>
+            )}
+
             {/* Contact buttons: adapt to your actual columns */}
             <div className="mt-4 flex flex-wrap gap-2">
               {profile.whatsapp_number && (
@@ -112,6 +128,18 @@ export default async function ListingDetailPage({ params }: Props) {
                   Messenger
                 </a>
               )}
+
+              {profile.facebook_link && (
+                <a
+                  href={profile.facebook_link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-full bg-blue-700 text-white px-3 py-1.5 text-sm"
+                >
+                  Facebook
+                </a>
+              )}
+
               {profile.contact_number && (
                 <a href={profile.contact_number} target="_blank" rel="noreferrer"
                   className="rounded-full bg-gray-900 text-white px-3 py-1.5 text-sm">

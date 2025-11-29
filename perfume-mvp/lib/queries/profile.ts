@@ -11,16 +11,15 @@ export type Profile = {
   avatar_url: string | null;
   contact_number: string | null;
   messenger_link: string | null;
+  facebook_link: string | null;
   whatsapp_number: string | null;
   website: string | null;
   location: string | null;
   bio: string | null;
   created_at?: string;
   updated_at?: string;
-  // not stored in table:
   email?: string | null;
   phone_verified?: boolean;
-  whatsapp_verified?: boolean;
 };
 
 /** Read currently logged-in user's profile (adds email from session) */
@@ -42,6 +41,7 @@ export async function updateMyProfile(patch: Partial<Profile>): Promise<void> {
     avatar_url: patch.avatar_url ?? null,
     contact_number: patch.contact_number ?? null,
     messenger_link: patch.messenger_link ?? null,
+    facebook_link: patch.facebook_link ?? null,
     whatsapp_number: patch.whatsapp_number ?? null,
     website: patch.website ?? null,
     location: patch.location ?? null,
