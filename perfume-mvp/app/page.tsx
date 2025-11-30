@@ -62,7 +62,7 @@ export default function Home() {
 
         <div className="relative z-10 mx-auto max-w-6xl text-center px-6 sm:px-12">
 
-          <h1 className="text-5xl font-light tracking-tight text-[#111] sm:text-6xl lg:text-7xl mb-6 pt-16 lg:pt-0">
+          <h1 className="text-5xl font-light tracking-tight text-[#111] sm:text-6xl lg:text-7xl mb-6 mt-16 lg:pt-0">
             Discover Your
             <span className="block mt-2 font-serif italic text-[#d4af37]">Signature Scent</span>
           </h1>
