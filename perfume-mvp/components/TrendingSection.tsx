@@ -28,7 +28,7 @@ async function fetchTrendingPerfumes(): Promise<PerfumeScoreRow[]>{
   .select("id, brand, perfume_name, sub_brand, min_price, representative_images, click_score, last_clicked_at")
   .order("click_score", {ascending: false})
   .order("last_clicked_at", {ascending: false})
-  .limit(8);
+  .limit(5);
 
   if(error) throw error;
   return data ?? []
@@ -40,7 +40,7 @@ async function fetchTrendingWeek() {
     .select("*")
     .gte("last_clicked_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
     .order("click_score", { ascending: false })
-    .limit(10);
+    .limit(5);
 
   if (error) throw error;
   return data;

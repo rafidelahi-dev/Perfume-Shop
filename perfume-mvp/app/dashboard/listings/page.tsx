@@ -12,15 +12,23 @@ export default function MyListingsPage() {
 
   return (
     <section>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">My Listings</h2>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-[#1a1a1a] text-[#f8f7f3] px-6 py-3 rounded-xl hover:opacity-90 transition-opacity font-medium"
-        >
-          {showForm ? "Cancel" : "+ Add New Listing"}
-        </button>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="w-full sm:max-w-sm">
+        <h2 className="text-lg sm:text-2xl font-semibold">My Listings</h2>
+        <p className="mt-1 text-[11px] sm:text-xs text-gray-600">
+          You can list all the perfumes that you are selling here. These will be
+          displayed in the "Perfumes" section for all users to see and contact you.
+        </p>
       </div>
+
+      {/* Button */}
+      <button
+        onClick={() => setShowForm(!showForm)}
+        className="self-start sm:self-auto bg-[#1a1a1a] text-[#f8f7f3] px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:opacity-90 transition-opacity font-medium text-xs sm:text-sm"
+      >
+        {showForm ? "Cancel" : "+ Add New Listing"}
+      </button>
+    </div>
 
 
       <div className="mb-4">

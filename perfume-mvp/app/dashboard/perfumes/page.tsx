@@ -172,9 +172,10 @@ export default function MyPerfumesPage() {
   return (
     <section>
       <h2 className="text-2xl font-semibold mb-4">My Perfumes</h2>
+      <p>This is where you can store your perfume collection for better tracking and orientation</p>
 
       {/* Toggle button for showing form */}
-      <div className="mb-6">
+      <div className="mb-6 mt-4">
         <button
           onClick={() => setShowForm((prev) => !prev)}
           className="rounded-xl bg-[#1a1a1a] px-5 py-2.5 text-[#f8f7f3] hover:opacity-90"
