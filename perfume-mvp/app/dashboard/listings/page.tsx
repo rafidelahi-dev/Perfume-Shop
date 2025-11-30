@@ -12,7 +12,7 @@ export default function MyListingsPage() {
 
   return (
     <section>
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4 md:mt-12">
       <div className="w-full sm:max-w-sm">
         <h2 className="text-lg sm:text-2xl font-semibold">My Listings</h2>
         <p className="mt-1 text-[11px] sm:text-xs text-gray-600">

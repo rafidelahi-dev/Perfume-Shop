@@ -233,7 +233,7 @@ export default function ProfilePage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-16 px-4 lg:px-0">
       {/* Header */}
-      <div className="text-center space-y-2">
+      <div className="text-center space-y-2 mt-4 md:mt-12">
         <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Profile Settings</h1>
         <p className="text-gray-600 text-sm lg:text-base">
           Manage your account information and preferences

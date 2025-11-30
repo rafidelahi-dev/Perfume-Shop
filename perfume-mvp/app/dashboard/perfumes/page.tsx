@@ -171,7 +171,7 @@ export default function MyPerfumesPage() {
   // ---------- Component ----------
   return (
     <section>
-      <h2 className="text-2xl font-semibold mb-4">My Perfumes</h2>
+      <h2 className="text-2xl font-semibold mb-4 mt-4 md:mt-12">My Perfumes</h2>
       <p>This is where you can store your perfume collection for better tracking and orientation</p>
 
       {/* Toggle button for showing form */}
