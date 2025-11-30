@@ -219,14 +219,11 @@ export default function ProfilePage() {
 
   async function handleVerifyContactNumber() {
     try {
-      toast.info("Sending OTP to your number…");
-
       // 🔥 Later this will call your OTP verification API
       // const { data, error } = await supabase.rpc("send_contact_otp", {
       //   phone: form.contact_number
       // });
-
-      toast.success("OTP sent! Verification popup coming soon.");
+      toast.info("We are working one verifying accounts. Stay tuned!");
     } catch (err) {
       toast.error("Failed to send verification OTP.");
     }
