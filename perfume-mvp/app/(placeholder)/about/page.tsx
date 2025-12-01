@@ -11,7 +11,7 @@ export default function AboutPage() {
       {/* HERO SECTION */}
       <section className="text-center space-y-6">
         <h1 className="text-4xl font-semibold text-[#1a1a1a]">
-          About <span className="text-[#d4af37]">Perfume Exchange</span>
+          About <span className="text-[#d4af37]">Cloud PerfumeBD</span>
         </h1>
         <p className="text-lg text-[#555] max-w-2xl mx-auto">
           A modern fragrance marketplace built for collectors, connoisseurs,
