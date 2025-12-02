@@ -7,8 +7,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import TrendingSection from "@/components/TrendingSection";
 
-
-
 // Move this OUTSIDE the component so it's stable
 const backgroundImages = [
   "/Background/1.png",
