@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   // 1. SEND EMAIL
   try {
   const { data, error } = await resend.emails.send({
-    from: "Cloud PerfumeBD <rafidelahi@cloudperfumebd.com>",
+    from: "User's Voice <rafidelahi@cloudperfumebd.com>",
     to: [process.env.SUPPORT_EMAIL!],
     subject: `[${category}] ${subject}`,
     replyTo: email,

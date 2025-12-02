@@ -30,9 +30,8 @@ export default function ProfilePage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [showWhatsappOtp, setShowWhatsappOtp] = useState(false);
-  const [whatsappOtp, setWhatsappOtp] = useState("");
-
+  const [showContactOtp, setShowContactOtp] = useState(false);
+  const [contactOtp, setContactOtp] = useState("");
 
   const {
     data: profile,
@@ -218,16 +217,77 @@ export default function ProfilePage() {
   if (!profile) return null;
 
   async function handleVerifyContactNumber() {
+    console.log("🔹 handleVerifyContactNumber clicked");
     try {
-      // 🔥 Later this will call your OTP verification API
-      // const { data, error } = await supabase.rpc("send_contact_otp", {
-      //   phone: form.contact_number
-      // });
-      toast.info("We are working one verifying accounts. Stay tuned!");
+      if (!form.contact_number) {
+        toast.error("Please enter a contact number first.");
+        return;
+      }
+
+      const res = await fetch("/api/send-contact-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: form.contact_number }),
+      });
+
+      const body = await res.json();
+      console.log("send-contact-otp body:", body);
+      console.log("send-contact-otp raw:", res);
+
+      if (!res.ok) {
+        toast.error(body.error || "Failed to send verification code.");
+        return;
+      }
+
+      toast.success("Verification code sent via SMS (if gateway accepted).");
+      setShowContactOtp(true);
     } catch (err) {
-      toast.error("Failed to send verification OTP.");
+      console.error(err);
+      toast.error("Failed to send verification code.");
     }
   }
+
+  async function handleConfirmContactOtp() {
+      console.log("🟢 handleConfirmContactOtp clicked");
+    try {
+      if (!form.contact_number) {
+        toast.error("Contact number is missing.");
+        return;
+      }
+      if (!contactOtp) {
+        toast.error("Please enter the OTP you received.");
+        return;
+      }
+
+      const res = await fetch("/api/confirm-contact-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: form.contact_number,
+          otp: contactOtp,
+        }),
+      });
+
+      const body = await res.json();
+
+      if (!res.ok) {
+        toast.error(body.error || "Invalid or expired code.");
+        return;
+      }
+
+      toast.success("Phone number verified!");
+
+      setShowContactOtp(false);
+      setContactOtp("");
+
+      // Refresh profile from Supabase so phone_verified updates
+      await qc.invalidateQueries({ queryKey: qk.profile(userId) });
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to verify code. Please try again.");
+    }
+  }
+
 
 
   return (
@@ -403,15 +463,13 @@ export default function ProfilePage() {
               onChange={(e) => setForm({ ...form, whatsapp_number: e.target.value }) } 
               placeholder="+8801XXXXXXXXX" />
             </div>
-
-
+            
             <div className="space-y-2 lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700">
                 Contact Number
               </label>
 
               <div className="flex items-center gap-3">
-                {/* Number input */}
                 <input
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none 
                             focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
@@ -422,11 +480,10 @@ export default function ProfilePage() {
                   placeholder="+8801XXXXXXXXX"
                 />
 
-                {/* Verify button */}
                 {!profile.phone_verified ? (
                   <button
                     type="button"
-                    onClick={() => handleVerifyContactNumber()}
+                    onClick={handleVerifyContactNumber}
                     className="px-4 py-2 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 
                               text-sm shadow-sm whitespace-nowrap"
                   >
@@ -438,6 +495,26 @@ export default function ProfilePage() {
                   </span>
                 )}
               </div>
+
+              {showContactOtp && !profile.phone_verified && (
+                <div className="mt-2 flex flex-col sm:flex-row gap-3">
+                  <input
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none 
+                              focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    value={contactOtp}
+                    onChange={(e) => setContactOtp(e.target.value)}
+                    placeholder="Enter the 6-digit code"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleConfirmContactOtp}
+                    className="px-4 py-2 rounded-lg text-white bg-green-600 hover:bg-green-700 
+                              text-sm shadow-sm whitespace-nowrap"
+                  >
+                    Confirm
+                  </button>
+                </div>
+              )}
 
               <p className="text-xs text-gray-500">
                 Your number will be used for buyer communication.
