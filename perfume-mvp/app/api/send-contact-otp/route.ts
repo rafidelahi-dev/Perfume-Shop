@@ -49,8 +49,8 @@ export async function POST(req: NextRequest) {
     if (error) {
       console.error("send_contact_otp error:", error);
       return NextResponse.json(
-        { error: "Failed to generate OTP" },
-        { status: 500 }
+        { error: error.message || "Failed to generate OTP" },
+        { status: 400 }
       );
     }
 
