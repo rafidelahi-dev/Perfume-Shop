@@ -160,18 +160,18 @@ export default function ProfilePage() {
     setDeleteError(null);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      // 🔒 Just make sure the user is logged in for UX purposes
+      const { data, error } = await supabase.auth.getUser();
+
+      if (error || !data.user) {
         setDeleteError("You are not logged in.");
         setDeleteLoading(false);
         return;
       }
 
+      // ✅ No need to send a token; the API route will read cookies itself
       const res = await fetch("/api/account/delete", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
       });
 
       if (!res.ok) {

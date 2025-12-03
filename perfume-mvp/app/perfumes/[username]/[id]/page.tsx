@@ -11,8 +11,8 @@ export default async function ListingDetailPage({ params }: Props) {
   const supabase = createServerSupabase();
 
   // Ensure auth (if not using middleware)
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) {
     redirect(`/login?next=/perfumes/${username}/${id}`);
   }
 
