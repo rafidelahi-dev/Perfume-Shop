@@ -316,6 +316,7 @@ export default function ProfilePage() {
                     src={form.avatar_url}
                     alt="Profile avatar"
                     fill
+                    sizes="(max-width: 1024px) 80px, 96px"
                     className="object-cover"
                     priority
                   />
