@@ -17,10 +17,8 @@ function AuthWatcher() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
-        console.log("🧹 User logged out → clearing React Query cache");
         queryClient.clear(); // Clears all cached queries + mutations
       } else {
-        console.log("✅ User logged in:", session.user.email);
         queryClient.invalidateQueries();
       }
     });

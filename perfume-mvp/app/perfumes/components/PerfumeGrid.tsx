@@ -35,7 +35,6 @@ function typeBadge(p: PerfumeListing) {
 }
 
 async function registerPerfumeClick(perfumeId?: string | null) {
-  console.log("➡️ registerPerfumeClick called with perfumeId:", perfumeId);
 
   if (!perfumeId) {
     console.warn("⚠️ No perfumeId provided — click not counted.");
@@ -47,13 +46,6 @@ async function registerPerfumeClick(perfumeId?: string | null) {
       p_perfume_id: perfumeId,
     });
 
-    console.log("📡 RPC Response:", { data, error });
-
-    if (error) {
-      console.error("❌ RPC increment_perfume_click failed:", error);
-    } else {
-      console.log("✅ Click registered successfully!");
-    }
   } catch (err) {
     console.error("🔥 Unexpected error (network or client):", err);
   }

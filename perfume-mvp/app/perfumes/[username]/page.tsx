@@ -53,8 +53,6 @@ export default async function SellerListingsPage({
     .eq("user_id", profile.id)
     .order("created_at", { ascending: false });
 
-  console.log("LISTINGS ERROR:", lErr);
-  console.log("LISTINGS DATA:", listings);
 
   const listingsWithProfile = (listings ?? []).map((l) => ({
     ...l,

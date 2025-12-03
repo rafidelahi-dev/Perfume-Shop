@@ -6,6 +6,9 @@ import Providers from "./providers";
 export const metadata: Metadata = {
   title: "Cloud PerfumeBD",
   description: "Discover, decant & deal — the new age fragrance marketplace.",
+  icons: {
+    icon: "/favicon.ico",
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

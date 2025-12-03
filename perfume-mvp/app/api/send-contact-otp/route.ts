@@ -80,12 +80,6 @@ export async function POST(req: NextRequest) {
     });
 
     const smsText = await smsResponse.text();
-    console.log(
-      "BulkSMSBD response:",
-      smsResponse.status,
-      smsResponse.statusText,
-      smsText
-    );
 
     // 🔍 TEMP: treat any 2xx as success, we can tighten later.
     if (!smsResponse.ok) {

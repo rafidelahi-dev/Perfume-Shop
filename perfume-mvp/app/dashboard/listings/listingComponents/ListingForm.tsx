@@ -270,12 +270,6 @@ const ListingForm: React.FC = () => {
         };
       }
 
-      // Debug
-      console.log(
-        "INSERT listings payload:",
-        JSON.stringify(payload, null, 2)
-      );
-
       await create.mutateAsync(payload);
 
       if (fileInputRef.current) fileInputRef.current.value = "";

@@ -217,7 +217,6 @@ export default function ProfilePage() {
   if (!profile) return null;
 
   async function handleVerifyContactNumber() {
-    console.log("🔹 handleVerifyContactNumber clicked");
     try {
       if (!form.contact_number) {
         toast.error("Please enter a contact number first.");
@@ -231,8 +230,6 @@ export default function ProfilePage() {
       });
 
       const body = await res.json();
-      console.log("send-contact-otp body:", body);
-      console.log("send-contact-otp raw:", res);
 
       if (!res.ok) {
         toast.error(body.error || "Failed to send verification code.");
@@ -248,7 +245,6 @@ export default function ProfilePage() {
   }
 
   async function handleConfirmContactOtp() {
-      console.log("🟢 handleConfirmContactOtp clicked");
     try {
       if (!form.contact_number) {
         toast.error("Contact number is missing.");

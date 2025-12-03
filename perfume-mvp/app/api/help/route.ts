@@ -12,8 +12,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  console.log("SUPPORT_EMAIL =", process.env.SUPPORT_EMAIL);
-
   // 1. SEND EMAIL
   try {
   const { data, error } = await resend.emails.send({
@@ -23,8 +21,6 @@ export async function POST(req: Request) {
     replyTo: email,
     text: `From: ${email}\n\n${message}`,
   });
-
-  console.log("Resend send result:", { data, error });
 
   if (error) {
     console.error("Resend error:", error);
