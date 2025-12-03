@@ -160,18 +160,18 @@ export default function ProfilePage() {
     setDeleteError(null);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      // 🔒 Just make sure the user is logged in for UX purposes
+      const { data, error } = await supabase.auth.getUser();
+
+      if (error || !data.user) {
         setDeleteError("You are not logged in.");
         setDeleteLoading(false);
         return;
       }
 
+      // ✅ No need to send a token; the API route will read cookies itself
       const res = await fetch("/api/account/delete", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
       });
 
       if (!res.ok) {
@@ -217,7 +217,6 @@ export default function ProfilePage() {
   if (!profile) return null;
 
   async function handleVerifyContactNumber() {
-    console.log("🔹 handleVerifyContactNumber clicked");
     try {
       if (!form.contact_number) {
         toast.error("Please enter a contact number first.");
@@ -231,8 +230,6 @@ export default function ProfilePage() {
       });
 
       const body = await res.json();
-      console.log("send-contact-otp body:", body);
-      console.log("send-contact-otp raw:", res);
 
       if (!res.ok) {
         toast.error(body.error || "Failed to send verification code.");
@@ -248,7 +245,6 @@ export default function ProfilePage() {
   }
 
   async function handleConfirmContactOtp() {
-      console.log("🟢 handleConfirmContactOtp clicked");
     try {
       if (!form.contact_number) {
         toast.error("Contact number is missing.");
@@ -320,6 +316,7 @@ export default function ProfilePage() {
                     src={form.avatar_url}
                     alt="Profile avatar"
                     fill
+                    sizes="(max-width: 1024px) 80px, 96px"
                     className="object-cover"
                     priority
                   />

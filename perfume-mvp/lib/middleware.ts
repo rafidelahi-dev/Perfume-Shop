@@ -8,10 +8,10 @@ export async function middleware(req: NextRequest) {
   const supabase = createMiddlewareClient({ req, res });
 
   // Always refresh/write cookies if a client session exists:
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data, error } = await supabase.auth.getUser();
 
-  // If a match hits (via config.matcher below) and no session → redirect to login
-  if (!session) {
+  // If a match hits (via config.matcher below) and no user → redirect to login
+  if (error || !data.user) {
     const redirectUrl = new URL("/login", req.url);
     redirectUrl.searchParams.set("next", req.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);

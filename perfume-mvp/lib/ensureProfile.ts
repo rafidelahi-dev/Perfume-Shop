@@ -2,8 +2,14 @@ import { supabase } from "@/lib/supabaseClient";
 
 /** Call this after login/signup or on app start. */
 export async function ensureProfile() {
-  const { data: { session } } = await supabase.auth.getSession();
-  const user = session?.user;
+  const { data, error: userError } = await supabase.auth.getUser();
+
+  if (userError) {
+    console.warn("ensureProfile getUser error:", userError.message);
+    return null;
+  }
+
+  const user = data.user;
   if (!user) return null;
 
   // try to fetch profile

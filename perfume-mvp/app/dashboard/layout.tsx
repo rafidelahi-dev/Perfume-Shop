@@ -6,23 +6,25 @@ import { DashboardSidebar } from "@/components/DashboardSidebar";
 import Header from "@/components/Header";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  const supabase = await createServerSupabase();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const supabase = createServerSupabase();
 
-  if (!session) {
+  // ✅ Use getUser so Supabase validates the token instead of trusting cookies directly
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
     redirect("/login?next=/dashboard");
   }
 
-  const email = session.user?.email ?? null;
+  const email = user.email ?? null;
 
   return (
     <>
-      <Header /> {/* Ensure Header has proper z-index */}
+      <Header />
       <div className="flex">
         <DashboardSidebar email={email} />
-        {/* Added pt-16 for mobile to account for header height + menu button */}
         <main className="flex-1 lg:ml-64 min-h-[calc(100vh-64px)] p-4 lg:p-6 pt-16 lg:pt-6">
           {children}
         </main>

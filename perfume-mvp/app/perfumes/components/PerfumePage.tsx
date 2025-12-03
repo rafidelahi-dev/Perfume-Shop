@@ -43,7 +43,7 @@ async function fetchPerfumes(): Promise<PerfumeListing[]> {
     `)
     .order("created_at", { ascending: false });
 
-  if (error) { console.log("this is the error: ", error )};
+  if (error) throw error;
 
   const rows = (data as RawListing[]) ?? [];
 
@@ -117,12 +117,6 @@ export default function PerfumesPage() {
 
 }, [params, setFilters, reset, filters]);
 
-
-  useEffect(() => {
-  console.log("🔍 Current Filters:", filters);
-  console.log("🧪 Listings fetched:", listings.length);
-  console.log("🎯 Filtered Perfumes:", filteredPerfumes.length);
-}, [filters, listings, filteredPerfumes]);
 
 
   
