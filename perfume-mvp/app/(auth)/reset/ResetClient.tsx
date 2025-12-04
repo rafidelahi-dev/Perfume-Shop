@@ -15,40 +15,30 @@ export default function ResetClient() {
 
   // Detect if this is a recovery session after clicking the email link
   useEffect(() => {
-    async function detectRecovery() {
-      // 1) Check URL hash: Supabase sends `#access_token=...&type=recovery`
-      if (typeof window !== "undefined") {
-        const hash = window.location.hash || "";
-        if (hash.includes("type=recovery")) {
+    async function init() {
+      // Only run in the browser
+      if (typeof window === "undefined") return;
+
+      const url = window.location.href;
+
+      // If the URL has a `code` param, it's a recovery callback
+      if (url.includes("code=")) {
+        const { data, error } = await supabase.auth.exchangeCodeForSession(url);
+
+        if (error) {
+          console.error("exchangeCodeForSession error:", error);
+          setErr(error.message);
+          return;
+        }
+
+        if (data.session?.user?.email) {
+          // Now we *do* have a logged-in "recovery" session
           setMode("update");
         }
       }
-
-      // 2) Ask Supabase for the current authenticated user
-      const { data, error } = await supabase.auth.getUser();
-
-      if (error) {
-        console.warn("reset/getUser error", error.message);
-      }
-
-      if (data.user) {
-        // We have a signed-in user (from recovery link) → show "update password"
-        setMode("update");
-      }
     }
 
-    detectRecovery();
-
-    // 3) Also listen for PASSWORD_RECOVERY events (recommended by Supabase)
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
-        setMode("update");
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    init();
   }, []);
 
   // STEP 1 — Request link
@@ -64,7 +54,7 @@ export default function ResetClient() {
         : undefined;
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo,   // ✅ correct key
+      redirectTo,
     });
 
     setLoading(false);
