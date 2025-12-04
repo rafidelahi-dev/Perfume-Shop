@@ -1,47 +1,66 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { useRouter } from "next/navigation";
 
 export default function ResetClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [mode, setMode] = useState<"request" | "update">("request");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [checkingLink, setCheckingLink] = useState(true);
 
-  // Detect if this is a recovery session after clicking the email link
+  // When user comes from email link: /reset?code=...&type=recovery
   useEffect(() => {
-    async function init() {
-      // Only run in the browser
-      if (typeof window === "undefined") return;
+    const code = searchParams.get("code");
+    const type = searchParams.get("type");
 
-      const url = window.location.href;
-
-      // If the URL has a `code` param, it's a recovery callback
-      if (url.includes("code=")) {
-        const { data, error } = await supabase.auth.exchangeCodeForSession(url);
-
-        if (error) {
-          console.error("exchangeCodeForSession error:", error);
-          setErr(error.message);
-          return;
-        }
-
-        if (data.session?.user?.email) {
-          // Now we *do* have a logged-in "recovery" session
-          setMode("update");
-        }
-      }
+    // If there is no code in the URL, just show "request" mode
+    if (!code) {
+      setCheckingLink(false);
+      return;
     }
 
-    init();
-  }, []);
+    // Only treat recovery links
+    if (type && type !== "recovery") {
+      setCheckingLink(false);
+      return;
+    }
 
-  // STEP 1 — Request link
+    (async () => {
+      setCheckingLink(true);
+      setErr(null);
+      setMsg(null);
+
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+
+      if (error) {
+        console.error("exchangeCodeForSession error:", error);
+        setErr(error.message);
+        setMode("request"); // fall back to request form
+      } else if (data.session?.user) {
+        setMode("update");
+
+        // Clean the URL so refresh doesn't re-exchange the code
+        if (typeof window !== "undefined") {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("code");
+          url.searchParams.delete("type");
+          window.history.replaceState({}, document.title, url.toString());
+        }
+      }
+
+      setCheckingLink(false);
+    })();
+  }, [searchParams]);
+
+  // STEP 1 — request reset link
   async function handleRequest(e: React.FormEvent) {
     e.preventDefault();
     setErr(null);
@@ -62,7 +81,7 @@ export default function ResetClient() {
     else setMsg("Check your email for a reset link.");
   }
 
-  // STEP 2 — Update password
+  // STEP 2 — actually set new password
   async function handleUpdate(e: React.FormEvent) {
     e.preventDefault();
     setErr(null);
@@ -77,6 +96,15 @@ export default function ResetClient() {
       setMsg("Password updated. Redirecting…");
       setTimeout(() => router.replace("/login"), 1500);
     }
+  }
+
+  // While we are exchanging the code, show a small loading state
+  if (checkingLink && searchParams.get("code")) {
+    return (
+      <div className="max-w-sm mx-auto rounded-xl border bg-white p-6">
+        <p className="text-sm text-gray-600">Verifying reset link…</p>
+      </div>
+    );
   }
 
   return (
