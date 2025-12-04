@@ -13,21 +13,42 @@ export default function ResetClient() {
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Detect if this is a recovery session after clicking the link
+  // Detect if this is a recovery session after clicking the email link
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session?.user?.email) {
+    async function detectRecovery() {
+      // 1) Check URL hash: Supabase sends `#access_token=...&type=recovery`
+      if (typeof window !== "undefined") {
+        const hash = window.location.hash || "";
+        if (hash.includes("type=recovery")) {
+          setMode("update");
+        }
+      }
+
+      // 2) Ask Supabase for the current authenticated user
+      const { data, error } = await supabase.auth.getUser();
+
+      if (error) {
+        console.warn("reset/getUser error", error.message);
+      }
+
+      if (data.user) {
+        // We have a signed-in user (from recovery link) → show "update password"
         setMode("update");
       }
-    });
+    }
 
-    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
+    detectRecovery();
+
+    // 3) Also listen for PASSWORD_RECOVERY events (recommended by Supabase)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
         setMode("update");
       }
     });
 
-    return () => listener.subscription.unsubscribe();
+    return () => subscription.unsubscribe();
   }, []);
 
   // STEP 1 — Request link
