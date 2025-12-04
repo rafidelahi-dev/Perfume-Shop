@@ -64,7 +64,7 @@ export default function ResetClient() {
         : undefined;
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo,
+      redirectTo,   // ✅ correct key
     });
 
     setLoading(false);
