@@ -1,3 +1,4 @@
+// components/Footer.tsx
 import React from 'react'
 import Link from 'next/link'
 import { Facebook, Twitter, Instagram, Mail } from 'lucide-react'
@@ -7,23 +8,16 @@ const Footer = () => {
 
   const companyLinks = [
     { href: '/about', label: 'About Us' },
-    /*{ href: '/careers', label: 'Careers' },
-    { href: '/press', label: 'Press' },
-    { href: '/sustainability', label: 'Sustainability' }*/
   ]
 
   const customerServiceLinks = [
     { href: '/help-center', label: 'Help Center' },
-    /*{ href: '/shipping-info', label: 'Shipping Information' },
-    { href: '/returns', label: 'Returns & Exchanges' },*/
     { href: '/contact-us', label: 'Contact Us' }
   ]
 
   const policyLinks = [
     { href: '/privacy-policy', label: 'Privacy Policy' },
     { href: '/terms', label: 'Terms of Service' },
-    /*{ href: '/cookie-policy', label: 'Cookie Policy' },
-    { href: '/accessibility', label: 'Accessibility' }*/
   ]
 
   const socialLinks = [
@@ -33,152 +27,89 @@ const Footer = () => {
   ]
 
   return (
-    <footer className="bg-gray-900 text-white">
-      {/* Main Footer Content */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
+    <footer className="bg-[#111] text-white border-t border-[#333]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
           
-          {/* Brand Section */}
-          <div className="lg:col-span-1 text-center sm:text-left">
-            <Link href="/" className="flex items-center justify-center sm:justify-start space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">CP</span>
-              </div>
-              <span className="text-xl font-serif font-semibold">Cloud PerfumeBD</span>
+          {/* Brand Section (Wider on LG) */}
+          <div className="lg:col-span-4 text-center sm:text-left">
+            <Link href="/" className="flex items-center justify-center sm:justify-start space-x-3 mb-6">
+              <span className="text-2xl font-serif font-bold tracking-tight">Cloud <span className="text-[#d4af37] italic">PerfumeBD</span></span>
             </Link>
-            <p className="text-gray-300 text-sm leading-relaxed mb-6 max-w-md mx-auto sm:mx-0">
+            <p className="text-gray-400 text-sm leading-relaxed mb-8 max-w-sm mx-auto sm:mx-0">
               The premier destination for fragrance enthusiasts to discover, exchange, 
-              and experience the world&apos;s finest perfumes. Connect with a community 
-              that shares your passion for exquisite scents.
+              and experience the world&apos;s finest perfumes.
             </p>
             
-            {/* Newsletter Signup */}
-            <div className="space-y-3 max-w-md mx-auto sm:mx-0">
-              <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-400">
-                Stay in the Scent Loop
-              </h4>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-2 sm:space-y-0">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="w-full sm:flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-                <button className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 text-sm font-medium">
-                  Subscribe
-                </button>
-              </div>
+            {/* Newsletter */}
+            <div className="max-w-sm mx-auto sm:mx-0">
+               <h4 className="text-xs font-bold uppercase tracking-widest text-[#d4af37] mb-3">Subscribe</h4>
+               <div className="flex gap-2">
+                 <input 
+                   type="email" 
+                   placeholder="Email address" 
+                   className="flex-1 bg-white/5 border border-white/10 rounded-md px-4 py-2 text-sm focus:outline-none focus:border-[#d4af37] transition-colors"
+                 />
+                 <button className="bg-[#d4af37] text-[#111] px-4 py-2 rounded-md text-sm font-bold hover:bg-[#b8941f] transition-colors">
+                   Join
+                 </button>
+               </div>
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="text-center sm:text-left">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4">
-              Marketplace
-            </h3>
-            <nav className="space-y-3">
-              <Link href="/perfumes" className="block text-gray-300 hover:text-white transition-colors duration-200 text-sm">
-                Explore Fragrances
-              </Link>
-              <Link href="/dashboard/listings" className="block text-gray-300 hover:text-white transition-colors duration-200 text-sm">
-                Sell Your Perfume
-              </Link>
-              <Link href="/new-arrivals" className="block text-gray-300 hover:text-white transition-colors duration-200 text-sm">
-                New Arrivals
-              </Link>
-              {/* <Link href="/rare-finds" className="block text-gray-300 hover:text-white transition-colors duration-200 text-sm">
-                Rare Finds
-              </Link> 
-              <Link href="/brands" className="block text-gray-300 hover:text-white transition-colors duration-200 text-sm">
-                Shop by Brand
-              </Link> */}
-            </nav>
-          </div>
-
-          {/* Customer Service */}
-          <div className="text-center sm:text-left">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4">
-              Customer Service
-            </h3>
-            <nav className="space-y-3">
-              {customerServiceLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="block text-gray-300 hover:text-white transition-colors duration-200 text-sm"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          {/* Company & Legal */}
-          <div className="space-y-8 text-center sm:text-left">
+          {/* Links Section */}
+          <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-8">
+            {/* Marketplace */}
             <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4">
-                Company
-              </h3>
-              <nav className="space-y-3">
-                {companyLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="block text-gray-300 hover:text-white transition-colors duration-200 text-sm"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </nav>
+              <h3 className="text-sm font-bold uppercase tracking-widest text-white mb-4">Marketplace</h3>
+              <ul className="space-y-3">
+                <li><Link href="/perfumes" className="text-gray-400 hover:text-[#d4af37] transition-colors text-sm">Explore Fragrances</Link></li>
+                <li><Link href="/dashboard/listings" className="text-gray-400 hover:text-[#d4af37] transition-colors text-sm">Sell Perfume</Link></li>
+                <li><Link href="/new-arrivals" className="text-gray-400 hover:text-[#d4af37] transition-colors text-sm">New Arrivals</Link></li>
+              </ul>
             </div>
 
-            {/* Social Links */}
+            {/* Support */}
             <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4">
-                Connect With Us
-              </h3>
-              <div className="flex justify-center sm:justify-start space-x-4">
-                {socialLinks.map((social) => {
-                  const Icon = social.icon;
-                  return (
-                    <a
-                      key={social.label}
-                      href={social.href}
-                      className="text-gray-400 hover:text-white transition-colors duration-200"
-                      aria-label={social.label}
-                    >
-                      <Icon size={20} />
-                    </a>
-                  );
-                })}
-              </div>
+              <h3 className="text-sm font-bold uppercase tracking-widest text-white mb-4">Support</h3>
+              <ul className="space-y-3">
+                 {customerServiceLinks.map(link => (
+                   <li key={link.href}><Link href={link.href} className="text-gray-400 hover:text-[#d4af37] transition-colors text-sm">{link.label}</Link></li>
+                 ))}
+                 {companyLinks.map(link => (
+                   <li key={link.href}><Link href={link.href} className="text-gray-400 hover:text-[#d4af37] transition-colors text-sm">{link.label}</Link></li>
+                 ))}
+              </ul>
+            </div>
+
+            {/* Socials */}
+            <div>
+               <h3 className="text-sm font-bold uppercase tracking-widest text-white mb-4">Follow Us</h3>
+               <div className="flex gap-4">
+                 {socialLinks.map((social) => {
+                   const Icon = social.icon;
+                   return (
+                     <a key={social.label} href={social.href} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#d4af37] hover:text-[#111] transition-all duration-300">
+                       <Icon size={18} />
+                     </a>
+                   )
+                 })}
+               </div>
             </div>
           </div>
+
         </div>
       </div>
 
       {/* Bottom Footer */}
-      <div className="border-t border-gray-800">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center text-center md:text-left">
-            <p className="text-sm text-gray-400">
-              © {currentYear} PerfumeShare. All rights reserved.
-            </p>
-            
-            <nav className="flex flex-wrap justify-center gap-4 sm:gap-6 text-sm">
-              {policyLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-
-            <div className="flex justify-center md:justify-end items-center space-x-2 text-sm text-gray-400">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <span>Secure Transactions</span>
+      <div className="border-t border-[#222] bg-[#0d0d0d]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-xs text-gray-500">© {currentYear} Cloud PerfumeBD. All rights reserved.</p>
+            <div className="flex gap-6">
+               {policyLinks.map(link => (
+                 <Link key={link.href} href={link.href} className="text-xs text-gray-500 hover:text-white transition-colors">{link.label}</Link>
+               ))}
             </div>
           </div>
         </div>
