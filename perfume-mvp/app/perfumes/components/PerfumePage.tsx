@@ -98,25 +98,17 @@ export default function PerfumesPage() {
 }, [listings, filters.brand, filters.q, filters.priceMin, filters.priceMax, filters.types]);
 
   useEffect(() => {
-  const q = params.get("q") ?? "";
-  const brand = params.get("brand") ?? "";
+    const qParam = params.get("q") ?? "";
+    const brandParam = params.get("brand") ?? "";
 
-  if (!q && !brand) {
-      if (filters.q !== "" || filters.brand !== "") {
-          reset();
-      }
-      return; 
-  }
-  
-  if (q !== filters.q || brand !== filters.brand) {
-      setFilters({
-          q: q,
-          brand: brand
-      });
-  }
+    // If there are no params in the URL, don't touch the current filters.
+    if (!qParam && !brandParam) return;
 
-}, [params, setFilters, reset, filters]);
-
+    setFilters({
+      q: qParam,
+      brand: brandParam,
+    });
+  }, [params, setFilters]);
 
 
   
