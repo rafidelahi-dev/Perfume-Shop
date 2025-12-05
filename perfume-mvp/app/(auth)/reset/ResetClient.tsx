@@ -56,17 +56,18 @@ export default function ResetClient() {
 
     const redirectTo =
       typeof window !== "undefined"
-        ? `${location.origin}/reset`
+        ? `${window.location.origin}/reset`
         : undefined;
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo, // Supabase will append ?code=... and send user here
+      redirectTo,
     });
 
     setLoading(false);
     if (error) setErr(error.message);
     else setMsg("Check your email for a reset link.");
   }
+
 
   // ✅ 3. Step 2 – set new password (only after code→session succeeded)
   async function handleUpdate(e: React.FormEvent) {

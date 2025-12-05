@@ -74,9 +74,6 @@ export default function DecantOptions({
                     <span>{o.ml} ml</span>
                     <span>
                         ${o.price}{" "}
-                        <span className="text-gray-500 text-xs">
-                        (${ppm.toFixed(2)}/ml)
-                        </span>
                     </span>
                     </div>
                 );

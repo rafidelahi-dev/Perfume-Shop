@@ -82,8 +82,8 @@ export default function Header() {
             <Image
               src="/logo.png"
               alt="Perfume Share Logo"
-              width={68}
-              height={68}
+              width={58}
+              height={58}
               className="object-contain"
               style={{ height: "auto", width: "auto" }}
               priority
