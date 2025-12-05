@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import TrendingSection from "@/components/TrendingSection";
 
-// Move this OUTSIDE the component so it's stable
 const backgroundImages = [
   "/Background/1.png",
   "/Background/2.png",
@@ -17,111 +16,115 @@ const backgroundImages = [
   "/Background/5.png",
 ];
 
-
 export default function Home() {
   const [currentBg, setCurrentBg] = useState(0);
-  
 
   useEffect(() => {
-  const interval = setInterval(() => {
-    setCurrentBg((prev) => (prev + 1) % backgroundImages.length);
-  }, 3000);
+    const interval = setInterval(() => {
+      setCurrentBg((prev) => (prev + 1) % backgroundImages.length);
+    }, 4000); // Slowed down slightly for a more relaxed luxury feel
 
-  return () => clearInterval(interval);
-}, []); // this is now valid
-
-
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <>
-    <Header/>
-      {/* Enhanced Hero Section with Background */}
-      <section className="relative w-full overflow-hidden rounded-none min-h-[85vh] flex items-center justify-center pb-10">
-        {/* Background Image with Overlay */}
+      <Header />
+      
+      {/* Enhanced Hero Section */}
+      <section className="relative w-full overflow-hidden min-h-[90vh] flex items-center justify-center pb-10 pt-20">
+        
+        {/* Background Image Carousel */}
         <div className="absolute inset-0 z-0">
           {backgroundImages.map((bg, index) => (
             <div
               key={bg}
-              className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
-                index === currentBg ? "opacity-100" : "opacity-0"
+              className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-[1500ms] ease-in-out ${
+                index === currentBg ? "opacity-100 scale-105" : "opacity-0 scale-100"
               }`}
               style={{
                 backgroundImage: `url('${bg}')`,
               }}
             />
           ))}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#f8f7f3]/50 via-[#f3f1ec]/5 to-[#e8e5dd]/40" />
-  
+          {/* Enhanced Gradient Overlay for Readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#f8f7f3]/80 via-[#f8f7f3]/60 to-[#f8f7f3]" />
+          <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px]" />
         </div>
 
-        {/* Decorative Elements */}
-        <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-gradient-to-br from-[#d4af37]/10 to-transparent rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-tr from-[#c9b7a7]/10 to-transparent rounded-full blur-3xl" />
+        <div className="relative z-10 mx-auto max-w-7xl text-center px-6 sm:px-12 flex flex-col items-center">
+          
+          <div className="inline-block mb-4 px-4 py-1.5 rounded-full border border-[#d4af37]/30 bg-[#d4af37]/10 backdrop-blur-md">
+            <span className="text-xs font-semibold tracking-widest uppercase text-[#8a7224]">The New Standard</span>
+          </div>
 
-        <div className="relative z-10 mx-auto max-w-6xl text-center px-6 sm:px-12">
-
-          <h1 className="text-5xl font-light tracking-tight text-[#111] sm:text-6xl lg:text-7xl mb-6 mt-16 lg:pt-0">
+          <h1 className="text-5xl font-light tracking-tight text-[#111] sm:text-7xl lg:text-8xl mb-8">
             Discover Your
-            <span className="block mt-2 font-serif italic text-[#d4af37]">Signature Scent</span>
+            <span className="block mt-2 font-serif italic text-[#d4af37] drop-shadow-sm">Signature Scent</span>
           </h1>
           
-          <p className="mt-6 text-xl text-[#444] max-w-2xl mx-auto leading-relaxed font-light">
+          <p className="mt-2 text-lg sm:text-xl text-[#555] max-w-2xl mx-auto leading-relaxed font-light">
             {"Curate, decant, and share exceptional fragrances from the world's most discerning perfume collectors."}
           </p>
           
-          <div className="mt-12 flex flex-wrap justify-center gap-6">
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <Link 
               href="/perfumes" 
-              className="btn btn-primary text-base px-8 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              className="btn bg-[#1a1a1a] text-white hover:bg-black border-none text-base px-10 py-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
             >
               Explore Collection
             </Link>
             <Link 
               href="/dashboard/listings" 
-              className="btn btn-outline text-base px-8 py-4 border-2 hover:bg-white/50"
+              className="btn bg-white/50 backdrop-blur-md border border-[#1a1a1a]/10 text-[#1a1a1a] hover:bg-white text-base px-10 py-4 rounded-full shadow-sm hover:shadow-md transition-all duration-300"
             >
               Become a Seller
             </Link>
           </div>
 
           {/* Trust Indicators */}
-          <div className="mt-16 flex flex-wrap justify-center gap-8 text-sm text-[#666]">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-[#d4af37] rounded-full" />
-              <span>100% Authentic</span>
+          <div className="mt-20 pt-8 border-t border-black/5 grid grid-cols-3 gap-8 sm:gap-16 text-xs sm:text-sm font-medium tracking-wide text-[#666] uppercase">
+            <div className="flex flex-col items-center gap-2">
+               <span className="text-[#d4af37] text-lg">✦</span>
+               <span>100% Authentic</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-[#d4af37] rounded-full" />
-              <span>Global Community</span>
+            <div className="flex flex-col items-center gap-2">
+               <span className="text-[#d4af37] text-lg">✦</span>
+               <span>Global Community</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-[#d4af37] rounded-full" />
-              <span>Secure Transactions</span>
+            <div className="flex flex-col items-center gap-2">
+               <span className="text-[#d4af37] text-lg">✦</span>
+               <span>Secure Deals</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Trending Now - Enhanced */}
+      {/* Trending Now */}
       <TrendingSection/>
 
       {/* CTA Section */}
-      <section className="py-20 px-6 sm:px-12 bg-gradient-to-br from-[#1a1a1a] to-[#2d2d2d] text-white">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="text-3xl font-light mb-6">Ready to Find Your Signature Scent?</h2>
-          <p className="text-white/70 max-w-2xl mx-auto mb-8 font-light leading-relaxed">
+      <section className="relative py-24 px-6 sm:px-12 overflow-hidden">
+        <div className="absolute inset-0 bg-[#1a1a1a]">
+            {/* Abstract shapes in background */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#d4af37]/10 rounded-full blur-[100px] translate-x-1/2 -translate-y-1/2"></div>
+        </div>
+        
+        <div className="relative z-10 mx-auto max-w-4xl text-center">
+          <h2 className="text-3xl md:text-5xl font-light mb-6 text-white">Ready to Find Your Scent?</h2>
+          <p className="text-white/60 max-w-2xl mx-auto mb-10 font-light text-lg leading-relaxed">
             Join thousands of fragrance enthusiasts discovering, sharing, and trading exclusive perfumes from around the world.
           </p>
           <div className="flex flex-wrap justify-center gap-6">
             <Link 
               href="/signup" 
-              className="rounded-full bg-[#d4af37] px-8 py-4 text-sm font-medium text-[#1a1a1a] hover:bg-[#b8941f] transition-all transform hover:-translate-y-1"
+              className="rounded-full bg-[#d4af37] px-10 py-4 text-sm font-bold text-[#1a1a1a] hover:bg-[#c4a030] transition-all transform hover:-translate-y-1 shadow-[0_0_20px_rgba(212,175,55,0.3)]"
             >
               Start Your Journey
             </Link>
             <Link 
               href="/about" 
-              className="rounded-full border border-white/30 px-8 py-4 text-sm font-medium text-white hover:bg-white/10 transition-all"
+              className="rounded-full border border-white/20 bg-white/5 px-10 py-4 text-sm font-medium text-white hover:bg-white/10 transition-all backdrop-blur-sm"
             >
               Learn More
             </Link>

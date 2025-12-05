@@ -87,6 +87,7 @@ export function DashboardSidebar({ email }: { email: string | null }) {
           top-0
           left-0
           h-full
+          pt-[70px]
           w-64
           bg-white
           border-r
