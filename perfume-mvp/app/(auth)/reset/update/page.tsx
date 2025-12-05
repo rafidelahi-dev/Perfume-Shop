@@ -1,4 +1,3 @@
-// app/(auth)/reset/update/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -39,8 +38,12 @@ export default function ResetUpdatePage() {
         setMsg("Password updated. Redirecting…");
         setTimeout(() => router.replace("/login"), 1500);
       }
-    } catch (e: any) {
-      setErr(e?.message || "Something went wrong.");
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setErr(e.message);
+      } else {
+        setErr("Something went wrong.");
+      }
     } finally {
       setLoading(false);
     }

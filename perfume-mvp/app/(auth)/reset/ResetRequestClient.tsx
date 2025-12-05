@@ -30,8 +30,12 @@ export default function ResetRequestClient() {
       } else {
         setMsg("Check your email for a reset link.");
       }
-    } catch (e: any) {
-      setErr(e?.message || "Something went wrong.");
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setErr(e.message);
+      } else {
+        setErr("Something went wrong.");
+      }
     } finally {
       setLoading(false);
     }
