@@ -15,25 +15,33 @@ export default function ResetClient() {
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // ✅ 1. When we arrive with ?code=..., exchange it for a session
+  // 1) When we arrive with ?token_hash=...&type=recovery, verify it
   useEffect(() => {
-    const code = searchParams.get("code");
-    if (!code) return; // no code → normal "request" mode
+    const token_hash = searchParams.get("token_hash");
+    const type = searchParams.get("type");
+
+    if (!token_hash || type !== "recovery") {
+      // normal "request link" mode
+      return;
+    }
 
     (async () => {
       setLoading(true);
       setErr(null);
       setMsg("Verifying reset link…");
 
-      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+      const { data, error } = await supabase.auth.verifyOtp({
+        token_hash,
+        type: "recovery",
+      });
 
       setLoading(false);
 
       if (error) {
-        console.error("exchangeCodeForSession error", error);
+        console.error("verifyOtp error", error);
         setErr(error.message || "Invalid or expired reset link.");
         setMsg(null);
-        setMode("request"); // fall back to requesting a new link
+        setMode("request");
         return;
       }
 
@@ -47,7 +55,7 @@ export default function ResetClient() {
     })();
   }, [searchParams]);
 
-  // ✅ 2. Step 1 – request reset link
+  // 2) Request reset link
   async function handleRequest(e: React.FormEvent) {
     e.preventDefault();
     setErr(null);
@@ -68,8 +76,7 @@ export default function ResetClient() {
     else setMsg("Check your email for a reset link.");
   }
 
-
-  // ✅ 3. Step 2 – set new password (only after code→session succeeded)
+  // 3) After link verified → set new password
   async function handleUpdate(e: React.FormEvent) {
     e.preventDefault();
     setErr(null);
@@ -103,10 +110,8 @@ export default function ResetClient() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-
             {err && <p className="text-sm text-red-600">{err}</p>}
             {msg && <p className="text-sm text-green-700">{msg}</p>}
-
             <button
               disabled={loading}
               className="w-full bg-gray-900 text-white rounded p-2 disabled:opacity-60"
@@ -118,7 +123,6 @@ export default function ResetClient() {
       ) : (
         <>
           <h2 className="text-xl font-semibold mb-4">Set a new password</h2>
-
           <form onSubmit={handleUpdate} className="space-y-3">
             <input
               type="password"
@@ -129,10 +133,8 @@ export default function ResetClient() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-
             {err && <p className="text-sm text-red-600">{err}</p>}
             {msg && <p className="text-sm text-green-700">{msg}</p>}
-
             <button
               disabled={loading}
               className="w-full bg-gray-900 text-white rounded p-2 disabled:opacity-60"
