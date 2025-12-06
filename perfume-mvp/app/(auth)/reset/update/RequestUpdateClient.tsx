@@ -23,6 +23,7 @@ export default function ResetUpdateClient() {
         setAllowed(true);
       } else {
         setErr("Reset link is invalid or expired. Please request a new link.");
+        console.log(err);
       }
     });
 
