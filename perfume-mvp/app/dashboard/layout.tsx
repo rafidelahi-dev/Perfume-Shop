@@ -1,6 +1,5 @@
 // app/dashboard/layout.tsx (Modified)
 import { ReactNode } from "react";
-// ❌ REMOVE: import { redirect } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabaseServer"; // Still needed for safe cookie read
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import Header from "@/components/Header";
