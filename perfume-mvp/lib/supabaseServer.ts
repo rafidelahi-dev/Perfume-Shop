@@ -7,7 +7,7 @@ export async function createServerSupabase() {
   // Next.js 15 expects cookies() to be awaited in async helpers
   const cookieStore = await cookies();
 
-  const supabase = createServerClient(
+  const supabase = await createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
