@@ -1,13 +1,12 @@
 "use client";
 
-// app/page.tsx
+// components/TrendingSection.tsx
 import { useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { useQuery } from "@tanstack/react-query";
 import TrendingGrid from "./TrendingGrid";
 import TrendingBrands from "./TrendingBrands";
-import "../app/globals.css";
 
 type PerfumeScoreRow = {
   id: string;
@@ -22,6 +21,7 @@ type PerfumeScoreRow = {
 
 type TabType = "now" | "week" | "month" | "brands";
 
+// --- DATA FETCHING (PRESERVED) ---
 async function fetchTrendingPerfumes(): Promise<PerfumeScoreRow[]>{
   const { data, error} = await supabase
   .from("perfume_score")
@@ -46,8 +46,6 @@ async function fetchTrendingWeek() {
   return data;
 }
 
-
-
 async function fetchTrendingMonth() {
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
@@ -63,8 +61,6 @@ async function fetchTrendingMonth() {
   return data;
 }
 
-
-
 async function fetchTrendingBrands() {
   const { data, error } = await supabase
     .rpc("get_trending_brands");
@@ -73,20 +69,10 @@ async function fetchTrendingBrands() {
   return data;
 }
 
-
-const gradientClasses = [
-  "bg-gradient-to-br from-blue-50 to-blue-100",
-  "bg-gradient-to-br from-amber-50 to-amber-100",
-  "bg-gradient-to-br from-gray-50 to-gray-100",
-  "bg-gradient-to-br from-rose-50 to-rose-100",
-  "bg-gradient-to-br from-emerald-50 to-emerald-100",
-  "bg-gradient-to-br from-indigo-50 to-indigo-100",
-];
-
 export default function TrendingSection() {
     const [tab, setTab] = useState<TabType>("now");
-    const { data: perfumes = [], isLoading, error 
-        } = useQuery({queryKey: ['trendingPerfumes'],
+    const { data: perfumes = [], isLoading, error } = useQuery({
+        queryKey: ['trendingPerfumes'],
         queryFn: fetchTrendingPerfumes,
         staleTime: 60_000,
     })
@@ -101,89 +87,91 @@ export default function TrendingSection() {
         queryFn: fetchTrendingMonth
     });
 
-    // NEW: Brand Trending
     const { data: brands = [] } = useQuery({
         queryKey: ["trendingBrands"],
         queryFn: fetchTrendingBrands,
         staleTime: 60_000,
     });
 
-return (
-    <section className="py-20 px-6 sm:px-12 bg-gradient-to-b from-white/50 to-[#f8f7f3]">
-        <div className="mx-auto max-w-[110rem] px-4">
-            {/* Header */}
-            <div className="mb-10 md:mb-16 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div className="flex-1">
-                <h2 className="text-2xl md:text-3xl font-light text-[#111] mb-2 md:mb-4">
-                Trending Now
-                </h2>
-                <p className="text-sm md:text-base text-[#666] font-light">
-                Discover what the community is loving this season
-                </p>
+    return (
+        <section className="py-20 px-6 sm:px-12 bg-[#fcfbf9]">
+            <div className="mx-auto max-w-7xl">
+                
+                {/* Header & Tabs Container */}
+                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-12">
+                    <div>
+                        <h2 className="text-3xl md:text-4xl font-serif text-[#111] mb-3">
+                            Trending Collections
+                        </h2>
+                        <p className="text-[#666] font-light max-w-md">
+                            Discover the scents captivating our community this season.
+                        </p>
+                    </div>
 
-                {/* Tabs */}
-                <div className="mt-6 md:mt-10 flex gap-3 md:gap-4 border-b border-black/10">
-                    <div className="tab-scroll flex gap-3 md:gap-4 overflow-x-auto">
+                    {/* Modern Pill Tabs */}
+                    <div className="flex bg-gray-100/80 p-1.5 rounded-full overflow-x-auto max-w-full">
                         {[
-                            { key: "now", label: "Trending Now" },
+                            { key: "now", label: "Today" },
                             { key: "week", label: "This Week" },
                             { key: "month", label: "This Month" },
-                            { key: "brands", label: "Top Brands" },
+                            { key: "brands", label: "Brands" },
                         ].map((t) => (
                             <button
-                            key={t.key}
-                            onClick={() => setTab(t.key as TabType)}
-                            className={`pb-3 px-3 md:px-4 text-xs md:text-sm font-medium whitespace-nowrap transition-all border-b-2 ${
-                                tab === t.key
-                                ? "border-[#d4af37] text-[#111]"
-                                : "border-transparent text-[#666] hover:text-[#111]"
-                            }`}
+                                key={t.key}
+                                onClick={() => setTab(t.key as TabType)}
+                                className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap ${
+                                    tab === t.key
+                                    ? "bg-white text-[#1a1a1a] shadow-sm"
+                                    : "text-gray-500 hover:text-[#1a1a1a]"
+                                }`}
                             >
-                            {t.label}
+                                {t.label}
                             </button>
                         ))}
                     </div>
                 </div>
+
+                {/* Content Area */}
+                <div className="min-h-[400px]">
+                    {isLoading && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {Array.from({ length: 4 }).map((_, i) => (
+                                <div key={i} className="h-96 rounded-2xl bg-gray-100 animate-pulse" />
+                            ))}
+                        </div>
+                    )}
+
+                    {error && !isLoading && (
+                        <div className="w-full h-40 flex items-center justify-center border border-red-100 bg-red-50 rounded-lg">
+                            <p className="text-red-600">Failed to load trending data.</p>
+                        </div>
+                    )}
+
+                    {!isLoading && !error && perfumes.length === 0 && (
+                        <p className="text-center text-gray-500 py-20">
+                            No trending data yet. Be the first to explore!
+                        </p>
+                    )}
+                    
+                    {!isLoading && (
+                        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            {tab === "now" && <TrendingGrid perfumes={perfumes} />}
+                            {tab === "week" && <TrendingGrid perfumes={week} />}
+                            {tab === "month" && <TrendingGrid perfumes={month} />}
+                            {tab === "brands" && <TrendingBrands brands={brands} />}
+                        </div>
+                    )}
+                </div>
+
+                <div className="mt-12 text-center">
+                    <Link
+                        href="/perfumes"
+                        className="inline-flex items-center gap-2 text-sm font-medium text-[#1a1a1a] hover:text-[#d4af37] transition-colors border-b border-[#1a1a1a] hover:border-[#d4af37] pb-0.5"
+                    >
+                        View Full Collection <span>→</span>
+                    </Link>
+                </div>
             </div>
-
-            <Link
-                href="/perfumes"
-                className="self-start md:self-end text-xs md:text-sm text-[#666] hover:text-[#111] border-b border-transparent hover:border-[#111] transition-all pb-1"
-            >
-                View all collections
-            </Link>
-            </div>
-
-            {/* Loading state */}
-            {isLoading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {Array.from({ length: 3 }).map((_, i) => (
-                <div
-                    key={i}
-                    className="h-80 rounded-3xl bg-gray-100 animate-pulse"
-                />
-                ))}
-            </div>
-            )}
-
-            {error && !isLoading && (
-                <p className="text-center text-red-600">
-                    Failed to load trending perfumes.
-                </p>
-            )}
-
-            {!isLoading && !error && perfumes.length === 0 && (
-                <p className="text-center text-gray-600">
-                    No trending perfumes found. Start exploring perfumes to build trends. 
-                </p>
-            )}
-            
-            {tab === "now" && <TrendingGrid perfumes={perfumes} />}
-            {tab === "week" && <TrendingGrid perfumes={week} />}
-            {tab === "month" && <TrendingGrid perfumes={month} />}
-            {tab === "brands" && <TrendingBrands brands={brands} />}
-    </div>
-</section>
-)
+        </section>
+    )
 }
-

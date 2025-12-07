@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import Header from "@/components/Header";
 import { UsernameListingGrid } from "./components/UsernameListingGrid";
+import { Facebook, MessageSquare, Phone, User } from "lucide-react";
 
 type Params = { username: string };
 
@@ -70,39 +71,40 @@ export default async function SellerListingsPage({
     !!profile.contact_number;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#fcfaf7]"> {/* Added subtle bg color to body */}
       <Header />
-      <section className="mx-auto max-w-6xl px-4 pb-8 pt-20">
+      <section className="mx-auto max-w-6xl px-4 pb-12 pt-20">
         {/* Seller header */}
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="mb-8 flex flex-col gap-6 rounded-3xl bg-white p-6 shadow-md md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
             {profile.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={profile.avatar_url}
                 alt={profile.display_name ?? profile.username}
-                className="h-14 w-14 rounded-full object-cover"
+                className="h-16 w-16 rounded-full object-cover border border-black/10 shadow-sm"
               />
             ) : (
-              <div className="h-14 w-14 rounded-full bg-gray-200" />
+              <div className="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center border border-black/10">
+                    <User className="h-6 w-6 text-gray-400" />
+                </div>
             )}
             <div>
-              <h1 className="text-2xl font-semibold">
+              <h1 className="text-3xl font-serif font-medium text-[#1a1a1a]">
                 {profile.display_name ?? profile.username}
               </h1>
               {profile.bio && (
-                <p className="text-sm text-gray-600">{profile.bio}</p>
+                <p className="text-sm text-gray-600 mt-1">{profile.bio}</p>
               )}
+                <p className="text-xs text-gray-400 mt-1">@{profile.username}</p>
             </div>
           </div>
 
           {/* Contact area (buttons + warning) */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             {!hasAnyContact && (
-              <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs md:text-sm px-3 py-2 rounded-lg max-w-md">
-                This seller hasn’t shared any contact details yet. Please be
-                careful when making any deal and avoid sending money without
-                proper verification.
+              <div className="bg-white border border-yellow-300 text-yellow-800 text-xs md:text-sm px-4 py-3 rounded-xl max-w-lg shadow-sm">
+                <span className="font-semibold">⚠️ Seller Note:</span> This seller hasn’t shared contact details. Proceed with caution and verify transactions carefully.
               </div>
             )}
 
@@ -112,8 +114,9 @@ export default async function SellerListingsPage({
                   href={`https://wa.me/${profile.whatsapp_number}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-full bg-green-600 text-white px-3 py-1.5 text-xs md:text-sm"
+                  className="flex items-center gap-2 rounded-full bg-[#34A853] text-white px-4 py-2 text-sm font-medium hover:bg-[#2d9146] transition"
                 >
+                    <MessageSquare className="h-4 w-4" />
                   WhatsApp
                 </a>
               )}
@@ -123,8 +126,9 @@ export default async function SellerListingsPage({
                   href={profile.messenger_link}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-full bg-blue-600 text-white px-3 py-1.5 text-xs md:text-sm"
+                  className="flex items-center gap-2 rounded-full bg-[#0078FF] text-white px-4 py-2 text-sm font-medium hover:bg-[#0063d3] transition"
                 >
+                    <MessageSquare className="h-4 w-4" />
                   Messenger
                 </a>
               )}
@@ -134,8 +138,9 @@ export default async function SellerListingsPage({
                   href={profile.facebook_link}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-full bg-blue-700 text-white px-3 py-1.5 text-xs md:text-sm"
+                  className="flex items-center gap-2 rounded-full bg-[#1877F2] text-white px-4 py-2 text-sm font-medium hover:bg-[#156cdb] transition"
                 >
+                    <Facebook className="h-4 w-4" />
                   Facebook
                 </a>
               )}
@@ -143,15 +148,19 @@ export default async function SellerListingsPage({
               {profile.contact_number && (
                 <a
                   href={`tel:${profile.contact_number}`}
-                  className="rounded-full bg-gray-900 text-white px-3 py-1.5 text-xs md:text-sm"
+                  className="flex items-center gap-2 rounded-full bg-[#1a1a1a] text-white px-4 py-2 text-sm font-medium hover:bg-black transition"
                 >
+                    <Phone className="h-4 w-4" />
                   Call
                 </a>
               )}
             </div>
           </div>
         </div>
-
+        
+        <h2 className="text-2xl font-light text-[#1a1a1a] mb-6">
+            Active Listings by {profile.display_name ?? profile.username}
+        </h2>
         {/* Listings grid */}
         <UsernameListingGrid
           listings={listingsWithProfile}
