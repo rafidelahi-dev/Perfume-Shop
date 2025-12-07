@@ -18,7 +18,7 @@ export default function LoginClient({ nextPath }: LoginClientProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [oauthLoading, setOauthLoading] =
-    useState<"google" | "facebook" | null>(null);
+    useState<"google" | null>(null);
 
   // If already logged in, redirect to nextPath
   useEffect(() => {
@@ -47,7 +47,7 @@ export default function LoginClient({ nextPath }: LoginClientProps) {
     setLoading(false);
   }
 
-  async function signInWithOAuth(provider: "google" | "facebook") {
+  async function signInWithOAuth(provider: "google") {
     try {
       setOauthLoading(provider);
       setError(null);
@@ -116,15 +116,6 @@ export default function LoginClient({ nextPath }: LoginClientProps) {
           {oauthLoading === "google"
             ? "Connecting to Google…"
             : "Continue with Google"}
-        </button>
-        <button
-          onClick={() => signInWithOAuth("facebook")}
-          disabled={oauthLoading === "facebook"}
-          className="w-full border rounded p-2"
-        >
-          {oauthLoading === "facebook"
-            ? "Connecting to Facebook…"
-            : "Continue with Facebook"}
         </button>
       </div>
 
