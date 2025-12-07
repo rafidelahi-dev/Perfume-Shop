@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { createServerSupabase } from "@/lib/supabaseServer";
 
 export async function POST(req: NextRequest) {
   try {
+    const supabase = await createServerSupabase();
 
-    const cookieStore = cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     const { phone } = (await req.json()) as { phone?: string };
 
     if (!phone || typeof phone !== "string") {
@@ -81,7 +79,6 @@ export async function POST(req: NextRequest) {
 
     const smsText = await smsResponse.text();
 
-    // 🔍 TEMP: treat any 2xx as success, we can tighten later.
     if (!smsResponse.ok) {
       console.error("BulkSMSBD error:", smsResponse.status, smsText);
       return NextResponse.json(
@@ -89,9 +86,6 @@ export async function POST(req: NextRequest) {
         { status: 502 }
       );
     }
-
-    // If their docs say it *must* contain "202" you can keep this check:
-    // if (!smsText.includes("202")) { ... }
 
     return NextResponse.json({ ok: true });
   } catch (err) {
