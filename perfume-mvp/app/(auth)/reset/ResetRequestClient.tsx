@@ -16,10 +16,7 @@ export default function ResetRequestClient() {
     setLoading(true);
 
     try {
-      const redirectTo =
-        typeof window !== "undefined"
-          ? `${window.location.origin}/reset/update`
-          : undefined;
+      const redirectTo = "https://www.cloudperfumebd.com/reset/update";
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo,

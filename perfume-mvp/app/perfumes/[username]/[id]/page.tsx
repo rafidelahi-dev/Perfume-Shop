@@ -11,7 +11,7 @@ type Props = { params: { username: string; id: string } };
 
 export default async function ListingDetailPage({ params }: Props) {
   const { username, id } = params;
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   // --- Data Fetching and Authorization ---
 
