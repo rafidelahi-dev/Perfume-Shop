@@ -1,36 +1,41 @@
+// app/api/account/delete/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { createServerSupabase } from "@/lib/supabaseServer";
 
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   try {
-    const accessToken = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (!accessToken) return new NextResponse("Missing token", { status: 401 });
+    // 1) Get the currently logged-in user from Supabase cookies
+    const supabase = await createServerSupabase();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
 
-    // 1) Verify which user is calling, using the access token
-    const anon = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-    const { data: userRes, error: userErr } = await anon.auth.getUser(accessToken);
-    if (userErr || !userRes.user) return new NextResponse("Invalid session", { status: 401 });
+    if (error || !user) {
+      return new NextResponse("Not authenticated", { status: 401 });
+    }
 
-    const userId = userRes.user.id;
-
-    // 2) Use the service role to delete the user
+    // 2) Use the service role to delete that user
     const admin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!, // SECRET on server only
-      { auth: { autoRefreshToken: false, persistSession: false } }
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
     );
 
-    const { error: delErr } = await admin.auth.admin.deleteUser(userId);
-    if (delErr) return new NextResponse(delErr.message, { status: 400 });
+    const { error: delErr } = await admin.auth.admin.deleteUser(user.id);
+    if (delErr) {
+      return new NextResponse(delErr.message, { status: 400 });
+    }
 
     return NextResponse.json({ ok: true });
   } catch (e: unknown) {
-    const msg =
-    e instanceof Error ? e.message : "Server error";
-
+    const msg = e instanceof Error ? e.message : "Server error";
     return new NextResponse(msg, { status: 500 });
   }
 }
