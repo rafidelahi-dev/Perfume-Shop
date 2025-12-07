@@ -1,31 +1,19 @@
-<<<<<<< Updated upstream
 "use client";
-
 import { useQuery } from "@tanstack/react-query";
 import { fetchMyPerfumes } from "@/lib/queries/userPerfumes";
 import { fetchMyListings } from "@/lib/queries/listings";
 import { useRouter } from "next/navigation";
 import { qk } from "@/lib/queries/key";
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+// NOTE: Removed { useEffect, useState } and { supabase } as the user ID is now passed via props.
 
-export default function DashboardOverview() {
-  const [userId, setUserId] = useState<string | null>(null);
-  useEffect(() => {
-      const fetchUser = async () => {
-        const { data } = await supabase.auth.getUser();
-        setUserId(data.user?.id || null);
-      };
-      fetchUser();
+// 1. Accept userId as a required prop from the Server Component wrapper.
+export default function DashboardOverviewClient({ userId }: { userId: string }) {
+  // userId is now immediately available, no need for useState/useEffect auth logic.
   
-      const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-        setUserId(session?.user?.id || null);
-      });
-  
-      return () => listener.subscription.unsubscribe();
-    }, []);
   const router = useRouter();
+
   const perfumesQuery = useQuery({
+    // 2. Use the prop directly. TanStack Query will run immediately.
     queryKey: qk.dashboardPerfumeStats(userId),
     queryFn: fetchMyPerfumes,
   });
@@ -223,31 +211,4 @@ export default function DashboardOverview() {
       </div>
     </div>
   );
-=======
-// app/dashboard/page.tsx
-// This is an async Server Component that runs authentication before rendering the client code.
-
-import { createServerSupabase } from "@/lib/supabaseServer";
-import { redirect } from "next/navigation";
-import DashboardOverviewClient from "./DashbaordOverviewClient"; // <-- **RENAME your old file to this!**
-
-// Ensure this component is async
-export default async function DashboardPage() {
-  // 1. CRITICAL: Use the server client to safely read the session cookies
-  const supabase = await createServerSupabase();
-  const { 
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-
-  // 2. Security Check: If the user is not authenticated, redirect them.
-  // The middleware also does this, but this is a final check before rendering.
-  if (error || !user) {
-    // This stops the redirect loop by cleanly sending unauthenticated users to login.
-    return redirect("/login?next=/dashboard"); 
-  }
-  
-  // 3. Pass the authenticated user's ID as a required prop to the client component.
-  return <DashboardOverviewClient userId={user.id} />;
->>>>>>> Stashed changes
 }

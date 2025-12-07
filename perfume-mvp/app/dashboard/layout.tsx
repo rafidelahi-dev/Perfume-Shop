@@ -6,7 +6,12 @@ import { DashboardSidebar } from "@/components/DashboardSidebar";
 import Header from "@/components/Header";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
+<<<<<<< Updated upstream
   const supabase = createServerSupabase();
+=======
+  // Use the Server Supabase client to safely read the session cookies
+  const supabase = await createServerSupabase();
+>>>>>>> Stashed changes
 
   // ✅ Use getUser so Supabase validates the token instead of trusting cookies directly
   const {
