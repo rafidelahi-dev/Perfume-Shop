@@ -8,8 +8,8 @@ import type { PerfumeListing, SellerProfile } from "@/types/perfume";
 
 
 type PerfumeGridProps = {
-  perfumes: PerfumeListing[];
-  isLoading: boolean;
+ perfumes: PerfumeListing[];
+ isLoading: boolean;
   error: unknown | null;
 };
 
@@ -25,7 +25,7 @@ function effectivePrice(p: PerfumeListing) {
 function typeBadge(p: PerfumeListing) {
   const t = (p.type ?? "").toLowerCase();
   if (t === "decant")
-    return p.decant_ml ? `Decant • ${p.decant_ml} ml` : "Decant";
+    return p.decant_options ? `Decant • Various Sizes` : "Decant"; // Changed badge text to reflect DecantOptions usage
   if (t === "partial")
     return p.partial_left_ml
       ? `Partial • ${p.partial_left_ml} ml left`
@@ -61,8 +61,15 @@ export default function PerfumeGrid({
   error,
 }: PerfumeGridProps) {
   if (error)
-  { const message = error instanceof Error ? error.message : "Failed to load perfumes";
-    }
+  { 
+    const message = error instanceof Error ? error.message : "Failed to load perfumes";
+    return (
+        <div className="text-center mt-12 p-6 bg-red-50 border border-red-200 rounded-xl">
+            <p className="text-red-700 font-medium">Error loading listings:</p>
+            <p className="text-sm text-red-600 italic">{message}</p>
+        </div>
+    );
+  }
 
   if (isLoading)
     return (
@@ -70,7 +77,7 @@ export default function PerfumeGrid({
         {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}
-            className="aspect-[3/4] animate-pulse rounded-2xl bg-gray-100"
+            className="aspect-[3/4] animate-pulse rounded-2xl bg-[#f5f1e8]"
           ></div>
         ))}
       </div>
@@ -78,7 +85,7 @@ export default function PerfumeGrid({
 
   if (!perfumes.length)
     return (
-      <p className="text-center text-gray-600 mt-12">
+      <p className="text-center text-gray-500 mt-12 italic font-light">
         No perfumes found matching your filters.
       </p>
     );
@@ -99,19 +106,21 @@ export default function PerfumeGrid({
               href={`/perfumes/${p?.profiles?.username}/${p.id}`}
               prefetch={false}
               onClick={() => registerPerfumeClick(p.perfume_id)}
-              className="block group rounded-2xl border border-black/5 bg-white/80 backdrop-blur-sm overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
+              // Card Styling
+              className="block group rounded-2xl border border-black/5 bg-white shadow-sm overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-[#d4af37]/30"
             >
               {/* ---------------- Image ---------------- */}
-              <div className="aspect-[3/4] relative">
+              <div className="aspect-[3/4] relative bg-[#f9f6ef] overflow-hidden">
                 {thumb ? (
                   <Image
                     src={thumb}
                     alt={p.perfume_name || "Perfume"}
                     fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-[#f9f6ef] text-[#aaa] text-sm">
+                  <div className="w-full h-full flex items-center justify-center bg-[#f2eee4] text-[#aaa] text-sm">
                     No Image
                   </div>
                 )}
@@ -119,26 +128,33 @@ export default function PerfumeGrid({
 
               {/* ---------------- Content ---------------- */}
               <div className="p-4">
-                <p className="font-small text-[#666] truncate">
-                  {p.brand} {p.sub_brand && `– ${p.sub_brand}`}
+                {/* Brand */}
+                <p className="text-xs uppercase tracking-wider font-medium text-gray-500 truncate mb-1">
+                  {p.brand} {p.sub_brand && <span className="text-[#d4af37]"> • </span>} {p.sub_brand}
                 </p>
 
-                <b className="text-md text-[#1a1a1a] truncate">
+                {/* Perfume Name - Serif Font */}
+                <h3 className="text-lg font-serif font-semibold text-[#1a1a1a] truncate group-hover:text-[#d4af37] transition">
                   {p.perfume_name}
-                </b>
+                </h3>
 
                 {/* Price & Type */}
                 <div className="mt-2">
-                  <p className="text-[#d4af37] font-semibold">
+                  <p className="text-[#1a1a1a] font-bold text-lg">
                     {Number.isFinite(priceToShow)
                       ? `$${priceToShow.toFixed(2)}`
                       : "—"}
+                    <span className="text-xs font-light text-gray-500 ml-1">USD</span>
                   </p>
-                  {badge && (
-                    <span className="mt-1 inline-block text-[11px] rounded-full bg-[#fff6dc] border border-[#d4af37]/40 px-2 py-0.5 text-[#6b5600]">
+                  
+                  {/* The badge for Intact/Partial */}
+                  {badge && (p.type ?? "").toLowerCase() !== "decant" && (
+                    <span className="mt-1 inline-block text-[11px] rounded-full bg-[#f9f6ef] border border-gray-100 px-2.5 py-0.5 text-[#555] font-medium">
                       {badge}
                     </span>
                   )}
+                  
+                  {/* Decant Options component */}
                   {(p.type ?? "").toLowerCase() === "decant" &&
                     Array.isArray(p.decant_options) &&
                     p.decant_options.length > 0 && (
@@ -151,9 +167,9 @@ export default function PerfumeGrid({
 
                 {/* Seller Info */}
                 {p.profiles && (
-                  <p className="text-xs text-[#555] mt-1">
-                    Sold by{" "}
-                    <span className="font-medium">
+                  <p className="text-xs text-gray-500 mt-3 border-t border-gray-50/50 pt-3">
+                    Listed by{" "}
+                    <span className="font-semibold text-[#1a1a1a]">
                       {p.profiles.display_name ?? p.profiles.username}
                     </span>
                   </p>
