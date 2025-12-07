@@ -9,7 +9,12 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   const supabase = createServerSupabase();
+=======
+  // Use the Server Supabase client to safely read the session cookies
+  const supabase = await createServerSupabase();
+>>>>>>> Stashed changes
 =======
   // Use the Server Supabase client to safely read the session cookies
   const supabase = await createServerSupabase();

@@ -1,6 +1,7 @@
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
@@ -225,6 +226,33 @@ export default function DashboardOverview() {
       </div>
     </div>
   );
+=======
+// app/dashboard/page.tsx
+// This is an async Server Component that runs authentication before rendering the client code.
+
+import { createServerSupabase } from "@/lib/supabaseServer";
+import { redirect } from "next/navigation";
+import DashboardOverviewClient from "./DashbaordOverviewClient"; // <-- **RENAME your old file to this!**
+
+// Ensure this component is async
+export default async function DashboardPage() {
+  // 1. CRITICAL: Use the server client to safely read the session cookies
+  const supabase = await createServerSupabase();
+  const { 
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  // 2. Security Check: If the user is not authenticated, redirect them.
+  // The middleware also does this, but this is a final check before rendering.
+  if (error || !user) {
+    // This stops the redirect loop by cleanly sending unauthenticated users to login.
+    return redirect("/login?next=/dashboard"); 
+  }
+  
+  // 3. Pass the authenticated user's ID as a required prop to the client component.
+  return <DashboardOverviewClient userId={user.id} />;
+>>>>>>> Stashed changes
 =======
 // app/dashboard/page.tsx
 // This is an async Server Component that runs authentication before rendering the client code.
