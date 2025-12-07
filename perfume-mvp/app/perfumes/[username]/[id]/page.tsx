@@ -13,14 +13,6 @@ export default async function ListingDetailPage({ params }: Props) {
   const { username, id } = params;
   const supabase = await createServerSupabase();
 
-  // --- Data Fetching and Authorization ---
-
-  // 1. Ensure auth (if not using middleware)
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-  if (userError || !userData.user) {
-    redirect(`/login?next=/perfumes/${username}/${id}`);
-  }
-
   // 2. Find seller by username
   const { data: profile, error: pErr } = await supabase
     .from("profiles")
