@@ -8,7 +8,7 @@ type Props = { params: { username: string; id: string } };
 
 export default async function ListingDetailPage({ params }: Props) {
   const { username, id } = params;
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   // Ensure auth (if not using middleware)
   const { data, error } = await supabase.auth.getUser();
