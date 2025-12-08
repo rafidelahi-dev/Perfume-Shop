@@ -76,7 +76,7 @@ export default function TrendingGrid({ perfumes }: { perfumes: PerfumeScoreRow[]
                  </p>
                  {displayPrice && (
                    <span className="font-medium text-[#1a1a1a]">
-                     ${displayPrice}<span className="text-xs text-gray-400 font-normal">+</span>
+                     TK{displayPrice}<span className="text-xs text-gray-400 font-normal">+</span>
                    </span>
                  )}
               </div>

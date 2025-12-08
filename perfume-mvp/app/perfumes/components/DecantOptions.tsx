@@ -37,7 +37,7 @@ export default function DecantOptions({
     <div className="mt-2 flex flex-wrap gap-1.5 relative" ref={popRef}>
       {inline.map((o, i) => (
         <Chip key={i}>
-          {o.ml} ml • ${o.price}
+          {o.ml} ml • TK{o.price}
         </Chip>
       ))}
 
@@ -75,10 +75,10 @@ export default function DecantOptions({
                     >
                     <span>
                         <b className="font-semibold">{o.ml} ml</b>
-                        <span className="text-xs text-gray-500 ml-2">(${ppm.toFixed(2)}/ml)</span>
+                        <span className="text-xs text-gray-500 ml-2">(TK{ppm.toFixed(2)}/ml)</span>
                     </span>
                     <span className="font-bold text-[#d4af37]">
-                        ${o.price.toFixed(2)}
+                        TK{o.price.toFixed(2)}
                     </span>
                     </div>
                 );

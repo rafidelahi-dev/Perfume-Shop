@@ -12,16 +12,8 @@ export default async function SellerListingsPage({
 }: {
   params: Params;
 }) {
-  const { username } = params;
+  const { username } = await params;
   const supabase = await createServerSupabase();
-
-  // Auth gate (if you want this page to require login)
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session) {
-    redirect(`/login?next=/perfumes/${username}`);
-  }
 
   // Get profile by username (now with contact fields)
   const { data: profile, error: pErr } = await supabase
