@@ -142,7 +142,7 @@ export default function PerfumeGrid({
                 <div className="mt-2">
                   <p className="text-[#1a1a1a] font-bold text-lg">
                     {Number.isFinite(priceToShow)
-                      ? `$${priceToShow.toFixed(2)}`
+                      ? `TK${priceToShow.toFixed(2)}`
                       : "—"}
                     <span className="text-xs font-light text-gray-500 ml-1">USD</span>
                   </p>

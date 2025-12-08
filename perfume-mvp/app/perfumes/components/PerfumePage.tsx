@@ -243,10 +243,10 @@ export default function PerfumesPage() {
                 {/* Quick presets */}
                 <div className="mt-2 flex flex-wrap gap-2">
                   {[
-                    { label: "Under $50", min: null, max: 50 },
-                    { label: "$50–$100", min: 50, max: 100 },
-                    { label: "$100–$200", min: 100, max: 200 },
-                    { label: "Over $200", min: 200, max: null },
+                    { label: "Under TK50", min: null, max: 50 },
+                    { label: "TK50–$100", min: 50, max: 100 },
+                    { label: "TK100–$200", min: 100, max: 200 },
+                    { label: "Over TK200", min: 200, max: null },
                   ].map((p) => (
                     <button
                       key={p.label}

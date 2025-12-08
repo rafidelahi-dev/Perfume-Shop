@@ -10,7 +10,7 @@ import { Phone, MessageCircle, Facebook, Zap } from 'lucide-react'; // Using luc
 type Props = { params: { username: string; id: string } };
 
 export default async function ListingDetailPage({ params }: Props) {
-  const { username, id } = params;
+  const { username, id } = await params;
   const supabase = await createServerSupabase();
 
   // 2. Find seller by username
@@ -112,7 +112,7 @@ export default async function ListingDetailPage({ params }: Props) {
 
               <div className="pt-2">
                 <span className="text-4xl font-black text-[#d4af37]">
-                  {Number.isFinite(priceToShow) ? `$${priceToShow.toFixed(2)}` : "Price on Contact"}
+                  {Number.isFinite(priceToShow) ? `TK${priceToShow.toFixed(2)}` : "Price on Contact"}
                 </span>
                 {isDecant && listing.min_price != null && (
                   <span className="ml-3 text-sm text-gray-500">
