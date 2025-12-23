@@ -8,12 +8,21 @@ import Link from "next/link";
 import TrendingSection from "@/components/TrendingSection";
 
 const backgroundImages = [
-  "/Background/1.png",
-  "/Background/2.png",
-  "/Background/6.png",
-  "/Background/3.png",
-  "/Background/4.png",
-  "/Background/5.png",
+  "/Background/8.png",
+  "/Background/9.png",
+  "/Background/10.png",
+  "/Background/11.png",
+  "/Background/12.png",
+  "/Background/13.png",
+  "/Background/14.png",
+  "/Background/15.png",
+  "/Background/16.png",
+  "/Background/17.png",
+  "/Background/18.png",
+  "/Background/19.png",
+  "/Background/20.png",
+  "/Background/21.png",
+  "/Background/22.png",
 ];
 
 export default function Home() {
@@ -33,7 +42,6 @@ export default function Home() {
       
       {/* Enhanced Hero Section */}
       <section className="relative w-full overflow-hidden min-h-[90vh] flex items-center justify-center pb-10 pt-20">
-        
         {/* Background Image Carousel */}
         <div className="absolute inset-0 z-0">
           {backgroundImages.map((bg, index) => (
@@ -48,7 +56,7 @@ export default function Home() {
             />
           ))}
           {/* Enhanced Gradient Overlay for Readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#f8f7f3]/80 via-[#f8f7f3]/60 to-[#f8f7f3]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#f8f7f3]/60 via-[#f8f7f3]/40 to-[#f8f7f3]" />
           <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px]" />
         </div>
 
@@ -63,8 +71,8 @@ export default function Home() {
             <span className="block mt-2 font-serif italic text-[#d4af37] drop-shadow-sm">Signature Scent</span>
           </h1>
           
-          <p className="mt-2 text-lg sm:text-xl text-[#555] max-w-2xl mx-auto leading-relaxed font-light">
-            {"Curate, decant, and share exceptional fragrances from the world's most discerning perfume collectors."}
+          <p className="mt-2 text-lg sm:text-xl text-[#111] max-w-2xl mx-auto leading-relaxed font-light">
+            {"A community-powered marketplace for genuine perfumes and decants. Explore rare finds, connect with sellers, and indulge your passion for fragrance."}
           </p>
           
           <div className="mt-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -75,7 +83,7 @@ export default function Home() {
               Explore Collection
             </Link>
             <Link 
-              href="/dashboard/listings" 
+              href="/signup" 
               className="btn bg-white/50 backdrop-blur-md border border-[#1a1a1a]/10 text-[#1a1a1a] hover:bg-white text-base px-10 py-4 rounded-full shadow-sm hover:shadow-md transition-all duration-300"
             >
               Become a Seller
@@ -86,15 +94,15 @@ export default function Home() {
           <div className="mt-20 pt-8 border-t border-black/5 grid grid-cols-3 gap-8 sm:gap-16 text-xs sm:text-sm font-medium tracking-wide text-[#666] uppercase">
             <div className="flex flex-col items-center gap-2">
                <span className="text-[#d4af37] text-lg">✦</span>
-               <span>100% Authentic</span>
+               <span className="font-bold">Community Driven</span>
             </div>
             <div className="flex flex-col items-center gap-2">
                <span className="text-[#d4af37] text-lg">✦</span>
-               <span>Global Community</span>
+               <span className="font-bold">Nation wide</span>
             </div>
             <div className="flex flex-col items-center gap-2">
                <span className="text-[#d4af37] text-lg">✦</span>
-               <span>Secure Deals</span>
+               <span className="font-bold">Transparency</span>
             </div>
           </div>
         </div>
