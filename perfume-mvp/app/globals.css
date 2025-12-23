@@ -25,7 +25,9 @@ html, body {
 
 
 /* smoother UI */
-header, nav, button, a { transition: all .2s ease; }
+header, nav, button, a { 
+  transition: all .2s ease; 
+}
 
 
 /* ---------- Component layer: reusable styles ---------- */
@@ -104,10 +106,6 @@ html {
   }
 }
 
-
-
-
-
 /* Enhanced focus states */
 button:focus-visible,
 a:focus-visible {
@@ -137,7 +135,6 @@ a:focus-visible {
 @keyframes shimmer {
   100% { transform: translateX(100%); }
 }
-
 
 /* Loading animation */
 @keyframes fadeInUp {

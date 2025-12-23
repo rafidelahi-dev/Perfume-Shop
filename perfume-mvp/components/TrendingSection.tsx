@@ -3,6 +3,7 @@
 // components/TrendingSection.tsx
 import { useState } from "react";
 import Link from "next/link";
+import "../app/globals.css";
 import { supabase } from "@/lib/supabaseClient";
 import { useQuery } from "@tanstack/react-query";
 import TrendingGrid from "./TrendingGrid";
@@ -109,7 +110,7 @@ export default function TrendingSection() {
                     </div>
 
                     {/* Modern Pill Tabs */}
-                    <div className="flex bg-gray-100/80 p-1.5 rounded-full overflow-x-auto max-w-full">
+                    <div className="flex bg-gray-100/80 p-1.5 rounded-full overflow-x-auto tab-scroll max-w-full">
                         {[
                             { key: "now", label: "Today" },
                             { key: "week", label: "This Week" },

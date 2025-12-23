@@ -42,7 +42,6 @@ export default function Home() {
       
       {/* Enhanced Hero Section */}
       <section className="relative w-full overflow-hidden min-h-[90vh] flex items-center justify-center pb-10 pt-20">
-        
         {/* Background Image Carousel */}
         <div className="absolute inset-0 z-0">
           {backgroundImages.map((bg, index) => (
