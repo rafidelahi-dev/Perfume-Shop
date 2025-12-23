@@ -98,9 +98,10 @@ html {
 /* Mobile view trending scrool bar. Thin scrollbar ONLY for tabs */
 .tab-scroll::-webkit-scrollbar {
   height: 2px;
+  background: transparent;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 374px) {
   .tab-scroll::-webkit-scrollbar {
     display: none;
   }
