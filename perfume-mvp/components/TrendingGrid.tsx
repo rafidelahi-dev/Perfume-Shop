@@ -81,14 +81,6 @@ export default function TrendingGrid({ perfumes }: { perfumes: PerfumeScoreRow[]
                  )}
               </div>
               
-              {p.click_score !== null && (
-                 <div className="flex items-center gap-1 pt-2">
-                    <div className="h-1 flex-1 rounded-full bg-gray-100 overflow-hidden">
-                        <div className="h-full bg-[#d4af37]/50" style={{ width: `${Math.min(p.click_score, 100)}%` }}></div>
-                    </div>
-                    <span className="text-[10px] text-gray-400">{p.click_score} views</span>
-                 </div>
-              )}
             </div>
           </Link>
         );
