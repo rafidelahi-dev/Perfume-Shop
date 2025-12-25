@@ -144,7 +144,7 @@ export default function PerfumeGrid({
                     {Number.isFinite(priceToShow)
                       ? `TK${priceToShow.toFixed(2)}`
                       : "—"}
-                    <span className="text-xs font-light text-gray-500 ml-1">USD</span>
+                    <span className="text-xs font-light text-gray-500 ml-1">TK</span>
                   </p>
                   
                   {/* The badge for Intact/Partial */}

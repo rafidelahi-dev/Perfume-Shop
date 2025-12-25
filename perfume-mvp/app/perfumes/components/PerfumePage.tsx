@@ -212,7 +212,7 @@ export default function PerfumesPage() {
               {/* Price Range */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-[#1a1a1a]">
-                  Price Range (USD)
+                  Price Range (TK)
                 </label>
                 <div className="flex items-center gap-3">
                   <input
@@ -244,8 +244,8 @@ export default function PerfumesPage() {
                 <div className="mt-2 flex flex-wrap gap-2">
                   {[
                     { label: "Under TK50", min: null, max: 50 },
-                    { label: "TK50–$100", min: 50, max: 100 },
-                    { label: "TK100–$200", min: 100, max: 200 },
+                    { label: "TK50–TK100", min: 50, max: 100 },
+                    { label: "TK100–TK200", min: 100, max: 200 },
                     { label: "Over TK200", min: 200, max: null },
                   ].map((p) => (
                     <button
@@ -305,7 +305,7 @@ export default function PerfumesPage() {
 
                   {(filters.priceMin !== null || filters.priceMax !== null) && (
                     <span className="inline-flex items-center gap-2 rounded-full border border-[#d4af37]/30 bg-[#d4af37]/10 px-4 py-2 text-sm">
-                      Price: {filters.priceMin ?? 0} – {filters.priceMax ?? "∞"}
+                      Price: TK{filters.priceMin ?? 0} – TK{filters.priceMax ?? "∞"}
                       <button
                         onClick={() =>
                           setFilters({ priceMin: null, priceMax: null })

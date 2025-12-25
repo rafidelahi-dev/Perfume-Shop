@@ -64,7 +64,8 @@ async function fetchTrendingMonth() {
 
 async function fetchTrendingBrands() {
   const { data, error } = await supabase
-    .rpc("get_trending_brands");
+    .rpc("get_trending_brands")
+    .limit(9);
 
   if (error) throw error;
   return data;

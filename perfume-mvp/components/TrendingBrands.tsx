@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 type BrandRow = {
   brand: string;
   total: number;
@@ -26,6 +28,7 @@ export default function TrendingBrands({ brands }: { brands: BrandRow[] }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {brands.map((b, i) => (
+          <Link href={`/perfumes?brand=${encodeURIComponent(b.brand)}`} key={b.brand}>
           <div
             key={b.brand}
             // Card Container
@@ -48,18 +51,9 @@ export default function TrendingBrands({ brands }: { brands: BrandRow[] }) {
                 </span>
               </div>
 
-              {/* View Count Badge */}
-              <div className="flex flex-col items-end">
-                <span className="text-sm font-bold text-[#1a1a1a]">
-                    {b.total}
-                </span>
-                <span className="text-[10px] uppercase tracking-wider text-gray-400 font-medium">
-                    Views
-                </span>
-              </div>
-
             </div>
           </div>
+          </Link>
         ))}
       </div>
     </div>
