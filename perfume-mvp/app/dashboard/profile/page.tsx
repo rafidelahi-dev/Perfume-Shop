@@ -515,8 +515,8 @@ export default function ProfilePage() {
                     type="button"
                     onClick={handleVerifyContactNumber}
                     disabled={!contactOk}
-                    className="px-4 py-2 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 
-                              text-sm shadow-sm whitespace-nowrap"
+                    className={`px-4 py-2 rounded-lg text-white ${contactOk ? "bg-indigo-600 hover:bg-indigo-700" : "bg-gray-400 cursor-not-allowed"} 
+                              text-sm shadow-sm whitespace-nowrap`}
                   >
                     Verify
                   </button>
