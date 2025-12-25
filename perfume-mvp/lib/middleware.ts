@@ -55,7 +55,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/reset/:path*",        // <-- IMPORTANT: add this!
+    "/reset/:path*",
     "/dashboard/:path*",
     "/perfumes/:username/:id*",
     "/perfumes/:username",

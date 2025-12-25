@@ -216,6 +216,26 @@ export default function ProfilePage() {
 
   if (!profile) return null;
 
+  function normalizeBDPhone(input: string){
+    const raw = input.trim().replace(/\s+/g, "");
+
+    if(raw.startsWith("+")) return raw;
+
+    if(/^01\d{9}$/.test(raw)) return `+88${raw}`;
+    
+    if(/^8801\d{9}$/.test(raw)) return `+${raw}`
+
+    return raw;
+  }
+
+  function isValidBDPhone(phone: string){
+    return /^\+8801\d{9}$/.test(phone.trim());
+  }
+
+  const contactNumberRaw = form.contact_number ?? "";
+  const contactNumber = normalizeBDPhone(contactNumberRaw);
+  const contactOk = isValidBDPhone(contactNumber);
+
   async function handleVerifyContactNumber() {
     try {
       if (!form.contact_number) {
@@ -223,10 +243,17 @@ export default function ProfilePage() {
         return;
       }
 
+      const phone = normalizeBDPhone(form.contact_number);
+      
+      if(!isValidBDPhone(phone)){
+        toast.error("Please enter a valid Bangladeshi Contact Number.")
+        return;
+      }
+
       const res = await fetch("/api/send-contact-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: form.contact_number }),
+        body: JSON.stringify({ phone }),
       });
 
       const body = await res.json();
@@ -284,7 +311,7 @@ export default function ProfilePage() {
     }
   }
 
-
+  
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-16 px-4 lg:px-0">
@@ -472,17 +499,24 @@ export default function ProfilePage() {
                             focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   value={form.contact_number ?? ""}
                   onChange={(e) =>
-                    setForm({ ...form, contact_number: e.target.value })
+                    setForm((f) => ({ ...form, contact_number: e.target.value }))
                   }
                   placeholder="+8801XXXXXXXXX"
+                  onBlur={() => {
+                    const normalized = normalizeBDPhone(form.contact_number ?? "")
+                    if(normalized !== (form.contact_number ?? "")) {
+                      setForm((f) => ({...f, contact_number: normalized}))
+                    }
+                  }}
                 />
 
                 {!profile.phone_verified ? (
                   <button
                     type="button"
                     onClick={handleVerifyContactNumber}
-                    className="px-4 py-2 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 
-                              text-sm shadow-sm whitespace-nowrap"
+                    disabled={!contactOk}
+                    className={`px-4 py-2 rounded-lg text-white ${contactOk ? "bg-indigo-600 hover:bg-indigo-700" : "bg-gray-400 cursor-not-allowed"} 
+                              text-sm shadow-sm whitespace-nowrap`}
                   >
                     Verify
                   </button>
@@ -492,6 +526,11 @@ export default function ProfilePage() {
                   </span>
                 )}
               </div>
+              {contactNumber && !contactOk && !profile.phone_verified && (
+                <p className="text-xs text-red-600 mt-2">
+                  Please use a proper Bangladeshi format: <b>+8801*********</b>
+                </p>
+              )}
 
               {showContactOtp && !profile.phone_verified && (
                 <div className="mt-2 flex flex-col sm:flex-row gap-3">
