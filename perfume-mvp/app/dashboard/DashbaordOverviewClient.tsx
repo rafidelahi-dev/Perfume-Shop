@@ -67,7 +67,7 @@ export default function DashboardOverviewClient({ userId }: { userId: string }) 
       textColor: "text-green-700",
       iconBg: "bg-green-500"
     },
-    {
+    {/*{
       title: "Collection Value",
       value: "–",
       icon: (
@@ -80,7 +80,7 @@ export default function DashboardOverviewClient({ userId }: { userId: string }) 
       borderColor: "border-purple-200",
       textColor: "text-purple-700",
       iconBg: "bg-purple-500"
-    }
+    } */}
   ];
 
   if (hasError) {
@@ -190,7 +190,7 @@ export default function DashboardOverviewClient({ userId }: { userId: string }) 
             <span className="font-medium text-gray-700 group-hover:text-green-600 transition-colors duration-300">New Listing</span>
           </button>
 
-          <button className="flex items-center gap-3 p-4 bg-white border border-gray-300 rounded-lg hover:border-blue-500 hover:shadow-md transition-all duration-300 group">
+          {/*<button className="flex items-center gap-3 p-4 bg-white border border-gray-300 rounded-lg hover:border-blue-500 hover:shadow-md transition-all duration-300 group">
             <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-500 transition-colors duration-300">
               <svg className="w-5 h-5 text-blue-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -206,7 +206,7 @@ export default function DashboardOverviewClient({ userId }: { userId: string }) 
               </svg>
             </div>
             <span className="font-medium text-gray-700 group-hover:text-purple-600 transition-colors duration-300">Analytics</span>
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
