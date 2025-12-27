@@ -145,9 +145,9 @@ export default function DashboardOverview() {
 
       iconBg: "bg-green-500"
 
-    },
+    }
 
-    {
+    /*{
 
       title: "Collection Value",
 
@@ -173,7 +173,7 @@ export default function DashboardOverview() {
 
       iconBg: "bg-purple-500"
 
-    }
+    }*/
 
   ];
 
@@ -243,7 +243,7 @@ export default function DashboardOverview() {
 
       {/* Stats Grid */}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
 
         {stats.map((stat, index) => (
 
@@ -353,7 +353,7 @@ export default function DashboardOverview() {
 
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2">
 
           <button onClick={handleAddPerfume}
 
@@ -393,7 +393,7 @@ export default function DashboardOverview() {
 
 
 
-          <button className="flex items-center gap-3 p-4 bg-white border border-gray-300 rounded-lg hover:border-blue-500 hover:shadow-md transition-all duration-300 group">
+          {/* <button className="flex items-center gap-3 p-4 bg-white border border-gray-300 rounded-lg hover:border-blue-500 hover:shadow-md transition-all duration-300 group">
 
             <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-500 transition-colors duration-300">
 
@@ -425,7 +425,7 @@ export default function DashboardOverview() {
 
             <span className="font-medium text-gray-700 group-hover:text-purple-600 transition-colors duration-300">Analytics</span>
 
-          </button>
+          </button> */}
 
         </div>
 
