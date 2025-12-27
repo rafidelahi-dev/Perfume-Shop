@@ -89,9 +89,9 @@ export default function Header() {
             : "h-20 bg-transparent border-transparent"
         }`}
       >
-        <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-full w-full items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link href="/" className="flex items-center gap-1 sm:gap-2 group">
             <div className="relative transition-transform duration-300 group-hover:scale-105">
               <Image
                 src="/logo.png"
