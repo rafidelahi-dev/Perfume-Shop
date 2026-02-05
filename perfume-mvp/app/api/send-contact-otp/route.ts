@@ -39,6 +39,34 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const normalized = phone.trim();
+    if (!/^\+8801\d{9}$/.test(normalized)) {
+      return NextResponse.json({ error: "Invalid phone format. Use +8801*********" }, { status: 400 });
+    }
+
+    const { data: existing, error: existingError} = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("contact_number", normalized)
+      .eq("phone_verified", true)
+      .limit(1)
+      .maybeSingle();
+
+      if(existingError){
+        console.error("Phone lookup error:", existingError);
+        return NextResponse.json(
+          { error: "Unable to verify phone number right now"},
+          { status: 500},
+        )
+      }
+
+      if(existing && existing.id !== session.user.id){
+        return NextResponse.json(
+          { error: "The phone number is already verfied by another account"},
+          { status: 409},
+        )
+      }
+
     // 1) Ask Supabase to create + store an OTP (does NOT send SMS)
     const { data: otp, error } = await supabase.rpc("send_contact_otp", {
       p_phone: phone,
@@ -69,7 +97,7 @@ export async function POST(req: NextRequest) {
       message: smsBody,
     });
 
-    const smsResponse = await fetch("http://bulksmsbd.net/api/smsapi", {
+    const smsResponse = await fetch("https://bulksmsbd.net/api/smsapi", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",

@@ -286,7 +286,7 @@ export default function ProfilePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          phone: form.contact_number,
+          phone: normalizeBDPhone(form.contact_number),
           otp: contactOtp,
         }),
       });
@@ -499,7 +499,7 @@ export default function ProfilePage() {
                             focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   value={form.contact_number ?? ""}
                   onChange={(e) =>
-                    setForm((f) => ({ ...form, contact_number: e.target.value }))
+                    setForm((f) => ({ ...f, contact_number: e.target.value }))
                   }
                   placeholder="+8801XXXXXXXXX"
                   onBlur={() => {
