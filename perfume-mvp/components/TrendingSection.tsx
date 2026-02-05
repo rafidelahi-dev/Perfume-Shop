@@ -97,7 +97,7 @@ export default function TrendingSection() {
 
     return (
         <section className="py-20 px-6 sm:px-12 bg-[#fcfbf9]">
-            <div className="mx-auto max-w-7xl">
+            <div className="mx-auto">
                 
                 {/* Header & Tabs Container */}
                 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-12">
