@@ -15,11 +15,24 @@ export async function ensureProfile() {
   // try to fetch profile
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, username, display_name, full_name, avatar_url")
+    .select("id, username, display_name, full_name, avatar_url, email")
     .eq("id", user.id)
     .single();
 
-  if (profile) return profile;
+  if(profile){
+    if(!profile.email && user.email){
+      // This should be rare, but if we have a user without a profile, we can try to create one
+      await supabase
+      .from("profiles")
+      .update({email: user.email})
+      .eq("id", user.id);
+      profile.email = user.email;
+
+    }
+    return profile;
+  }
+
+
 
   // Insert a minimal profile if missing (should be rare thanks to trigger)
   const username = (user.user_metadata?.user_name ||
@@ -38,6 +51,7 @@ export async function ensureProfile() {
     .insert({
       id: user.id,
       username,
+      email: user.email,
       display_name: displayName,
       full_name: user.user_metadata?.name || null,
       avatar_url: avatar,
