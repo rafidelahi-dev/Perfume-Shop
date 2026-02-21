@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/reac
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Toaster } from "sonner";
+import { ensureProfile } from "@/lib/ensureProfile";
 
 // ------------------------------
 // 🔁 AuthWatcher component
@@ -15,10 +16,13 @@ function AuthWatcher() {
     // Subscribe to Supabase auth state changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!session) {
         queryClient.clear(); // Clears all cached queries + mutations
       } else {
+        if( _event === "SIGNED_IN" || _event === "INITIAL_SESSION"){
+          await ensureProfile();
+        }
         queryClient.invalidateQueries();
       }
     });

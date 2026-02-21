@@ -136,7 +136,7 @@ export default function TrendingSection() {
                 {/* Content Area */}
                 <div className="min-h-[400px]">
                     {isLoading && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8">
                             {Array.from({ length: 4 }).map((_, i) => (
                                 <div key={i} className="h-96 rounded-2xl bg-gray-100 animate-pulse" />
                             ))}
