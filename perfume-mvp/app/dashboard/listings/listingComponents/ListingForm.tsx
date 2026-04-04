@@ -68,7 +68,7 @@ const ListingForm: React.FC = () => {
 
   // form state
   const [brand, setBrand] = useState("");
-  const [userId, setUserId] = useState<string | null>(null);
+
   const [perfumeName, setPerfumeName] = useState("");
   const [type, setType] = useState<ListingType>("intact");
 
