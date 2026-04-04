@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { uploadToBucket } from "@/lib/queries/storage";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { insertListing } from "@/lib/queries/listings";
 import { toast } from "sonner";
 import { qk } from "@/lib/queries/key";
 import Image from "next/image";
-import { supabase } from "@/lib/supabaseClient";
+import { useSessionUserId } from "@/lib/hooks/useSessionUserId";
 
 /** ───────────────── Types ───────────────── **/
 
@@ -81,24 +81,7 @@ const ListingForm: React.FC = () => {
   ]);
   const [images, setImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUserId(data.user?.id ?? null);
-    };
-    void fetchUser();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUserId(session?.user?.id ?? null);
-      }
-    );
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
+  const userId = useSessionUserId();
 
   function addDecantRow() {
     setDecants((rows) => [...rows, { size_ml: "", price: "" }]);

@@ -1,7 +1,7 @@
 // components/Footer.tsx
 import React from 'react'
 import Link from 'next/link'
-import { Facebook, Twitter, Instagram, Mail } from 'lucide-react'
+import { Facebook, Instagram, Mail } from 'lucide-react'
 
 const Footer = () => {
   const currentYear = new Date().getFullYear()
@@ -23,7 +23,7 @@ const Footer = () => {
   const socialLinks = [
     { icon: Facebook, href: 'https://facebook.com', label: 'Facebook' },
     { icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
-    { icon: Mail, href: '', label: 'Email' }
+    { icon: Mail, href: 'mailto:support@cloudperfumebd.com', label: 'Email' }
   ]
 
   return (

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import DecantOptions from "./DecantOptions";
 import { supabase } from "@/lib/supabaseClient";
-import type { PerfumeListing, SellerProfile } from "@/types/perfume";
+import type { PerfumeListing } from "@/types/perfume";
 
 
 type PerfumeGridProps = {
@@ -42,9 +42,12 @@ async function registerPerfumeClick(perfumeId?: string | null) {
   }
 
   try {
-    const { data, error } = await supabase.rpc("increment_perfume_click", {
+    const { error } = await supabase.rpc("increment_perfume_click", {
       p_perfume_id: perfumeId,
     });
+    if (error) {
+      console.warn("increment_perfume_click failed:", error.message);
+    }
 
   } catch (err) {
     console.error("🔥 Unexpected error (network or client):", err);
@@ -144,7 +147,6 @@ export default function PerfumeGrid({
                     {Number.isFinite(priceToShow)
                       ? `TK${priceToShow.toFixed(2)}`
                       : "—"}
-                    <span className="text-xs font-light text-gray-500 ml-1">TK</span>
                   </p>
                   
                   {/* The badge for Intact/Partial */}

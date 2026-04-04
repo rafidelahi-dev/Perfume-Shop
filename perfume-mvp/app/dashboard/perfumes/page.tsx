@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { qk } from "@/lib/queries/key";
 import {
@@ -16,7 +16,7 @@ import PerfumeList, {
 } from "./perfumeComponents/PerfumeList";
 import EditPerfume from "./perfumeComponents/EditPerfume";
 import { toast } from "sonner";
-import { supabase } from "@/lib/supabaseClient";
+import { useSessionUserId } from "@/lib/hooks/useSessionUserId";
 
 type FormState = {
   brand: string;
@@ -49,23 +49,7 @@ export default function MyPerfumesPage() {
     null
   );
   const [showForm, setShowForm] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUserId(data.user?.id || null);
-    };
-    fetchUser();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUserId(session?.user?.id || null);
-      }
-    );
-
-    return () => listener.subscription.unsubscribe();
-  }, []);
+  const userId = useSessionUserId();
 
   // ---------- React Query ----------
   const {
@@ -75,6 +59,7 @@ export default function MyPerfumesPage() {
   } = useQuery<UserPerfume[], Error>({
     queryKey: qk.userPerfumes(userId),
     queryFn: fetchMyPerfumes,
+    enabled: !!userId,
   });
 
   // (Currently not used in UI, but typed properly now)

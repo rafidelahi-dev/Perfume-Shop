@@ -239,6 +239,12 @@ export default function SignupClient() {
                   </p>
                   <input
                     className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                    placeholder="Full name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                  />
+                  <input
+                    className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
                     placeholder="Whatsapp Number"
                     value={whatsappNumber}
                     onChange={(e) => setWhatsappNumber(e.target.value)}

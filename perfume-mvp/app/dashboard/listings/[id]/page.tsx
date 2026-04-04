@@ -8,6 +8,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
+import { useSessionUserId } from "@/lib/hooks/useSessionUserId";
 import { Trash2, Plus, Upload, ArrowLeft, Save } from "lucide-react";
 import { qk } from "@/lib/queries/key";
 import { toast } from "sonner";
@@ -113,7 +114,7 @@ export default function EditListingPage() {
   const [bottleSize, setBottleSize] = useState<string | "">("");
   const [partialLeft, setPartialLeft] = useState<string | "">("");
   const [decants, setDecants] = useState<DecantFormRow[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
+  const userId = useSessionUserId();
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -155,23 +156,6 @@ export default function EditListingPage() {
       );
     }
   }, [listing]);
-
-  // Track user ID for uploads / cache keys
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUserId(data.user?.id ?? null);
-    };
-    fetchUser();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUserId(session?.user?.id ?? null);
-      }
-    );
-
-    return () => listener.subscription.unsubscribe();
-  }, []);
 
   // Mutation with optimistic update
   const save = useMutation<void, Error, ListingPatch, MutationContext>({
