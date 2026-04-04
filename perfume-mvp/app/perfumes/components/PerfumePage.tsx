@@ -270,7 +270,11 @@ export default function PerfumesPage() {
                         type="button"
                         onClick={() => {
                           const set = new Set(filters.types ?? []);
-                          active ? set.delete(t) : set.add(t);
+                          if (active) {
+                            set.delete(t);
+                          } else {
+                            set.add(t);
+                          }
                           setFilters({ types: Array.from(set) });
                         }}
                         className={`rounded-full px-3 py-1 text-xs border ${

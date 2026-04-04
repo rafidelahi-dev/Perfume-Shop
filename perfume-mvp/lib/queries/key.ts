@@ -7,4 +7,6 @@ export const qk = {
   listingById: (id: string) => ["listing", id] as const,
   dashboardListingStats: (userId?: string | null) => ["dashboardListingStats", userId] as const,
   dashboardPerfumeStats: (userId?: string | null) => ["dashboardPerfumeStats", userId] as const,
+  userReviews: (userId?: string | null) => ["userReviews", userId] as const,
+  dashboardReviewStats: (userId?: string | null) => ["dashboardReviewStats", userId] as const,
 };

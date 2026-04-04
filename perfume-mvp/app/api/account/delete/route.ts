@@ -1,9 +1,9 @@
 // app/api/account/delete/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createServerSupabase } from "@/lib/supabaseServer";
 
-export async function POST(_req: NextRequest) {
+export async function POST() {
   try {
     // 1) Get the currently logged-in user from Supabase cookies
     const supabase = await createServerSupabase();

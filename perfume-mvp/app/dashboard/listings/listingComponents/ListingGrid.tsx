@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -7,7 +7,7 @@ import { qk } from "@/lib/queries/key";
 import { fetchMyListings, deleteMyListing } from "@/lib/queries/listings";
 import { toast } from "sonner";
 import Image from "next/image";
-import { supabase } from "@/lib/supabaseClient";
+import { useSessionUserId } from "@/lib/hooks/useSessionUserId";
 
 // 🔹 Shape of a listing as used in this component
 export interface Listing {
@@ -31,23 +31,7 @@ interface ListingGridProps {
 }
 
 export const ListingGrid: React.FC<ListingGridProps> = () => {
-  const [userId, setUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUserId(data.user?.id || null);
-    };
-    fetchUser();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUserId(session?.user?.id || null);
-      }
-    );
-
-    return () => listener.subscription.unsubscribe();
-  }, []);
+  const userId = useSessionUserId();
 
   const [searchTerm] = useState("");
   const qc = useQueryClient();

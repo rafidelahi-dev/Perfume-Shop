@@ -2,40 +2,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchMyPerfumes } from "@/lib/queries/userPerfumes";
 import { fetchMyListings } from "@/lib/queries/listings";
+import { fetchMyReviews } from "@/lib/queries/reviews";
 import { useRouter } from "next/navigation";
 import { qk } from "@/lib/queries/key";
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { useSessionUserId } from "@/lib/hooks/useSessionUserId";
 
 export default function DashboardOverview() {
 
-  const [userId, setUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-
-      const fetchUser = async () => {
-
-        const { data } = await supabase.auth.getUser();
-
-        setUserId(data.user?.id || null);
-
-      };
-
-      fetchUser();
-
- 
-
-      const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-
-        setUserId(session?.user?.id || null);
-
-      });
-
- 
-
-      return () => listener.subscription.unsubscribe();
-
-    }, []);
+  const userId = useSessionUserId();
 
   const router = useRouter();
 
@@ -44,6 +18,8 @@ export default function DashboardOverview() {
     queryKey: qk.dashboardPerfumeStats(userId),
 
     queryFn: fetchMyPerfumes,
+
+    enabled: !!userId,
 
   });
 
@@ -55,19 +31,29 @@ export default function DashboardOverview() {
 
     queryFn: fetchMyListings,
 
+    enabled: !!userId,
+
   });
 
+  const reviewsQuery = useQuery({
 
+    queryKey: qk.dashboardReviewStats(userId),
+
+    queryFn: fetchMyReviews,
+
+    enabled: !!userId,
+
+  });
 
   const perfumesCount = perfumesQuery.data?.length ?? 0;
 
   const listingsCount = listingsQuery.data?.length ?? 0;
 
+  const reviewsCount = reviewsQuery.data?.length ?? 0;
 
+  const isLoading = perfumesQuery.isLoading || listingsQuery.isLoading || reviewsQuery.isLoading;
 
-  const isLoading = perfumesQuery.isLoading || listingsQuery.isLoading;
-
-  const hasError = perfumesQuery.error || listingsQuery.error;
+  const hasError = perfumesQuery.error || listingsQuery.error || reviewsQuery.error;
 
 
 
@@ -85,7 +71,11 @@ export default function DashboardOverview() {
 
   }
 
+  const handleWriteReview = () => {
 
+    router.push("/dashboard/reviews");
+
+  }
 
   // Skeleton loader data
 
@@ -144,6 +134,34 @@ export default function DashboardOverview() {
       textColor: "text-green-700",
 
       iconBg: "bg-green-500"
+
+    },
+
+    {
+
+      title: "My Reviews",
+
+      value: reviewsCount,
+
+      icon: (
+
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+
+        </svg>
+
+      ),
+
+      description: "Fragrances reviewed",
+
+      color: "bg-gradient-to-br from-amber-50 to-amber-100",
+
+      borderColor: "border-amber-200",
+
+      textColor: "text-amber-700",
+
+      iconBg: "bg-amber-500"
 
     }
 
@@ -388,6 +406,22 @@ export default function DashboardOverview() {
             </div>
 
             <span className="font-medium text-gray-700 group-hover:text-green-600 transition-colors duration-300">New Listing</span>
+
+          </button>
+
+          <button onClick={handleWriteReview} className="flex items-center gap-3 p-4 bg-white border border-gray-300 rounded-lg hover:border-amber-500 hover:shadow-md transition-all duration-300 group">
+
+            <div className="p-2 bg-amber-100 rounded-lg group-hover:bg-amber-500 transition-colors duration-300">
+
+              <svg className="w-5 h-5 text-amber-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+
+              </svg>
+
+            </div>
+
+            <span className="font-medium text-gray-700 group-hover:text-amber-600 transition-colors duration-300">Write a Review</span>
 
           </button>
 
