@@ -32,7 +32,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       .select("display_name, username, avatar_url")
       .eq("id", user.id)
       .single();
-    displayName = profile?.display_name ?? profile?.username ?? null;
+    displayName = profile?.display_name || profile?.username || "User";
     avatarUrl = profile?.avatar_url ?? null;
   }
 

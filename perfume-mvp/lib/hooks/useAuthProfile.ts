@@ -68,7 +68,10 @@ export function useAuthProfile(initialAuth?: {
         return;
       }
 
-      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+      if (event === "SIGNED_IN" || event === "USER_UPDATED") {
+        loadFromSession();
+      }
+      if (event === "TOKEN_REFRESHED" && !hadInitialAuth.current) {
         loadFromSession();
       }
     });
