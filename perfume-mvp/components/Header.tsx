@@ -74,7 +74,7 @@ export default function Header({ hideMobileBurger = false }: { hideMobileBurger?
           />
         </div>
         <span className="font-medium text-gray-700 max-w-[100px] truncate hidden xl:block">
-          {loading ? "..." : displayName?.split(" ")[0] || "User"}
+          {displayName?.split(" ")[0] || "User"}
         </span>
       </Link>
     );
