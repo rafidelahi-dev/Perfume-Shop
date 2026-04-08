@@ -115,7 +115,12 @@ export default function Header({ hideMobileBurger = false }: { hideMobileBurger?
 
             <div className="h-6 w-px bg-gray-300 mx-2" /> 
 
-            {isAuthenticated ? (
+            {loading ? (
+              <div className="flex items-center gap-3 ml-2 animate-pulse">
+                <div className="h-8 w-16 rounded-full bg-gray-200" />
+                <div className="h-9 w-24 rounded-full bg-gray-200" />
+              </div>
+            ) : isAuthenticated ? (
               <div className="flex items-center gap-2">
                 <NavLink href="/dashboard" label="Dashboard" />
                 <UserChip />
@@ -167,7 +172,12 @@ export default function Header({ hideMobileBurger = false }: { hideMobileBurger?
             <NavLink href="/perfumes" label="Perfumes" />
             <hr className="border-gray-100" />
             
-            {isAuthenticated ? (
+            {loading ? (
+              <div className="flex flex-col gap-3 mt-4 animate-pulse">
+                <div className="h-14 rounded-xl bg-gray-100" />
+                <div className="h-10 rounded-lg bg-gray-100" />
+              </div>
+            ) : isAuthenticated ? (
               <>
                 <Link
                   href="/dashboard/profile"
@@ -183,13 +193,13 @@ export default function Header({ hideMobileBurger = false }: { hideMobileBurger?
                     />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-semibold text-gray-900">{loading ? "..." : displayName}</span>
+                    <span className="font-semibold text-gray-900">{displayName}</span>
                     <span className="text-xs text-gray-500">View Profile</span>
                   </div>
                 </Link>
 
                 <NavLink href="/dashboard" label="Dashboard" />
-                
+
                 <button
                   onClick={() => { logout(); setOpen(false); }}
                   className="mt-4 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600"
