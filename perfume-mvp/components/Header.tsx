@@ -160,7 +160,7 @@ export default function Header({ hideMobileBurger = false }: { hideMobileBurger?
       </header>
 
       {/* Mobile Drawer */}
-      {open && (
+      {!hideMobileBurger && open && (
         <div className="fixed inset-0 z-40 bg-white pt-24 px-6 md:hidden animate-in slide-in-from-top-10 fade-in duration-200">
            <div className="flex flex-col space-y-4">
             <NavLink href="/" label="Home" />
