@@ -8,7 +8,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuthProfile } from "@/lib/hooks/useAuthProfile";
 
-export default function Header({ hideMobileBurger = false }: { hideMobileBurger?: boolean }) {
+export default function Header({
+  hideMobileBurger = false,
+  hideLogout = false,
+}: {
+  hideMobileBurger?: boolean;
+  hideLogout?: boolean;
+}) {
   const pathname = usePathname();
   const next = useMemo(() => encodeURIComponent(pathname || "/"), [pathname]);
   const router = useRouter();
@@ -124,13 +130,15 @@ export default function Header({ hideMobileBurger = false }: { hideMobileBurger?
               <div className="flex items-center gap-2">
                 <NavLink href="/dashboard" label="Dashboard" />
                 <UserChip />
-                <button
-                  onClick={logout}
-                  className="ml-2 rounded-full p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
-                  title="Logout"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-                </button>
+                {!hideLogout && (
+                  <button
+                    onClick={logout}
+                    className="ml-2 rounded-full p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                    title="Logout"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                  </button>
+                )}
               </div>
             ) : (
               <div className="flex items-center gap-3 ml-2">
@@ -200,12 +208,14 @@ export default function Header({ hideMobileBurger = false }: { hideMobileBurger?
 
                 <NavLink href="/dashboard" label="Dashboard" />
 
-                <button
-                  onClick={() => { logout(); setOpen(false); }}
-                  className="mt-4 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600"
-                >
-                  Sign Out
-                </button>
+                {!hideLogout && (
+                  <button
+                    onClick={() => { logout(); setOpen(false); }}
+                    className="mt-4 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600"
+                  >
+                    Sign Out
+                  </button>
+                )}
               </>
             ) : (
               <div className="flex flex-col gap-3 mt-4">
