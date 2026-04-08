@@ -29,7 +29,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
     <>
 
-      <Header />
+      <Header hideMobileBurger />
 
       <div className="flex">
         {/* Pass the email/user data safely */}
