@@ -3,29 +3,35 @@ import { redirect } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import Header from "@/components/Header";
 import DecantOptions from "../../components/DecantOptions"; // assuming this component is well-designed
+import type { Metadata } from "next";
 
 // ** Importing relevant icons for contact buttons to improve UX **
 import { Phone, MessageCircle, Facebook, Zap } from 'lucide-react'; // Using lucide-react for icons
 
 type Props = { params: Promise<{ username: string; id: string }> };
 
-export async function generateMetadata({ params }: Props): Promise<import("next").Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username, id } = await params;
   const supabase = await createServerSupabase();
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("username, display_name")
+    .select("id, username, display_name")
     .eq("username", username)
     .single();
+
+  if (!profile) {
+    return { title: "Listing Not Found | CloudPerfumeBD" };
+  }
 
   const { data: listing } = await supabase
     .from("listings")
     .select("brand, perfume_name, type, price, min_price, images")
     .eq("id", id)
+    .eq("user_id", profile.id)
     .single();
 
-  if (!listing || !profile) {
+  if (!listing) {
     return { title: "Listing Not Found | CloudPerfumeBD" };
   }
 
