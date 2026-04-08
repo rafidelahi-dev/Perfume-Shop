@@ -10,12 +10,16 @@ import { getSession, getUserProfile } from "@/lib/queries/auth";
  * It reacts to sign-in/sign-out automatically.
  * Now also includes avatarUrl for Header use.
  */
-export function useAuthProfile() {
-  const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+export function useAuthProfile(initialAuth?: {
+  isAuthenticated: boolean;
+  displayName: string | null;
+  avatarUrl: string | null;
+}) {
+  const [loading, setLoading] = useState(!initialAuth);
+  const [isAuthenticated, setIsAuthenticated] = useState(initialAuth?.isAuthenticated ?? false);
   const [email, setEmail] = useState<string | null>(null);
-  const [displayName, setDisplayName] = useState<string | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null); // ✅ added
+  const [displayName, setDisplayName] = useState<string | null>(initialAuth?.displayName ?? null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAuth?.avatarUrl ?? null);
 
   const loadFromSession = useCallback(async () => {
     setLoading(true);

@@ -11,15 +11,21 @@ import { useAuthProfile } from "@/lib/hooks/useAuthProfile";
 export default function Header({
   hideMobileBurger = false,
   hideLogout = false,
+  initialAuth,
 }: {
   hideMobileBurger?: boolean;
   hideLogout?: boolean;
+  initialAuth?: {
+    isAuthenticated: boolean;
+    displayName: string | null;
+    avatarUrl: string | null;
+  };
 }) {
   const pathname = usePathname();
   const next = useMemo(() => encodeURIComponent(pathname || "/"), [pathname]);
   const router = useRouter();
 
-  const { loading, isAuthenticated, displayName, avatarUrl } = useAuthProfile();
+  const { loading, isAuthenticated, displayName, avatarUrl } = useAuthProfile(initialAuth);
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 

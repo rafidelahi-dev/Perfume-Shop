@@ -23,13 +23,34 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   const email = user?.email ?? null; // Use optional chaining just in case
 
+  // Fetch profile for Header pre-population (avoids client-side flash)
+  let displayName: string | null = null;
+  let avatarUrl: string | null = null;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("display_name, username, avatar_url")
+      .eq("id", user.id)
+      .single();
+    displayName = profile?.display_name ?? profile?.username ?? null;
+    avatarUrl = profile?.avatar_url ?? null;
+  }
+
 
 
   return (
 
     <>
 
-      <Header hideMobileBurger hideLogout />
+      <Header
+        hideMobileBurger
+        hideLogout
+        initialAuth={{
+          isAuthenticated: !!user,
+          displayName,
+          avatarUrl,
+        }}
+      />
 
       <div className="flex">
         {/* Pass the email/user data safely */}
