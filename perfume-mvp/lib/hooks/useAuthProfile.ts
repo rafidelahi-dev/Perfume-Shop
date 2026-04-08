@@ -1,7 +1,7 @@
 // lib/hooks/useAuthProfile.ts
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { getSession, getUserProfile } from "@/lib/queries/auth";
 
@@ -20,6 +20,8 @@ export function useAuthProfile(initialAuth?: {
   const [email, setEmail] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(initialAuth?.displayName ?? null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAuth?.avatarUrl ?? null);
+
+  const hadInitialAuth = useRef(!!initialAuth);
 
   const loadFromSession = useCallback(async () => {
     setLoading(true);
@@ -50,7 +52,9 @@ export function useAuthProfile(initialAuth?: {
 
     (async () => {
       if (cancelled) return;
-      await loadFromSession();
+      if (!hadInitialAuth.current) {
+        await loadFromSession();
+      }
     })();
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
