@@ -55,7 +55,7 @@ export async function generateMetadata({
 export default async function SellerListingsPage({
   params,
 }: {
-  params: Params;
+  params: Promise<{ username: string }>;
 }) {
   const { username } = await params;
   const supabase = await createServerSupabase();
