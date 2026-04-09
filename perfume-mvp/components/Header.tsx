@@ -212,12 +212,35 @@ export default function Header({
                   </div>
                 </Link>
 
-                <NavLink href="/dashboard" label="Dashboard" />
+                {/* Dashboard sub-navigation */}
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 pb-1">Dashboard</p>
+                  {[
+                    { href: "/dashboard", label: "Overview" },
+                    { href: "/dashboard/perfumes", label: "My Perfumes" },
+                    { href: "/dashboard/listings", label: "My Listings" },
+                    { href: "/dashboard/reviews", label: "My Reviews" },
+                    { href: "/dashboard/profile", label: "Profile Settings" },
+                  ].map(({ href, label }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => setOpen(false)}
+                      className={`block pl-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        pathname === href
+                          ? "bg-gray-900 text-white"
+                          : "text-gray-600 hover:bg-gray-50"
+                      }`}
+                    >
+                      {label}
+                    </Link>
+                  ))}
+                </div>
 
                 {!hideLogout && (
                   <button
                     onClick={() => { logout(); setOpen(false); }}
-                    className="mt-4 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600"
+                    className="mt-2 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600"
                   >
                     Sign Out
                   </button>

@@ -43,7 +43,6 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     <>
 
       <Header
-        hideMobileBurger
         hideLogout
         initialAuth={{
           isAuthenticated: !!user,

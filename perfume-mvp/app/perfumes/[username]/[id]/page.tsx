@@ -2,7 +2,8 @@
 import { redirect } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import Header from "@/components/Header";
-import DecantOptions from "../../components/DecantOptions"; // assuming this component is well-designed
+import DecantOptions from "../../components/DecantOptions";
+import ImageGallery from "./ImageGallery";
 import type { Metadata } from "next";
 
 // ** Importing relevant icons for contact buttons to improve UX **
@@ -111,31 +112,12 @@ export default async function ListingDetailPage({ params }: Props) {
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           
           {/* 1. Images Section (Left Column) */}
-          <div className="lg:sticky lg:top-24 space-y-4">
+          <div className="lg:sticky lg:top-24">
             {(listing.images ?? []).length > 0 ? (
-              <>
-                {/* Main Image (First image, larger) */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={(listing.images as string[])[0]}
-                  alt={listing.perfume_name ?? "Perfume"}
-                  className="rounded-xl object-cover w-full h-[400px] shadow-lg border border-gray-200"
-                />
-                
-                {/* Thumbnails */}
-                {/* Show up to 3 more thumbnails */}
-                <div className="grid grid-cols-3 gap-4">
-                  {(listing.images as string[]).slice(1, 4).map((src, i) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      key={i}
-                      src={src}
-                      alt={`${listing.perfume_name} thumbnail ${i + 2}`}
-                      className="rounded-lg object-cover w-full h-28 opacity-90 hover:opacity-100 transition duration-150 cursor-pointer"
-                    />
-                  ))}
-                </div>
-              </>
+              <ImageGallery
+                images={listing.images as string[]}
+                perfumeName={listing.perfume_name ?? "Perfume"}
+              />
             ) : (
               <div className="h-[400px] w-full rounded-xl bg-gray-200 flex items-center justify-center text-gray-500 shadow-lg border border-gray-300">
                 <Zap className="w-8 h-8 mr-2" /> No Images Available
