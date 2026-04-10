@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
-import { getSessionUserId } from "./auth";
+import { getSession } from "./auth";
 
 export type Profile = {
   id: string;
@@ -20,20 +20,28 @@ export type Profile = {
 };
 
 export async function fetchMyProfile(): Promise<Profile> {
-  const userId = await getSessionUserId();
-  const [{ data: sessionData }, { data, error }] = await Promise.all([
-    supabase.auth.getSession(),
-    supabase.from("profiles").select("*").eq("id", userId).single(),
-  ]);
+  const session = await getSession();
+  const user = session?.user;
+  if (!user) throw new Error("Not Authenticated");
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
   if (error) throw error;
   return {
     ...(data as Profile),
-    email: sessionData.session?.user?.email ?? null,
+    email: user.email ?? null,
   };
 }
 
 export async function updateMyProfile(patch: Partial<Profile>): Promise<void> {
-  const userId = await getSessionUserId();
+  const session = await getSession();
+  const user = session?.user;
+  if (!user) throw new Error("Not Authenticated");
+
   const payload = {
     display_name: patch.display_name ?? null,
     avatar_url: patch.avatar_url ?? null,
@@ -48,7 +56,7 @@ export async function updateMyProfile(patch: Partial<Profile>): Promise<void> {
   const { error } = await supabase
     .from("profiles")
     .update(payload)
-    .eq("id", userId);
+    .eq("id", user.id);
   if (error) throw error;
 }
 
@@ -60,5 +68,6 @@ export async function checkUsernameAvailability(
     .select("id")
     .ilike("username", username)
     .limit(1);
-  return !data?.length && !error;
+  if (error) throw error;
+  return !data?.length;
 }
