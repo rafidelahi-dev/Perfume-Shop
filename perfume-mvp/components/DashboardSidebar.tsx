@@ -63,21 +63,7 @@ export function DashboardSidebar({ email }: { email: string | null }) {
 
   return (
     <>
-      {/* Mobile Menu Button - Increased z-index to appear above header */}
-      <button
-        onClick={() => setIsMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-lg border border-gray-300 hover:bg-gray-50 transition-colors"
-        aria-label="Open menu"
-      >
-        <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-
-      {/* Mobile Overlay - Behind sidebar but above everything else */}
-      {isMobileOpen && (
-        <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" />
-      )}
+      {/* Mobile handled by Header drawer — sidebar is desktop-only */}
 
       {/* Sidebar - Highest z-index when open */}
       <aside
@@ -97,18 +83,7 @@ export function DashboardSidebar({ email }: { email: string | null }) {
           ${isMobileOpen ? 'translate-x-0 z-50' : '-translate-x-full lg:translate-x-0 lg:z-40'}
         `}
       >
-        {/* Close button for mobile */}
-        <button
-          onClick={() => setIsMobileOpen(false)}
-          className="lg:hidden absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-          aria-label="Close menu"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-
-        <div className="mt-12 lg:mt-0">
+        <div className="mt-0">
           <h1 className="text-lg font-bold mb-4">PerfumeMVP</h1>
           <nav className="space-y-1">
             <NavLink href="/dashboard" label="Overview" />

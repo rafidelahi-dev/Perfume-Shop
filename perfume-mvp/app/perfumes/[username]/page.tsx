@@ -1,4 +1,5 @@
 // app/perfumes/[username]/page.tsx
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import Header from "@/components/Header";
@@ -7,10 +8,54 @@ import { Facebook, MessageSquare, Phone, User } from "lucide-react";
 
 type Params = { username: string };
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}): Promise<Metadata> {
+  const { username } = await params;
+  const supabase = await createServerSupabase();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("username, display_name, bio, avatar_url")
+    .eq("username", username)
+    .single();
+
+  if (!profile) {
+    return { title: "Seller Not Found | CloudPerfumeBD" };
+  }
+
+  const displayName = profile.display_name ?? profile.username;
+  const title = `${displayName}'s Perfumes | CloudPerfumeBD`;
+  const description = profile.bio
+    ? `${profile.bio} — Browse ${displayName}'s perfume listings on CloudPerfumeBD.`
+    : `Browse ${displayName}'s perfume listings on CloudPerfumeBD.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      ...(profile.avatar_url
+        ? { images: [{ url: profile.avatar_url, width: 400, height: 400, alt: displayName }] }
+        : {}),
+      type: "profile",
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+      ...(profile.avatar_url ? { images: [profile.avatar_url] } : {}),
+    },
+  };
+}
+
 export default async function SellerListingsPage({
   params,
 }: {
-  params: Params;
+  params: Promise<{ username: string }>;
 }) {
   const { username } = await params;
   const supabase = await createServerSupabase();

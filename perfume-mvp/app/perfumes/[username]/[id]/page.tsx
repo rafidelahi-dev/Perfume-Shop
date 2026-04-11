@@ -2,12 +2,69 @@
 import { redirect } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import Header from "@/components/Header";
-import DecantOptions from "../../components/DecantOptions"; // assuming this component is well-designed
+import DecantOptions from "../../components/DecantOptions";
+import ImageGallery from "./ImageGallery";
+import type { Metadata } from "next";
 
 // ** Importing relevant icons for contact buttons to improve UX **
 import { Phone, MessageCircle, Facebook, Zap } from 'lucide-react'; // Using lucide-react for icons
 
-type Props = { params: { username: string; id: string } };
+type Props = { params: Promise<{ username: string; id: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { username, id } = await params;
+  const supabase = await createServerSupabase();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, username, display_name")
+    .eq("username", username)
+    .single();
+
+  if (!profile) {
+    return { title: "Listing Not Found | CloudPerfumeBD" };
+  }
+
+  const { data: listing } = await supabase
+    .from("listings")
+    .select("brand, perfume_name, type, price, min_price, images")
+    .eq("id", id)
+    .eq("user_id", profile.id)
+    .single();
+
+  if (!listing) {
+    return { title: "Listing Not Found | CloudPerfumeBD" };
+  }
+
+  const isDecant = (listing.type ?? "").toLowerCase() === "decant";
+  const priceNum = isDecant && listing.min_price != null
+    ? Number(listing.min_price)
+    : Number(listing.price ?? NaN);
+  const priceText = Number.isFinite(priceNum) ? `TK${priceNum.toFixed(0)}` : "Price on Contact";
+
+  const title = `${listing.brand} — ${listing.perfume_name} | ${profile.display_name ?? profile.username}`;
+  const description = `${listing.type?.toUpperCase()} • ${priceText} • Sold by ${profile.display_name ?? profile.username} on CloudPerfumeBD`;
+  const image = Array.isArray(listing.images) && listing.images[0]
+    ? (listing.images as string[])[0]
+    : undefined;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      ...(image ? { images: [{ url: image, width: 1200, height: 630, alt: listing.perfume_name }] } : {}),
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      ...(image ? { images: [image] } : {}),
+    },
+  };
+}
 
 export default async function ListingDetailPage({ params }: Props) {
   const { username, id } = await params;
@@ -55,31 +112,12 @@ export default async function ListingDetailPage({ params }: Props) {
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           
           {/* 1. Images Section (Left Column) */}
-          <div className="lg:sticky lg:top-24 space-y-4">
+          <div className="lg:sticky lg:top-24">
             {(listing.images ?? []).length > 0 ? (
-              <>
-                {/* Main Image (First image, larger) */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={(listing.images as string[])[0]}
-                  alt={listing.perfume_name ?? "Perfume"}
-                  className="rounded-xl object-cover w-full h-[400px] shadow-lg border border-gray-200"
-                />
-                
-                {/* Thumbnails */}
-                {/* Show up to 3 more thumbnails */}
-                <div className="grid grid-cols-3 gap-4">
-                  {(listing.images as string[]).slice(1, 4).map((src, i) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      key={i}
-                      src={src}
-                      alt={`${listing.perfume_name} thumbnail ${i + 2}`}
-                      className="rounded-lg object-cover w-full h-28 opacity-90 hover:opacity-100 transition duration-150 cursor-pointer"
-                    />
-                  ))}
-                </div>
-              </>
+              <ImageGallery
+                images={listing.images as string[]}
+                perfumeName={listing.perfume_name ?? "Perfume"}
+              />
             ) : (
               <div className="h-[400px] w-full rounded-xl bg-gray-200 flex items-center justify-center text-gray-500 shadow-lg border border-gray-300">
                 <Zap className="w-8 h-8 mr-2" /> No Images Available

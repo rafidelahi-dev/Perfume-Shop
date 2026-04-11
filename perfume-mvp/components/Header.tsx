@@ -8,12 +8,24 @@ import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuthProfile } from "@/lib/hooks/useAuthProfile";
 
-export default function Header() {
+export default function Header({
+  hideMobileBurger = false,
+  hideLogout = false,
+  initialAuth,
+}: {
+  hideMobileBurger?: boolean;
+  hideLogout?: boolean;
+  initialAuth?: {
+    isAuthenticated: boolean;
+    displayName: string | null;
+    avatarUrl: string | null;
+  };
+}) {
   const pathname = usePathname();
   const next = useMemo(() => encodeURIComponent(pathname || "/"), [pathname]);
   const router = useRouter();
 
-  const { loading, isAuthenticated, displayName, avatarUrl } = useAuthProfile();
+  const { loading, isAuthenticated, displayName, avatarUrl } = useAuthProfile(initialAuth);
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -74,7 +86,7 @@ export default function Header() {
           />
         </div>
         <span className="font-medium text-gray-700 max-w-[100px] truncate hidden xl:block">
-          {loading ? "..." : displayName?.split(" ")[0] || "User"}
+          {displayName?.split(" ")[0] || "User"}
         </span>
       </Link>
     );
@@ -115,17 +127,24 @@ export default function Header() {
 
             <div className="h-6 w-px bg-gray-300 mx-2" /> 
 
-            {isAuthenticated ? (
+            {loading ? (
+              <div className="flex items-center gap-3 ml-2 animate-pulse">
+                <div className="h-8 w-16 rounded-full bg-gray-200" />
+                <div className="h-9 w-24 rounded-full bg-gray-200" />
+              </div>
+            ) : isAuthenticated ? (
               <div className="flex items-center gap-2">
                 <NavLink href="/dashboard" label="Dashboard" />
                 <UserChip />
-                <button
-                  onClick={logout}
-                  className="ml-2 rounded-full p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
-                  title="Logout"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-                </button>
+                {!hideLogout && (
+                  <button
+                    onClick={logout}
+                    className="ml-2 rounded-full p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                    title="Logout"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                  </button>
+                )}
               </div>
             ) : (
               <div className="flex items-center gap-3 ml-2">
@@ -143,29 +162,36 @@ export default function Header() {
           </nav>
 
           {/* Mobile Menu Button */}
-          <button
-            onClick={() => setOpen((o) => !o)}
-            className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <span className="sr-only">Menu</span>
-            {open ? (
-               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 18 18"/></svg>
-            ) : (
-               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-            )}
-          </button>
+          {!hideMobileBurger && (
+            <button
+              onClick={() => setOpen((o) => !o)}
+              className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <span className="sr-only">Menu</span>
+              {open ? (
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 18 18"/></svg>
+              ) : (
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+              )}
+            </button>
+          )}
         </div>
       </header>
 
       {/* Mobile Drawer */}
-      {open && (
+      {!hideMobileBurger && open && (
         <div className="fixed inset-0 z-40 bg-white pt-24 px-6 md:hidden animate-in slide-in-from-top-10 fade-in duration-200">
            <div className="flex flex-col space-y-4">
             <NavLink href="/" label="Home" />
             <NavLink href="/perfumes" label="Perfumes" />
             <hr className="border-gray-100" />
             
-            {isAuthenticated ? (
+            {loading ? (
+              <div className="flex flex-col gap-3 mt-4 animate-pulse">
+                <div className="h-14 rounded-xl bg-gray-100" />
+                <div className="h-10 rounded-lg bg-gray-100" />
+              </div>
+            ) : isAuthenticated ? (
               <>
                 <Link
                   href="/dashboard/profile"
@@ -181,19 +207,44 @@ export default function Header() {
                     />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-semibold text-gray-900">{loading ? "..." : displayName}</span>
+                    <span className="font-semibold text-gray-900">{displayName}</span>
                     <span className="text-xs text-gray-500">View Profile</span>
                   </div>
                 </Link>
 
-                <NavLink href="/dashboard" label="Dashboard" />
-                
-                <button
-                  onClick={() => { logout(); setOpen(false); }}
-                  className="mt-4 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600"
-                >
-                  Sign Out
-                </button>
+                {/* Dashboard sub-navigation */}
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 pb-1">Dashboard</p>
+                  {[
+                    { href: "/dashboard", label: "Overview" },
+                    { href: "/dashboard/perfumes", label: "My Perfumes" },
+                    { href: "/dashboard/listings", label: "My Listings" },
+                    { href: "/dashboard/reviews", label: "My Reviews" },
+                    { href: "/dashboard/profile", label: "Profile Settings" },
+                  ].map(({ href, label }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => setOpen(false)}
+                      className={`block pl-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        pathname === href
+                          ? "bg-gray-900 text-white"
+                          : "text-gray-600 hover:bg-gray-50"
+                      }`}
+                    >
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+
+                {!hideLogout && (
+                  <button
+                    onClick={() => { logout(); setOpen(false); }}
+                    className="mt-2 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600"
+                  >
+                    Sign Out
+                  </button>
+                )}
               </>
             ) : (
               <div className="flex flex-col gap-3 mt-4">

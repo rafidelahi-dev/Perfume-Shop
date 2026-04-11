@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(uvx --version)",
+      "Bash(uv --version)",
+      "Bash(uvx code-review-graph:*)",
+      "Bash(npx tsc:*)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(npm run:*)",
+      "WebSearch",
+      "WebFetch(domain:supabase.com)",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__execute_sql",
+      "mcp__supabase__get_advisors",
+      "mcp__supabase__apply_migration"
+    ]
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true,
+    "ui-ux-pro-max@ui-ux-pro-max-skill": true
+  }
+}
