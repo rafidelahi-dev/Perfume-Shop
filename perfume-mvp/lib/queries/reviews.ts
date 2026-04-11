@@ -44,14 +44,21 @@ export async function updateReview(
   id: string,
   input: Partial<ReviewInsert>
 ): Promise<void> {
+  const userId = await getSessionUserId();
   const { error } = await supabase
     .from("reviews")
     .update({ ...input, updated_at: new Date().toISOString() })
-    .eq("id", id);
+    .eq("id", id)
+    .eq("user_id", userId);
   if (error) throw error;
 }
 
 export async function deleteReview(id: string): Promise<void> {
-  const { error } = await supabase.from("reviews").delete().eq("id", id);
+  const userId = await getSessionUserId();
+  const { error } = await supabase
+    .from("reviews")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", userId);
   if (error) throw error;
 }
