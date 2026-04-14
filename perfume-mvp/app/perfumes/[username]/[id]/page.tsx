@@ -105,8 +105,43 @@ export default async function ListingDetailPage({ params }: Props) {
 
   // --- Component Rendering ---
 
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: listing.perfume_name,
+    brand: { "@type": "Brand", name: listing.brand },
+    ...(listing.sub_brand ? { description: listing.sub_brand } : {}),
+    image: Array.isArray(listing.images) && listing.images.length > 0
+      ? (listing.images as string[])
+      : undefined,
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "BDT",
+      price: Number.isFinite(priceToShow) ? priceToShow.toFixed(2) : undefined,
+      availability: "https://schema.org/InStock",
+      url: `https://cloudperfumebd.com/perfumes/${username}/${id}`,
+      seller: {
+        "@type": "Person",
+        name: profile.display_name ?? profile.username,
+        url: `https://cloudperfumebd.com/perfumes/${username}`,
+      },
+    },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Perfumes", item: "https://cloudperfumebd.com/perfumes" },
+      { "@type": "ListItem", position: 2, name: profile.display_name ?? profile.username, item: `https://cloudperfumebd.com/perfumes/${username}` },
+      { "@type": "ListItem", position: 3, name: `${listing.brand} — ${listing.perfume_name}`, item: `https://cloudperfumebd.com/perfumes/${username}/${id}` },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <Header />
       <main className="mx-auto max-w-6xl px-4 pb-12 pt-24">
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-10">

@@ -1,3 +1,10 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Verify Email",
+  robots: { index: false, follow: false },
+};
+
 export default function VerifyEmail() {
   return (
     <div className="min-h-[70vh] flex items-center justify-center bg-gray-50 px-4">

@@ -1,8 +1,14 @@
-"use client";
-
+import type { Metadata } from "next";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "About Cloud PerfumeBD — Bangladesh's Fragrance Community",
+  description:
+    "Learn about Cloud PerfumeBD — the community-driven perfume marketplace making genuine fragrances accessible, transparent, and enjoyable for everyone in Bangladesh.",
+  alternates: { canonical: "https://cloudperfumebd.com/about" },
+};
 
 export default function AboutPage() {
   return (

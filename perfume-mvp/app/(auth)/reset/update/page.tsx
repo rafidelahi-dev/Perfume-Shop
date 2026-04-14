@@ -1,6 +1,12 @@
 // app/(auth)/reset/update/page.tsx
 import { Suspense } from "react";
 import ResetUpdateClient from "./RequestUpdateClient";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Update Password",
+  robots: { index: false, follow: false },
+};
 
 export default function ResetUpdatePage() {
   return (
