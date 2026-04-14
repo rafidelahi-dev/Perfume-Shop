@@ -1,8 +1,14 @@
-"use client";
-
+import type { Metadata } from "next";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "About Cloud PerfumeBD — Bangladesh's Fragrance Community",
+  description:
+    "Learn about Cloud PerfumeBD — the community-driven perfume marketplace making genuine fragrances accessible, transparent, and enjoyable for everyone in Bangladesh.",
+  alternates: { canonical: "https://cloudperfumebd.com/about" },
+};
 
 export default function AboutPage() {
   return (
@@ -20,7 +26,7 @@ export default function AboutPage() {
         </p>
         <div className="relative w-full h-64 rounded-3xl overflow-hidden shadow-lg">
           <Image
-            src="/About/bangladesh.jpg"
+            src="/About/bangladesh.webp"
             alt="Perfume bottles"
             fill
             className="object-cover"
@@ -99,7 +105,7 @@ export default function AboutPage() {
       {/* IMAGE SECTION */}
       <section className="relative w-full h-72 rounded-3xl overflow-hidden shadow-lg">
         <Image
-          src="/About/community1.jpg"
+          src="/About/community1.webp"
           alt="Fragrance community"
           fill
           className="object-cover"

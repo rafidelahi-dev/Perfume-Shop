@@ -1,7 +1,12 @@
 // app/dashboard/layout.tsx (Modified)
+import type { Metadata } from "next";
 import { ReactNode } from "react";
 import { createServerSupabase } from "@/lib/supabaseServer"; // Still needed for safe cookie read
 import { DashboardSidebar } from "@/components/DashboardSidebar";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 import Header from "@/components/Header";
 

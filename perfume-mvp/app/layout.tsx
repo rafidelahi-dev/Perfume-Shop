@@ -3,12 +3,61 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "./providers";
 
+const SITE_URL = "https://cloudperfumebd.com";
+
 export const metadata: Metadata = {
-  title: "Cloud PerfumeBD",
-  description: "Discover, decant & deal — the new age fragrance marketplace.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Cloud PerfumeBD — Bangladesh's Fragrance Marketplace",
+    template: "%s | Cloud PerfumeBD",
+  },
+  description:
+    "Discover, decant & deal — Bangladesh's community-powered marketplace for genuine perfumes. Buy and sell full bottles, partials, and decants.",
+  keywords: [
+    "perfume Bangladesh",
+    "fragrance marketplace",
+    "decant perfume",
+    "buy perfume online Bangladesh",
+    "sell perfume Bangladesh",
+    "cloud perfumebd",
+    "authentic perfume",
+  ],
+  authors: [{ name: "Cloud PerfumeBD" }],
+  creator: "Cloud PerfumeBD",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: SITE_URL,
+    siteName: "Cloud PerfumeBD",
+    title: "Cloud PerfumeBD — Bangladesh's Fragrance Marketplace",
+    description:
+      "Discover, decant & deal — Bangladesh's community-powered marketplace for genuine perfumes.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Cloud PerfumeBD — Bangladesh's Fragrance Marketplace",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cloud PerfumeBD — Bangladesh's Fragrance Marketplace",
+    description:
+      "Discover, decant & deal — Bangladesh's community-powered marketplace for genuine perfumes.",
+    images: ["/og-image.png"],
+  },
+  alternates: {
+    canonical: SITE_URL,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   icons: {
     icon: "/favicon.ico",
-  }
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

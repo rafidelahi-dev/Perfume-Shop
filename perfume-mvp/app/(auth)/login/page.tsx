@@ -1,5 +1,11 @@
 import { Suspense } from "react";
 import LoginClient from "./LoginClient";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Log In",
+  robots: { index: false, follow: false },
+};
 
 type PageProps = {
   searchParams: Promise<{ next?: string }>;
