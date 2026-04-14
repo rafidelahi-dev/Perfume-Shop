@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { qk } from "@/lib/queries/key";
 import Image from "next/image";
 import { useSessionUserId } from "@/lib/hooks/useSessionUserId";
+import ComboBox from "@/components/ComboBox";
+import { usePerfumeAutocomplete } from "@/lib/hooks/usePerfumeAutocomplete";
 
 /** ───────────────── Types ───────────────── **/
 
@@ -65,6 +67,8 @@ const ListingForm: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const qc = useQueryClient();
+  const { brandSuggestions, nameSuggestions, subBrandSuggestions, onNameSelect } =
+    usePerfumeAutocomplete();
 
   // form state
   const [brand, setBrand] = useState("");
@@ -277,39 +281,38 @@ const ListingForm: React.FC = () => {
         {/* Left: Basic info */}
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1a]">
-              Brand *
-            </label>
-            <input
-              className="mt-1 w-full rounded-lg border border-black/10 bg-[#f8f7f3] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/20"
+            <ComboBox
+              label="Brand"
               placeholder="Dior"
               value={brand}
-              onChange={(e) => setBrand(e.target.value)}
+              onChange={setBrand}
+              suggestions={brandSuggestions(brand)}
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1a]">
-              Sub-brand (optional)
-            </label>
-            <input
-              className="mt-1 w-full rounded-lg border border-black/10 bg-[#f8f7f3] px-3 py-2"
+            <ComboBox
+              label="Sub-brand (optional)"
               placeholder="Sauvage line"
               value={subBrand}
-              onChange={(e) => setSubBrand(e.target.value)}
+              onChange={setSubBrand}
+              suggestions={subBrandSuggestions(brand, subBrand)}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1a]">
-              Perfume name *
-            </label>
-            <input
-              className="mt-1 w-full rounded-lg border border-black/10 bg-[#f8f7f3] px-3 py-2"
+            <ComboBox
+              label="Perfume name"
               placeholder="Sauvage"
               value={perfumeName}
-              onChange={(e) => setPerfumeName(e.target.value)}
+              onChange={setPerfumeName}
+              onSelect={(name) => {
+                const backfill = onNameSelect(name, brand);
+                setBrand(backfill.brand);
+                setSubBrand(backfill.sub_brand ?? "");
+              }}
+              suggestions={nameSuggestions(brand, perfumeName)}
               required
             />
           </div>
