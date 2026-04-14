@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="scroll-smooth selection:bg-[#d4af37] selection:text-white">
-      <body className="min-h-screen antialiased text-[#1a1a1a]">
+      <body suppressHydrationWarning className="min-h-screen antialiased text-[#1a1a1a]">
         {/* Background Layer */}
         <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
           {/* Base Cream Gradient */}
