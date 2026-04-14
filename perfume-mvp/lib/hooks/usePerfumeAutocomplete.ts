@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   fetchPerfumeSuggestions,
   type PerfumeSuggestion,
@@ -23,23 +23,18 @@ const SEED_BRANDS: string[] = [
 ];
 
 export function usePerfumeAutocomplete() {
-  const [allRecords, setAllRecords] = useState<PerfumeSuggestion[]>([]);
-
-  useEffect(() => {
-    fetchPerfumeSuggestions()
-      .then((dbRecords) => {
-        const dbBrands = new Set(dbRecords.map((r) => r.brand.toLowerCase()));
-        const seedRecords: PerfumeSuggestion[] = SEED_BRANDS.filter(
-          (b) => !dbBrands.has(b.toLowerCase())
-        ).map((b) => ({ brand: b, perfume_name: "", sub_brand: null }));
-        setAllRecords([...dbRecords, ...seedRecords]);
-      })
-      .catch(() => {
-        setAllRecords(
-          SEED_BRANDS.map((b) => ({ brand: b, perfume_name: "", sub_brand: null }))
-        );
-      });
-  }, []);
+  const { data: allRecords = [] } = useQuery<PerfumeSuggestion[]>({
+    queryKey: ["perfume-suggestions"],
+    queryFn: async () => {
+      const dbRecords = await fetchPerfumeSuggestions();
+      const dbBrands = new Set(dbRecords.map((r) => r.brand.toLowerCase()));
+      const seedRecords: PerfumeSuggestion[] = SEED_BRANDS.filter(
+        (b) => !dbBrands.has(b.toLowerCase())
+      ).map((b) => ({ brand: b, perfume_name: "", sub_brand: null }));
+      return [...dbRecords, ...seedRecords];
+    },
+    staleTime: Infinity,
+  });
 
   function brandSuggestions(query: string): string[] {
     if (!query.trim()) return [];

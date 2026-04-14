@@ -97,13 +97,13 @@ export default function ComboBox({
           setOpen(true);
         }}
         onFocus={() => {
-          if (suggestions.length > 0) setOpen(true);
+          if (suggestions.length > 0 && value.length >= 1) setOpen(true);
         }}
         onKeyDown={handleKeyDown}
       />
       {visible && (
         <ul className="absolute z-50 mt-1 w-full overflow-hidden rounded-lg border border-black/10 bg-white shadow-md">
-          {suggestions.slice(0, 8).map((s, i) => (
+          {suggestions.map((s, i) => (
             <li
               key={s}
               onMouseDown={(e) => {

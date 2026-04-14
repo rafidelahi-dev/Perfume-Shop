@@ -135,7 +135,7 @@ export default function ReviewForm({
             onChange={(val) => setForm((f) => ({ ...f, perfume_name: val }))}
             onSelect={(name) => {
               const backfill = onNameSelect(name, form.brand);
-              setForm((f) => ({ ...f, perfume_name: name, brand: backfill.brand }));
+              setForm((f) => ({ ...f, brand: backfill.brand }));
             }}
             suggestions={nameSuggestions(form.brand, form.perfume_name)}
             required
