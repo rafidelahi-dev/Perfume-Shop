@@ -32,6 +32,7 @@ remotePatterns.push({
 const nextConfig = {
   images: {
     remotePatterns,
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days — reduces repeated fetches to Supabase storage
   },
   experimental: {
     optimizePackageImports: ["@supabase/supabase-js"],
