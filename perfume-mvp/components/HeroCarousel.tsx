@@ -3,21 +3,21 @@
 import { useEffect, useState } from "react";
 
 const backgroundImages = [
-  "/Background/8.png",
-  "/Background/9.png",
-  "/Background/10.png",
-  "/Background/11.png",
-  "/Background/12.png",
-  "/Background/13.png",
-  "/Background/14.png",
-  "/Background/15.png",
-  "/Background/16.png",
-  "/Background/17.png",
-  "/Background/18.png",
-  "/Background/19.png",
-  "/Background/20.png",
-  "/Background/21.png",
-  "/Background/22.png",
+  "/Background/8.webp",
+  "/Background/9.webp",
+  "/Background/10.webp",
+  "/Background/11.webp",
+  "/Background/12.webp",
+  "/Background/13.webp",
+  "/Background/14.webp",
+  "/Background/15.webp",
+  "/Background/16.webp",
+  "/Background/17.webp",
+  "/Background/18.webp",
+  "/Background/19.webp",
+  "/Background/20.webp",
+  "/Background/21.webp",
+  "/Background/22.webp",
 ];
 
 export default function HeroCarousel() {

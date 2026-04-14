@@ -26,7 +26,7 @@ export default function AboutPage() {
         </p>
         <div className="relative w-full h-64 rounded-3xl overflow-hidden shadow-lg">
           <Image
-            src="/About/bangladesh.jpg"
+            src="/About/bangladesh.webp"
             alt="Perfume bottles"
             fill
             className="object-cover"
@@ -105,7 +105,7 @@ export default function AboutPage() {
       {/* IMAGE SECTION */}
       <section className="relative w-full h-72 rounded-3xl overflow-hidden shadow-lg">
         <Image
-          src="/About/community1.jpg"
+          src="/About/community1.webp"
           alt="Fragrance community"
           fill
           className="object-cover"
