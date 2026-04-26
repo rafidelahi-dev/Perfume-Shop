@@ -1,7 +1,16 @@
 // server component
 import { redirect } from "next/navigation";
-import { createServerSupabase } from "@/lib/supabaseServer";
+import { createClient } from "@supabase/supabase-js";
 import Header from "@/components/Header";
+
+export const revalidate = 300;
+
+function createPublicSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
 import DecantOptions from "../../components/DecantOptions";
 import ImageGallery from "./ImageGallery";
 import type { Metadata } from "next";
@@ -13,7 +22,7 @@ type Props = { params: Promise<{ username: string; id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username, id } = await params;
-  const supabase = await createServerSupabase();
+  const supabase = createPublicSupabase();
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -68,7 +77,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ListingDetailPage({ params }: Props) {
   const { username, id } = await params;
-  const supabase = await createServerSupabase();
+  const supabase = createPublicSupabase();
 
   // 2. Find seller by username
   const { data: profile, error: pErr } = await supabase

@@ -1,8 +1,17 @@
 // app/perfumes/[username]/page.tsx
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { createServerSupabase } from "@/lib/supabaseServer";
+import { createClient } from "@supabase/supabase-js";
 import Header from "@/components/Header";
+
+export const revalidate = 300;
+
+function createPublicSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
 import { UsernameListingGrid } from "./components/UsernameListingGrid";
 import { Facebook, MessageSquare, Phone, User } from "lucide-react";
 
@@ -14,7 +23,7 @@ export async function generateMetadata({
   params: Promise<{ username: string }>;
 }): Promise<Metadata> {
   const { username } = await params;
-  const supabase = await createServerSupabase();
+  const supabase = createPublicSupabase();
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -58,7 +67,7 @@ export default async function SellerListingsPage({
   params: Promise<{ username: string }>;
 }) {
   const { username } = await params;
-  const supabase = await createServerSupabase();
+  const supabase = createPublicSupabase();
 
   // Get profile by username (now with contact fields)
   const { data: profile, error: pErr } = await supabase
