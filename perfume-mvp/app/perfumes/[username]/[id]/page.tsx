@@ -110,6 +110,32 @@ export default async function ListingDetailPage({ params }: Props) {
     .single();
   if (lErr || !listing) redirect(`/perfumes/${username}`);
 
+  // Fetch community reviews for this perfume (public, no auth needed)
+  const { data: perfumeReviews } = await supabase
+    .from("reviews")
+    .select("rating, review_text, created_at")
+    .eq("brand", listing.brand ?? "")
+    .eq("perfume_name", listing.perfume_name ?? "")
+    .not("rating", "is", null)
+    .limit(20);
+
+  const ratingMap: Record<string, number> = {
+    love: 5,
+    like: 4,
+    okay: 3,
+    dislike: 2,
+    hate: 1,
+  };
+
+  const numericRatings = (perfumeReviews ?? [])
+    .map((r) => ratingMap[r.rating ?? ""])
+    .filter((n): n is number => n !== undefined);
+
+  const avgRating =
+    numericRatings.length > 0
+      ? numericRatings.reduce((a, b) => a + b, 0) / numericRatings.length
+      : null;
+
   // --- Calculated Properties ---
 
   const hasAnyContact =
@@ -145,6 +171,31 @@ export default async function ListingDetailPage({ params }: Props) {
         url: `https://cloudperfumebd.com/perfumes/${username}`,
       },
     },
+    ...(avgRating !== null
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: avgRating.toFixed(1),
+            reviewCount: numericRatings.length,
+            bestRating: 5,
+            worstRating: 1,
+          },
+          review: (perfumeReviews ?? [])
+            .filter((r) => r.review_text)
+            .slice(0, 3)
+            .map((r) => ({
+              "@type": "Review",
+              reviewRating: {
+                "@type": "Rating",
+                ratingValue: ratingMap[r.rating ?? ""] ?? 3,
+                bestRating: 5,
+                worstRating: 1,
+              },
+              reviewBody: r.review_text,
+              datePublished: r.created_at?.split("T")[0],
+            })),
+        }
+      : {}),
   };
 
   const breadcrumbSchema = {
