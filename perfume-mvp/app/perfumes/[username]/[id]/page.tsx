@@ -1,7 +1,11 @@
 // server component
 import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
+import type { Metadata } from "next";
+import { Phone, MessageCircle, Facebook, Zap } from "lucide-react";
 import Header from "@/components/Header";
+import DecantOptions from "../../components/DecantOptions";
+import ImageGallery from "./ImageGallery";
 
 export const revalidate = 300;
 
@@ -11,12 +15,6 @@ function createPublicSupabase() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 }
-import DecantOptions from "../../components/DecantOptions";
-import ImageGallery from "./ImageGallery";
-import type { Metadata } from "next";
-
-// ** Importing relevant icons for contact buttons to improve UX **
-import { Phone, MessageCircle, Facebook, Zap } from 'lucide-react'; // Using lucide-react for icons
 
 type Props = { params: Promise<{ username: string; id: string }> };
 
@@ -36,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const { data: listing } = await supabase
     .from("listings")
-    .select("brand, perfume_name, type, price, min_price, images")
+    .select("brand, perfume_name, type, price, min_price, decant_options, images")
     .eq("id", id)
     .eq("user_id", profile.id)
     .single();
@@ -49,10 +47,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const priceNum = isDecant && listing.min_price != null
     ? Number(listing.min_price)
     : Number(listing.price ?? NaN);
-  const priceText = Number.isFinite(priceNum) ? `TK${priceNum.toFixed(0)}` : "Price on Contact";
+  const priceText = Number.isFinite(priceNum) ? `TK${priceNum.toFixed(0)}` : "price on contact";
+  const displayName = profile.display_name ?? profile.username;
 
-  const title = `${listing.brand} — ${listing.perfume_name} | ${profile.display_name ?? profile.username}`;
-  const description = `${listing.type?.toUpperCase()} • ${priceText} • Sold by ${profile.display_name ?? profile.username} on CloudPerfumeBD`;
+  type DecantOption = { ml: number; price: number };
+  const decantOptions = Array.isArray(listing.decant_options)
+    ? (listing.decant_options as DecantOption[]).sort((a, b) => a.ml - b.ml)
+    : [];
+  const sizeStr = isDecant && decantOptions.length > 0
+    ? decantOptions.map((o) => `${o.ml}ml`).join("/")
+    : null;
+  const typeLabel = isDecant
+    ? `Decant${sizeStr ? ` ${sizeStr}` : ""}`
+    : (listing.type ?? "").charAt(0).toUpperCase() + (listing.type ?? "").slice(1);
+
+  const title = `${listing.brand} ${listing.perfume_name} in Bangladesh — ${typeLabel} — CloudPerfumeBD`;
+  const description = `Buy ${listing.brand} ${listing.perfume_name} ${typeLabel.toLowerCase()} in Bangladesh from ${displayName}. Starting ${priceText}. Authentic fragrance.`.slice(0, 150);
   const image = Array.isArray(listing.images) && listing.images[0]
     ? (listing.images as string[])[0]
     : undefined;
