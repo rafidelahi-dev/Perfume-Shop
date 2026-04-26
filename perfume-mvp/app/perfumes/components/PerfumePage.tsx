@@ -60,10 +60,11 @@ async function fetchPerfumes(): Promise<PerfumeListing[]> {
   return Number(p.price ?? NaN);
 }
 
-export default function PerfumesPage() {
+export default function PerfumesPage({ initialListings }: { initialListings?: PerfumeListing[] }) {
   const { data: listings = [], isLoading, error } = useQuery({
     queryKey: ["perfumes"],
     queryFn: fetchPerfumes,
+    initialData: initialListings,
   });
 
   const isOpen = useUiStore((s) => s.isFilterOpen);
