@@ -48,6 +48,7 @@ async function fetchInitialListings(): Promise<PerfumeListing[]> {
         whatsapp_number
       )
     `)
+    .eq("is_hidden", false)
     .order("created_at", { ascending: false });
 
   if (error) return [];

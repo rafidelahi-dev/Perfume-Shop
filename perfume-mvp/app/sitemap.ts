@@ -17,6 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     supabase
       .from("listings")
       .select("id, updated_at, profiles!inner(username)")
+      .eq("is_hidden", false)
       .order("created_at", { ascending: false }),
   ]);
 

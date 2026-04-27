@@ -98,6 +98,7 @@ export default async function SellerListingsPage({
       "id, brand, perfume_name, sub_brand, price, type, min_price, images"
     )
     .eq("user_id", profile.id)
+    .eq("is_hidden", false)
     .order("created_at", { ascending: false });
 
   if (lErr) {

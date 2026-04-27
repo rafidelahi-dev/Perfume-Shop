@@ -41,6 +41,7 @@ async function fetchPerfumes(): Promise<PerfumeListing[]> {
         whatsapp_number
     )
     `)
+    .eq("is_hidden", false)
     .order("created_at", { ascending: false });
 
   if (error) throw error;

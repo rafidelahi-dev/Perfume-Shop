@@ -1,5 +1,5 @@
 // server component
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import type { Metadata } from "next";
 import { Phone, MessageCircle, Facebook, Zap } from "lucide-react";
@@ -37,6 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .select("brand, perfume_name, type, price, min_price, decant_options, images")
     .eq("id", id)
     .eq("user_id", profile.id)
+    .eq("is_hidden", false)
     .single();
 
   if (!listing) {
@@ -107,8 +108,9 @@ export default async function ListingDetailPage({ params }: Props) {
     `)
     .eq("id", id)
     .eq("user_id", profile.id)
+    .eq("is_hidden", false)
     .single();
-  if (lErr || !listing) redirect(`/perfumes/${username}`);
+  if (lErr || !listing) notFound();
 
   // Fetch community reviews for this perfume (public, no auth needed)
   const { data: perfumeReviews } = await supabase
