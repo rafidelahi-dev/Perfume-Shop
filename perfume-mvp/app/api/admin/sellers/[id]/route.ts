@@ -17,6 +17,12 @@ export async function PATCH(
 ) {
   const { id } = await params
   const { action, reason }: { action: Action; reason?: string } = await req.json()
+
+  const validActions: Action[] = ['approve', 'flag', 'ban', 'unflag', 'unban']
+  if (!validActions.includes(action)) {
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
+  }
+
   const supabase = createAdminClient()
 
   const update: Record<string, unknown> = {
@@ -33,10 +39,14 @@ export async function PATCH(
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   if (action === 'ban') {
-    await supabase.from('listings').update({ is_hidden: true }).eq('user_id', id)
+    const { error: cascadeErr } = await supabase
+      .from('listings').update({ is_hidden: true }).eq('user_id', id)
+    if (cascadeErr) return NextResponse.json({ error: cascadeErr.message }, { status: 500 })
   }
   if (action === 'unban') {
-    await supabase.from('listings').update({ is_hidden: false }).eq('user_id', id)
+    const { error: cascadeErr } = await supabase
+      .from('listings').update({ is_hidden: false }).eq('user_id', id)
+    if (cascadeErr) return NextResponse.json({ error: cascadeErr.message }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })
