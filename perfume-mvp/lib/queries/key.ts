@@ -9,4 +9,6 @@ export const qk = {
   dashboardPerfumeStats: (userId?: string | null) => ["dashboardPerfumeStats", userId] as const,
   userReviews: (userId?: string | null) => ["userReviews", userId] as const,
   dashboardReviewStats: (userId?: string | null) => ["dashboardReviewStats", userId] as const,
+  adminSellers: () => ['admin', 'sellers'] as const,
+  adminListings: () => ['admin', 'listings'] as const,
 };
