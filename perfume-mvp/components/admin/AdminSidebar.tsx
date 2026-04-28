@@ -3,8 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Users, List, FileText } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
-import { qk } from '@/lib/queries/key'
+import { useAdminSellers } from '@/lib/queries/admin'
 
 const NAV = [
   { href: '/superadmin/sellers',  label: 'Sellers',  icon: Users },
@@ -15,11 +14,7 @@ const NAV = [
 export default function AdminSidebar() {
   const pathname = usePathname()
 
-  const { data: sellers = [] } = useQuery<{ status: string }[]>({
-    queryKey: qk.adminSellers(),
-    queryFn: () => fetch('/api/admin/sellers').then((r) => r.json()),
-    refetchInterval: 60_000,
-  })
+  const { data: sellers = [] } = useAdminSellers()
 
   const pendingCount = sellers.filter((s) => s.status === 'pending').length
 
@@ -45,7 +40,7 @@ export default function AdminSidebar() {
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
               <span className="flex-1">{label}</span>
-              {href.includes('sellers') && pendingCount > 0 && (
+              {href === '/superadmin/sellers' && pendingCount > 0 && (
                 <span className="bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full leading-none">
                   {pendingCount}
                 </span>
