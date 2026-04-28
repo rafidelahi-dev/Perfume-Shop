@@ -27,6 +27,7 @@ export function SellerDetailPanel({ seller, listings }: Props) {
   }
 
   return (
+    <>
     <div className="bg-[#fdfbf7] border-t border-gray-100 px-6 py-5 grid grid-cols-3 gap-6 text-sm">
       {/* Column 1: Profile */}
       <div className="space-y-3">
@@ -66,7 +67,7 @@ export function SellerDetailPanel({ seller, listings }: Props) {
           {sellerListings.map((l) => (
             <div key={l.id} className="flex items-center justify-between text-xs">
               <span className="text-gray-700 truncate">{l.perfume_name ?? '—'}</span>
-              <span className="text-gray-500 ml-2 flex-shrink-0">৳{l.price}</span>
+              <span className="text-gray-500 ml-2 flex-shrink-0">{l.price != null ? `৳${l.price}` : '—'}</span>
             </div>
           ))}
         </div>
@@ -95,7 +96,8 @@ export function SellerDetailPanel({ seller, listings }: Props) {
           {seller.status === 'pending' && (
             <button
               onClick={() => action.mutate({ id: seller.id, action: 'approve' })}
-              className="px-3 py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+              disabled={action.isPending}
+              className="px-3 py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Approve
             </button>
@@ -111,7 +113,8 @@ export function SellerDetailPanel({ seller, listings }: Props) {
           {seller.status === 'flagged' && (
             <button
               onClick={() => action.mutate({ id: seller.id, action: 'unflag' })}
-              className="px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+              disabled={action.isPending}
+              className="px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Unflag
             </button>
@@ -134,40 +137,41 @@ export function SellerDetailPanel({ seller, listings }: Props) {
           )}
         </div>
       </div>
-
-      {modal === 'flag' && (
-        <ActionModal
-          title="Flag seller"
-          description="Internal note only. The seller remains fully active — this is for your tracking."
-          confirmLabel="Flag seller"
-          confirmClass="bg-orange-500 hover:bg-orange-600 text-white"
-          requireReason
-          reasonPlaceholder="Reason for flagging (admin-internal only)..."
-          onConfirm={(reason) => handleAction('flag', reason)}
-          onClose={() => setModal(null)}
-        />
-      )}
-      {modal === 'ban' && (
-        <ActionModal
-          title="Ban seller"
-          description="This will permanently hide all their listings and block their account."
-          confirmLabel="Ban seller"
-          requireReason
-          reasonPlaceholder="Reason for ban..."
-          onConfirm={(reason) => handleAction('ban', reason)}
-          onClose={() => setModal(null)}
-        />
-      )}
-      {modal === 'unban' && (
-        <ActionModal
-          title="Unban seller"
-          description="This restores their account and makes their listings visible again."
-          confirmLabel="Unban seller"
-          confirmClass="bg-green-600 hover:bg-green-700 text-white"
-          onConfirm={() => handleAction('unban', '')}
-          onClose={() => setModal(null)}
-        />
-      )}
     </div>
+
+    {modal === 'flag' && (
+      <ActionModal
+        title="Flag seller"
+        description="Internal note only. The seller remains fully active — this is for your tracking."
+        confirmLabel="Flag seller"
+        confirmClass="bg-orange-500 hover:bg-orange-600 text-white"
+        requireReason
+        reasonPlaceholder="Reason for flagging (admin-internal only)..."
+        onConfirm={(reason) => handleAction('flag', reason)}
+        onClose={() => setModal(null)}
+      />
+    )}
+    {modal === 'ban' && (
+      <ActionModal
+        title="Ban seller"
+        description="This will permanently hide all their listings and block their account."
+        confirmLabel="Ban seller"
+        requireReason
+        reasonPlaceholder="Reason for ban..."
+        onConfirm={(reason) => handleAction('ban', reason)}
+        onClose={() => setModal(null)}
+      />
+    )}
+    {modal === 'unban' && (
+      <ActionModal
+        title="Unban seller"
+        description="This restores their account and makes their listings visible again."
+        confirmLabel="Unban seller"
+        confirmClass="bg-green-600 hover:bg-green-700 text-white"
+        onConfirm={() => handleAction('unban', '')}
+        onClose={() => setModal(null)}
+      />
+    )}
+    </>
   )
 }
