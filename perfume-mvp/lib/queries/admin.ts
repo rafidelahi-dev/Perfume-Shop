@@ -57,7 +57,10 @@ export function useSellerAction() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, reason }),
       }).then((r) => { if (!r.ok) throw new Error('Failed') }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: qk.adminSellers() }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.adminSellers() })
+      qc.invalidateQueries({ queryKey: qk.adminListings() })
+    },
   })
 }
 
