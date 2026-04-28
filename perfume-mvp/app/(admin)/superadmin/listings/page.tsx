@@ -128,20 +128,22 @@ export default function ListingsPage() {
               <StatusBadge status={listingStatus(listing)} />
 
               <div className="flex items-center gap-2">
-                {!listing.is_flagged ? (
-                  <button
-                    onClick={() => setFlagModal(listing.id)}
-                    className="px-2.5 py-1 text-xs font-medium bg-orange-100 hover:bg-orange-200 text-orange-800 rounded-lg transition-colors"
-                  >
-                    Flag
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => flagAction.mutate({ id: listing.id, action: 'unflag' })}
-                    className="px-2.5 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-                  >
-                    Unflag
-                  </button>
+                {!listing.is_hidden && (
+                  !listing.is_flagged ? (
+                    <button
+                      onClick={() => setFlagModal(listing.id)}
+                      className="px-2.5 py-1 text-xs font-medium bg-orange-100 hover:bg-orange-200 text-orange-800 rounded-lg transition-colors"
+                    >
+                      Flag
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => flagAction.mutate({ id: listing.id, action: 'unflag' })}
+                      className="px-2.5 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                    >
+                      Unflag
+                    </button>
+                  )
                 )}
                 <button
                   onClick={() => setRemoveModal(listing.id)}
@@ -163,7 +165,7 @@ export default function ListingsPage() {
           confirmClass="bg-orange-500 hover:bg-orange-600 text-white"
           requireReason
           reasonPlaceholder="Reason visible to seller..."
-          onConfirm={(reason) => { flagAction.mutate({ id: flagModal, action: 'flag', reason }); setFlagModal(null) }}
+          onConfirm={(reason) => { flagAction.mutate({ id: flagModal!, action: 'flag', reason }); setFlagModal(null) }}
           onClose={() => setFlagModal(null)}
         />
       )}
@@ -173,7 +175,7 @@ export default function ListingsPage() {
           title="Remove listing"
           description="This permanently deletes the listing. This cannot be undone."
           confirmLabel="Remove listing"
-          onConfirm={() => { deleteAction.mutate(removeModal); setRemoveModal(null) }}
+          onConfirm={() => { deleteAction.mutate(removeModal!); setRemoveModal(null) }}
           onClose={() => setRemoveModal(null)}
         />
       )}
