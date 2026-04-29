@@ -119,7 +119,7 @@ export function SellerDetailPanel({ seller, listings }: Props) {
               Unflag
             </button>
           )}
-          {seller.status !== 'banned' && (
+          {(seller.status === 'active' || seller.status === 'flagged') && (
             <button
               onClick={() => setModal('ban')}
               className="px-3 py-1.5 text-xs font-medium bg-red-100 hover:bg-red-200 text-red-800 rounded-lg transition-colors"
