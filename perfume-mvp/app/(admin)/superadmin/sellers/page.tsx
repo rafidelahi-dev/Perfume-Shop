@@ -10,7 +10,7 @@ type Filter = 'all' | 'pending' | 'active' | 'flagged' | 'banned'
 const FILTERS: Filter[] = ['all', 'pending', 'active', 'flagged', 'banned']
 
 export default function SellersPage() {
-  const { data: sellers = [], isLoading } = useAdminSellers()
+  const { data: sellers = [], isLoading, isError } = useAdminSellers()
   const { data: listings = [] } = useAdminListings()
   const [filter, setFilter] = useState<Filter>('pending')
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -45,11 +45,12 @@ export default function SellersPage() {
       </div>
 
       {isLoading && <div className="text-center py-20 text-gray-400">Loading...</div>}
-      {!isLoading && filtered.length === 0 && (
+      {isError && <div className="text-center py-20 text-red-500">Failed to load sellers. Please refresh.</div>}
+      {!isLoading && !isError && filtered.length === 0 && (
         <div className="text-center py-20 text-gray-400">No sellers in this category.</div>
       )}
 
-      {!isLoading && filtered.length > 0 && (
+      {!isLoading && !isError && filtered.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="grid grid-cols-[1.5fr_1fr_1fr_60px_100px_32px] gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
             <span>Seller</span>

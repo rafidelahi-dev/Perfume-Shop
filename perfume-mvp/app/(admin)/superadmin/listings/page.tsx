@@ -16,7 +16,7 @@ function listingStatus(l: AdminListing): string {
 }
 
 export default function ListingsPage() {
-  const { data: listings = [], isLoading } = useAdminListings()
+  const { data: listings = [], isLoading, isError } = useAdminListings()
   const flagAction   = useListingAction()
   const deleteAction = useDeleteListing()
 
@@ -83,11 +83,12 @@ export default function ListingsPage() {
       </div>
 
       {isLoading && <div className="text-center py-20 text-gray-400">Loading...</div>}
-      {!isLoading && filtered.length === 0 && (
+      {isError && <div className="text-center py-20 text-red-500">Failed to load listings. Please refresh.</div>}
+      {!isLoading && !isError && filtered.length === 0 && (
         <div className="text-center py-20 text-gray-400">No listings match your filters.</div>
       )}
 
-      {!isLoading && filtered.length > 0 && (
+      {!isLoading && !isError && filtered.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="grid grid-cols-[2fr_1fr_80px_80px_90px_140px] gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
             <span>Perfume</span>
@@ -165,7 +166,7 @@ export default function ListingsPage() {
           confirmClass="bg-orange-500 hover:bg-orange-600 text-white"
           requireReason
           reasonPlaceholder="Reason visible to seller..."
-          onConfirm={(reason) => { flagAction.mutate({ id: flagModal!, action: 'flag', reason }); setFlagModal(null) }}
+          onConfirm={(reason) => { flagAction.mutate({ id: flagModal!, action: 'flag', reason }, { onSuccess: () => setFlagModal(null) }) }}
           onClose={() => setFlagModal(null)}
         />
       )}
@@ -175,7 +176,7 @@ export default function ListingsPage() {
           title="Remove listing"
           description="This permanently deletes the listing. This cannot be undone."
           confirmLabel="Remove listing"
-          onConfirm={() => { deleteAction.mutate(removeModal!); setRemoveModal(null) }}
+          onConfirm={() => { deleteAction.mutate(removeModal!, { onSuccess: () => setRemoveModal(null) }) }}
           onClose={() => setRemoveModal(null)}
         />
       )}
