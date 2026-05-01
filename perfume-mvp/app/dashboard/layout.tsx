@@ -40,7 +40,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       .single();
     displayName = profile?.display_name || profile?.username || "User";
     avatarUrl = profile?.avatar_url ?? null;
-    isPending = (profile as { status?: string } | null)?.status === 'pending';
+    isPending = profile?.status === 'pending';
   }
 
 
