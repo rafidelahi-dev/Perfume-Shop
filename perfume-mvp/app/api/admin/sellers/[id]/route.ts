@@ -16,7 +16,13 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const { action, reason }: { action: Action; reason?: string } = await req.json()
+  let body: { action: Action; reason?: string }
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  }
+  const { action, reason } = body
 
   const validActions: Action[] = ['approve', 'flag', 'ban', 'unflag', 'unban']
   if (!validActions.includes(action)) {

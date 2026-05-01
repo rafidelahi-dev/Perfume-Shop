@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { qk } from './key'
 
 export type AdminSeller = {
@@ -61,6 +62,7 @@ export function useSellerAction() {
       qc.invalidateQueries({ queryKey: qk.adminSellers() })
       qc.invalidateQueries({ queryKey: qk.adminListings() })
     },
+    onError: () => toast.error('Action failed. Please try again.'),
   })
 }
 
@@ -86,6 +88,7 @@ export function useListingAction() {
         body: JSON.stringify({ action, reason }),
       }).then((r) => { if (!r.ok) throw new Error('Failed') }),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.adminListings() }),
+    onError: () => toast.error('Action failed. Please try again.'),
   })
 }
 
@@ -96,5 +99,6 @@ export function useDeleteListing() {
       fetch(`/api/admin/listings/${id}`, { method: 'DELETE' })
         .then((r) => { if (!r.ok) throw new Error('Failed') }),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.adminListings() }),
+    onError: () => toast.error('Failed to remove listing. Please try again.'),
   })
 }

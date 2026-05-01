@@ -6,7 +6,13 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const { action, reason }: { action: 'flag' | 'unflag'; reason?: string } = await req.json()
+  let body: { action: 'flag' | 'unflag'; reason?: string }
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  }
+  const { action, reason } = body
   const supabase = createAdminClient()
 
   const validActions = ['flag', 'unflag'] as const
