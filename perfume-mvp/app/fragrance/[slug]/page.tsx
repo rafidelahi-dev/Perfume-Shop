@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'website',
     },
     twitter: {
-      card: 'summary',
+      card: 'summary_large_image',
       title,
       description: entry.metaDescription,
     },
@@ -70,14 +70,15 @@ async function fetchListings(entry: PerfumeCatalogEntry): Promise<FragranceListi
   const filter = entry.searchTerms.map((t) => `perfume_name.ilike.%${t}%`).join(',');
   const { data, error } = await supabase
     .from('listings')
-    .select('id, perfume_name, price, min_price, type, profiles(display_name, username)')
+    .select('id, perfume_name, price, min_price, type, profiles!inner(display_name, username)')
     .or(filter)
     .eq('is_hidden', false)
+    .order('price', { ascending: true })
     .limit(20);
 
   if (error) {
     console.error('[FragrancePage] fetchListings failed:', error.message);
-    throw error;
+    return [];
   }
   return ((data ?? []) as unknown as FragranceListing[]).sort(
     (a, b) => effectivePrice(a) - effectivePrice(b)
