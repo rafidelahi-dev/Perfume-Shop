@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
+import { fragranceCatalog } from "@/lib/fragrance-catalog";
 
 const SITE_URL = "https://cloudperfumebd.com";
 
@@ -53,5 +54,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       };
     });
 
-  return [...staticPages, ...profilePages, ...listingPages];
+  const fragrancePages: MetadataRoute.Sitemap = fragranceCatalog.map((e) => ({
+    url: `${SITE_URL}/fragrance/${e.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...profilePages, ...listingPages, ...fragrancePages];
 }
