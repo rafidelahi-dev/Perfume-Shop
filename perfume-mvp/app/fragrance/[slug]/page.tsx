@@ -28,9 +28,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const entry = getCatalogEntry(slug);
   if (!entry) return { title: 'Not Found' };
 
-  // Avoid doubling the brand: "Dior Sauvage" is the name, brand is "Dior"
-  // Using just the name avoids "Dior Dior Sauvage in Bangladesh"
-  const title = `${entry.name} in Bangladesh | CloudPerfumeBD`;
+  // Include brand only if name doesn't already start with it
+  const title = entry.name.startsWith(entry.brand)
+    ? `${entry.name} in Bangladesh | CloudPerfumeBD`
+    : `${entry.brand} ${entry.name} in Bangladesh | CloudPerfumeBD`;
   return {
     title,
     description: entry.metaDescription,
@@ -39,6 +40,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description: entry.metaDescription,
       type: 'website',
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description: entry.metaDescription,
     },
   };
 }
@@ -49,7 +55,6 @@ type FragranceListing = {
   price: number | null;
   min_price: number | null;
   type: string | null;
-  decant_options: { ml: number; price: number }[] | null;
   profiles: { display_name: string | null; username: string } | null;
 };
 
@@ -63,15 +68,20 @@ function effectivePrice(listing: FragranceListing): number {
 async function fetchListings(entry: PerfumeCatalogEntry): Promise<FragranceListing[]> {
   const supabase = createPublicSupabase();
   const filter = entry.searchTerms.map((t) => `perfume_name.ilike.%${t}%`).join(',');
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('listings')
-    .select('id, perfume_name, price, min_price, type, decant_options, profiles(display_name, username)')
+    .select('id, perfume_name, price, min_price, type, profiles(display_name, username)')
     .or(filter)
     .eq('is_hidden', false)
-    .order('price', { ascending: true })
     .limit(20);
 
-  return (data ?? []) as unknown as FragranceListing[];
+  if (error) {
+    console.error('[FragrancePage] fetchListings failed:', error.message);
+    throw error;
+  }
+  return ((data ?? []) as unknown as FragranceListing[]).sort(
+    (a, b) => effectivePrice(a) - effectivePrice(b)
+  );
 }
 
 export default async function FragrancePage({ params }: Props) {
