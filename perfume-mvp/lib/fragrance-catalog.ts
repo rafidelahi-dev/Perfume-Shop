@@ -67,11 +67,11 @@ export const fragranceCatalog: PerfumeCatalogEntry[] = [
     searchTerms: ["Lattafa Fakhar Black"],
   },
   {
-    slug: "lattafa-fakhar-lattafa-extrait",
-    name: "Lattafa Fakhar Lattafa Extrait",
+    slug: "lattafa-fakhar-extrait",
+    name: "Lattafa Fakhar Extrait",
     brand: "Lattafa",
     metaDescription: "Lattafa Fakhar Extrait in Bangladesh — compare decant prices (5ml/10ml/30ml) from verified sellers. Read reviews & find cheapest sellers near you.",
-    searchTerms: ["Lattafa Fakhar Lattafa Extrait","Lattafa Fakhar Extrait"],
+    searchTerms: ["Lattafa Fakhar Extrait"],
   },
   {
     slug: "lattafa-raghba",
