@@ -1,11 +1,33 @@
 // app/page.tsx
 import type { Metadata } from "next";
+import { createClient } from "@supabase/supabase-js";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import Link from "next/link";
 import TrendingSection from "@/components/TrendingSection";
 import HeroCarousel from "@/components/HeroCarousel";
 import LatestArticles from "@/components/LatestArticles";
+
+export const revalidate = 60;
+
+async function fetchInitialTrending() {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  const { data, error } = await supabase
+    .from("perfume_score")
+    .select(
+      "id, brand, perfume_name, sub_brand, min_price, representative_images, click_score, last_clicked_at"
+    )
+    .order("click_score", { ascending: false })
+    .order("last_clicked_at", { ascending: false })
+    .limit(5);
+
+  if (error) return [];
+  return data ?? [];
+}
 
 export const metadata: Metadata = {
   title: { absolute: "Cloud PerfumeBD — Bangladesh's Fragrance Marketplace" },
@@ -31,7 +53,9 @@ const websiteSchema = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const initialTrending = await fetchInitialTrending();
+
   return (
     <>
       <script
@@ -94,7 +118,7 @@ export default function Home() {
       </section>
 
       {/* Trending Now */}
-      <TrendingSection />
+      <TrendingSection initialPerfumes={initialTrending} />
 
       {/* Latest Articles */}
       <LatestArticles />

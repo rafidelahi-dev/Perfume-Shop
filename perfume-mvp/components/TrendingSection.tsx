@@ -22,6 +22,10 @@ type PerfumeScoreRow = {
 
 type TabType = "now" | "week" | "month" | "brands";
 
+type TrendingSectionProps = {
+  initialPerfumes?: PerfumeScoreRow[];
+};
+
 // --- DATA FETCHING (PRESERVED) ---
 async function fetchTrendingPerfumes(): Promise<PerfumeScoreRow[]>{
   const { data, error} = await supabase
@@ -71,12 +75,13 @@ async function fetchTrendingBrands() {
   return data;
 }
 
-export default function TrendingSection() {
+export default function TrendingSection({ initialPerfumes }: TrendingSectionProps) {
     const [tab, setTab] = useState<TabType>("now");
     const { data: perfumes = [], isLoading, error } = useQuery({
         queryKey: ['trendingPerfumes'],
         queryFn: fetchTrendingPerfumes,
         staleTime: 60_000,
+        initialData: initialPerfumes,
     })
 
     // Lazy tabs: only fetch a tab's data once the user opens it

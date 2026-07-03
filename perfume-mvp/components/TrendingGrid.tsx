@@ -23,7 +23,7 @@ export default function TrendingGrid({ perfumes }: { perfumes: PerfumeScoreRow[]
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10 mt-8">
-      {perfumes.map((p) => {
+      {perfumes.map((p, i) => {
         const img =
           Array.isArray(p.representative_images) && p.representative_images.length > 0
             ? p.representative_images[0]
@@ -45,6 +45,7 @@ export default function TrendingGrid({ perfumes }: { perfumes: PerfumeScoreRow[]
                   src={img}
                   alt={p.perfume_name}
                   fill
+                  priority={i < 4}
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                 />
