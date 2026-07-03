@@ -2,6 +2,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { Facebook, Instagram, Mail } from 'lucide-react'
+import { SOCIAL_LINKS, SUPPORT_EMAIL } from '@/lib/site'
 
 const Footer = () => {
   const currentYear = new Date().getFullYear()
@@ -21,10 +22,10 @@ const Footer = () => {
   ]
 
   const socialLinks = [
-    { icon: Facebook, href: 'https://facebook.com', label: 'Facebook' },
-    { icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
-    { icon: Mail, href: 'mailto:support@cloudperfumebd.com', label: 'Email' }
-  ]
+    { icon: Facebook, href: SOCIAL_LINKS.facebook, label: 'Facebook' },
+    { icon: Instagram, href: SOCIAL_LINKS.instagram, label: 'Instagram' },
+    { icon: Mail, href: `mailto:${SUPPORT_EMAIL}`, label: 'Email' }
+  ].filter((s) => s.href)
 
   return (
     <footer className="bg-[#111] text-white border-t border-[#333]">
@@ -89,7 +90,7 @@ const Footer = () => {
                  {socialLinks.map((social) => {
                    const Icon = social.icon;
                    return (
-                     <a key={social.label} href={social.href} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#d4af37] hover:text-[#111] transition-all duration-300">
+                     <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.label} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#d4af37] hover:text-[#111] transition-all duration-300">
                        <Icon size={18} />
                      </a>
                    )
