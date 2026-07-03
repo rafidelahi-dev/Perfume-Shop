@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabaseServer";
+import { createAdminClient } from "@/lib/supabaseAdmin";
+import { rateLimit, tooManyRequests } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,19 +20,25 @@ export async function POST(req: NextRequest) {
     }
 
     const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-    if (sessionError || !session) {
-      console.error("confirm-contact-otp: no session", sessionError);
+    if (userError || !user) {
+      console.error("confirm-contact-otp: no user", userError);
       return NextResponse.json(
         { error: "Not authenticated" },
         { status: 401 }
       );
     }
 
-    const { data: ok, error } = await supabase.rpc("confirm_contact_otp", {
+    if (!rateLimit(`otp-confirm:${user.id}`, 10, 10 * 60 * 1000)) {
+      return tooManyRequests();
+    }
+
+    const admin = createAdminClient();
+    const { data: ok, error } = await admin.rpc("admin_confirm_contact_otp", {
+      p_user_id: user.id,
       p_phone: phone,
       p_otp: otp,
     });

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Users, List, FileText } from 'lucide-react'
 import { useAdminSellers } from '@/lib/queries/admin'
+import { useAdminBlogPosts } from '@/lib/queries/blog'
 
 const NAV = [
   { href: '/superadmin/sellers',  label: 'Sellers',  icon: Users },
@@ -15,8 +16,10 @@ export default function AdminSidebar() {
   const pathname = usePathname()
 
   const { data: sellers = [] } = useAdminSellers()
+  const { data: blogPosts = [] } = useAdminBlogPosts()
 
   const pendingCount = sellers.filter((s) => s.status === 'pending').length
+  const blogPendingCount = blogPosts.filter((p) => p.status === 'pending_review').length
 
   return (
     <aside className="w-56 min-h-screen bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
@@ -43,6 +46,11 @@ export default function AdminSidebar() {
               {href === '/superadmin/sellers' && pendingCount > 0 && (
                 <span className="bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full leading-none">
                   {pendingCount}
+                </span>
+              )}
+              {href === '/superadmin/blog' && blogPendingCount > 0 && (
+                <span className="bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full leading-none">
+                  {blogPendingCount}
                 </span>
               )}
             </Link>

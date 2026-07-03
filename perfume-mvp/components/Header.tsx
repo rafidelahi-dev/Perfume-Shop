@@ -36,6 +36,14 @@ export default function Header({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Lock body scroll while the mobile drawer is open
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   const safeAvatar =
     avatarUrl && avatarUrl !== "null" && avatarUrl.trim() !== ""
       ? avatarUrl
@@ -124,8 +132,10 @@ export default function Header({
           <nav className="hidden md:flex items-center gap-1">
             <NavLink href="/" label="Home" />
             <NavLink href="/perfumes" label="Perfumes" />
+            <NavLink href="/fragrances" label="Fragrances" />
+            <NavLink href="/blog" label="Blog" />
 
-            <div className="h-6 w-px bg-gray-300 mx-2" /> 
+            <div className="h-6 w-px bg-gray-300 mx-2" />
 
             {loading ? (
               <div className="flex items-center gap-3 ml-2 animate-pulse">
@@ -180,10 +190,12 @@ export default function Header({
 
       {/* Mobile Drawer */}
       {!hideMobileBurger && open && (
-        <div className="fixed inset-0 z-40 bg-white pt-24 px-6 md:hidden animate-in slide-in-from-top-10 fade-in duration-200">
+        <div className="fixed inset-0 z-40 overflow-y-auto bg-white pt-24 px-6 pb-10 md:hidden animate-in slide-in-from-top-10 fade-in duration-200">
            <div className="flex flex-col space-y-4">
             <NavLink href="/" label="Home" />
             <NavLink href="/perfumes" label="Perfumes" />
+            <NavLink href="/fragrances" label="Fragrances" />
+            <NavLink href="/blog" label="Blog" />
             <hr className="border-gray-100" />
             
             {loading ? (
@@ -220,6 +232,7 @@ export default function Header({
                     { href: "/dashboard/perfumes", label: "My Perfumes" },
                     { href: "/dashboard/listings", label: "My Listings" },
                     { href: "/dashboard/reviews", label: "My Reviews" },
+                    { href: "/dashboard/blog", label: "My Articles" },
                     { href: "/dashboard/profile", label: "Profile Settings" },
                   ].map(({ href, label }) => (
                     <Link

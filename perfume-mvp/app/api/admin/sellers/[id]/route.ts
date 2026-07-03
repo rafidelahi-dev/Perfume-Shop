@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabaseAdmin'
+import { requireAdmin } from '@/lib/adminAuth'
 
 type Action = 'approve' | 'flag' | 'ban' | 'unflag' | 'unban'
 
@@ -15,6 +16,9 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { response } = await requireAdmin()
+  if (response) return response
+
   const { id } = await params
   let body: { action: Action; reason?: string }
   try {

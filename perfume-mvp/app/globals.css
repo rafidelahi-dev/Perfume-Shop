@@ -24,10 +24,6 @@ html, body {
 }
 
 
-/* smoother UI */
-header, nav, button, a { 
-  transition: all .2s ease; 
-}
 
 
 /* ---------- Component layer: reusable styles ---------- */
@@ -54,11 +50,14 @@ header, nav, button, a {
 }
 
 
-/* Smooth hover effects */
-a, button {
-  transition: color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease, opacity .2s ease;
+/* Smooth hover effects — properties enumerated; `transition: all` invites jank */
+a, button, header, nav {
+  transition: color .2s ease, background-color .2s ease, border-color .2s ease,
+    box-shadow .2s ease, transform .2s ease, opacity .2s ease;
 }
-a:hover, button:hover {
+
+/* Opt-in hover lift for card-like elements (never on plain text links) */
+.hover-lift:hover {
   transform: translateY(-2px);
 }
 

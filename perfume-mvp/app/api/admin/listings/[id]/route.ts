@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabaseAdmin'
+import { requireAdmin } from '@/lib/adminAuth'
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { response } = await requireAdmin()
+  if (response) return response
+
   const { id } = await params
   let body: { action: 'flag' | 'unflag'; reason?: string }
   try {
@@ -34,6 +38,9 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { response } = await requireAdmin()
+  if (response) return response
+
   const { id } = await params
   const supabase = createAdminClient()
   const { error } = await supabase.from('listings').delete().eq('id', id)

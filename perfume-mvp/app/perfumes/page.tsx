@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: "Browse Perfumes — Buy & Sell Fragrances in Bangladesh",
   description:
     "Explore hundreds of genuine perfume listings from sellers across Bangladesh. Find full bottles, partials, and decants at community-driven prices.",
-  alternates: { canonical: "https://cloudperfumebd.com/perfumes" },
+  alternates: { canonical: "https://www.cloudperfumebd.com/perfumes" },
 };
 
 type RawListing = Omit<PerfumeListing, "profiles"> & {
@@ -64,7 +64,17 @@ export default async function Page() {
   const initialListings = await fetchInitialListings();
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-[110rem] px-4 pt-32 pb-10">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="h-80 rounded-2xl skeleton-shimmer" />
+            ))}
+          </div>
+        </div>
+      }
+    >
       <PerfumesPage initialListings={initialListings} />
     </Suspense>
   );

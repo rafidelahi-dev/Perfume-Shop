@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { createServerSupabase } from "@/lib/supabaseServer";
+import { createAdminClient } from "@/lib/supabaseAdmin";
+import { rateLimit, clientIp, tooManyRequests } from "@/lib/rateLimit";
 
 const resendApiKey = process.env.RESEND_API_KEY;
 const supportEmail = process.env.SUPPORT_EMAIL;
@@ -14,11 +15,18 @@ export async function POST(req: Request) {
     );
   }
 
+  if (!rateLimit(`help:${clientIp(req)}`, 5, 60 * 60 * 1000)) {
+    return tooManyRequests("Too many messages sent, please try again later.");
+  }
+
   const body = await req.json();
   const { email, category, subject, message } = body;
 
   if (!email || !subject || !message) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  }
+  if (String(message).length > 5000 || String(subject).length > 200) {
+    return NextResponse.json({ error: "Message too long" }, { status: 400 });
   }
 
   // 1. SEND EMAIL
@@ -41,8 +49,8 @@ export async function POST(req: Request) {
   }
 
 
-  // 2. (OPTIONAL) STORE IN SUPABASE
-  const supabase = await createServerSupabase();
+  // 2. (OPTIONAL) STORE IN SUPABASE — service role; RLS insert policy removed
+  const supabase = createAdminClient();
 
   const { error: insertError } = await supabase.from("support_messages").insert({
     email,

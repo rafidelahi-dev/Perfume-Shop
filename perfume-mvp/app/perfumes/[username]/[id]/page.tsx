@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Metadata } from "next";
 import { Phone, MessageCircle, Facebook, Zap } from "lucide-react";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import DecantOptions from "../../components/DecantOptions";
 import ImageGallery from "./ImageGallery";
 
@@ -62,7 +63,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? `Decant${sizeStr ? ` ${sizeStr}` : ""}`
     : (listing.type ?? "").charAt(0).toUpperCase() + (listing.type ?? "").slice(1);
 
-  const title = `${listing.brand} ${listing.perfume_name} in Bangladesh — ${typeLabel} — CloudPerfumeBD`;
+  const title = `${listing.brand} ${listing.perfume_name} in Bangladesh — ${typeLabel}`;
   const description = `Buy ${listing.brand} ${listing.perfume_name} ${typeLabel.toLowerCase()} in Bangladesh from ${displayName}. Starting ${priceText}. Authentic fragrance.`.slice(0, 150);
   const image = Array.isArray(listing.images) && listing.images[0]
     ? (listing.images as string[])[0]
@@ -71,6 +72,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
+    alternates: { canonical: `https://www.cloudperfumebd.com/perfumes/${username}/${id}` },
     openGraph: {
       title,
       description,
@@ -166,11 +168,11 @@ export default async function ListingDetailPage({ params }: Props) {
       priceCurrency: "BDT",
       price: Number.isFinite(priceToShow) ? priceToShow.toFixed(2) : undefined,
       availability: "https://schema.org/InStock",
-      url: `https://cloudperfumebd.com/perfumes/${username}/${id}`,
+      url: `https://www.cloudperfumebd.com/perfumes/${username}/${id}`,
       seller: {
         "@type": "Person",
         name: profile.display_name ?? profile.username,
-        url: `https://cloudperfumebd.com/perfumes/${username}`,
+        url: `https://www.cloudperfumebd.com/perfumes/${username}`,
       },
     },
     ...(avgRating !== null
@@ -204,9 +206,9 @@ export default async function ListingDetailPage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Perfumes", item: "https://cloudperfumebd.com/perfumes" },
-      { "@type": "ListItem", position: 2, name: profile.display_name ?? profile.username, item: `https://cloudperfumebd.com/perfumes/${username}` },
-      { "@type": "ListItem", position: 3, name: `${listing.brand} — ${listing.perfume_name}`, item: `https://cloudperfumebd.com/perfumes/${username}/${id}` },
+      { "@type": "ListItem", position: 1, name: "Perfumes", item: "https://www.cloudperfumebd.com/perfumes" },
+      { "@type": "ListItem", position: 2, name: profile.display_name ?? profile.username, item: `https://www.cloudperfumebd.com/perfumes/${username}` },
+      { "@type": "ListItem", position: 3, name: `${listing.brand} — ${listing.perfume_name}`, item: `https://www.cloudperfumebd.com/perfumes/${username}/${id}` },
     ],
   };
 
@@ -346,6 +348,7 @@ export default async function ListingDetailPage({ params }: Props) {
           </div>
         </section>
       </main>
+      <Footer />
     </div>
   );
 }

@@ -3,12 +3,14 @@ import { createClient } from '@supabase/supabase-js';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { fragranceCatalog, getCatalogEntry } from '@/lib/fragrance-catalog';
 import type { PerfumeCatalogEntry } from '@/lib/fragrance-catalog';
+import BlogPostCard from '@/components/blog/BlogPostCard';
 
 export const revalidate = 3600;
 
-const SITE_URL = 'https://cloudperfumebd.com';
+const SITE_URL = 'https://www.cloudperfumebd.com';
 
 function createPublicSupabase() {
   return createClient(
@@ -30,8 +32,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   // Include brand only if name doesn't already start with it
   const title = entry.name.startsWith(entry.brand)
-    ? `${entry.name} in Bangladesh | CloudPerfumeBD`
-    : `${entry.brand} ${entry.name} in Bangladesh | CloudPerfumeBD`;
+    ? `${entry.name} in Bangladesh`
+    : `${entry.brand} ${entry.name} in Bangladesh`;
   return {
     title,
     description: entry.metaDescription,
@@ -65,6 +67,42 @@ function effectivePrice(listing: FragranceListing): number {
   return Number(listing.price ?? NaN);
 }
 
+type RelatedPost = {
+  id: string
+  slug: string
+  title: string
+  excerpt: string
+  cover_image_url: string | null
+  published_at: string | null
+  blog_post_categories: { blog_categories: { name: string; slug: string } | null }[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  blog_post_tags: any[]
+}
+
+async function fetchRelatedPosts(entry: PerfumeCatalogEntry): Promise<RelatedPost[]> {
+  const supabase = createPublicSupabase();
+  const terms = [entry.name.toLowerCase(), entry.brand.toLowerCase()];
+
+  const { data: posts } = await supabase
+    .from('blog_posts')
+    .select(`
+      id, slug, title, excerpt, cover_image_url, published_at,
+      blog_post_categories(blog_categories(name, slug)),
+      blog_post_tags(blog_tags(name, slug))
+    `)
+    .eq('status', 'published')
+    .limit(20);
+
+  if (!posts) return [];
+
+  return (posts as unknown as RelatedPost[]).filter((p) => {
+    const catSlugs: string[] = p.blog_post_categories?.map((c: any) => c.blog_categories?.slug ?? '').filter(Boolean) ?? [];
+    const tagSlugs: string[] = p.blog_post_tags?.map((t: any) => t.blog_tags?.slug ?? '').filter(Boolean) ?? [];
+    const all = [...catSlugs, ...tagSlugs];
+    return terms.some((term) => all.some((s) => s.includes(term) || term.includes(s)));
+  }).slice(0, 2);
+}
+
 async function fetchListings(entry: PerfumeCatalogEntry): Promise<FragranceListing[]> {
   const supabase = createPublicSupabase();
   const filter = entry.searchTerms.map((t) => `perfume_name.ilike.%${t}%`).join(',');
@@ -90,7 +128,10 @@ export default async function FragrancePage({ params }: Props) {
   const entry = getCatalogEntry(slug);
   if (!entry) notFound();
 
-  const listings = await fetchListings(entry);
+  const [listings, relatedPosts] = await Promise.all([
+    fetchListings(entry),
+    fetchRelatedPosts(entry),
+  ]);
 
   const prices = listings.map(effectivePrice).filter(Number.isFinite);
   const lowPrice = prices.length > 0 ? Math.min(...prices) : null;
@@ -169,7 +210,30 @@ export default async function FragrancePage({ params }: Props) {
             })}
           </ul>
         )}
+
+        {relatedPosts.length > 0 && (
+          <div className="mt-16">
+            <h2 className="text-xl font-serif font-semibold text-[#1a1a1a] mb-6">Related Reading</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {relatedPosts.map((post) => {
+                const cat = post.blog_post_categories?.[0]?.blog_categories?.name ?? null;
+                return (
+                  <BlogPostCard
+                    key={post.id}
+                    slug={post.slug}
+                    title={post.title}
+                    excerpt={post.excerpt}
+                    cover_image_url={post.cover_image_url}
+                    published_at={post.published_at}
+                    category={cat}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
       </main>
+      <Footer />
     </div>
   );
 }

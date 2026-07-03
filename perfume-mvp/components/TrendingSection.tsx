@@ -79,19 +79,25 @@ export default function TrendingSection() {
         staleTime: 60_000,
     })
 
+    // Lazy tabs: only fetch a tab's data once the user opens it
     const { data: week = [] } = useQuery({
         queryKey: ["trending-week"],
-        queryFn: fetchTrendingWeek
+        queryFn: fetchTrendingWeek,
+        enabled: tab === "week",
+        staleTime: 60_000,
     });
 
     const { data: month = [] } = useQuery({
         queryKey: ["trending-month"],
-        queryFn: fetchTrendingMonth
+        queryFn: fetchTrendingMonth,
+        enabled: tab === "month",
+        staleTime: 60_000,
     });
 
     const { data: brands = [] } = useQuery({
         queryKey: ["trendingBrands"],
         queryFn: fetchTrendingBrands,
+        enabled: tab === "brands",
         staleTime: 60_000,
     });
 

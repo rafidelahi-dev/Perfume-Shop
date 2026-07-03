@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabaseAdmin'
+import { requireAdmin } from '@/lib/adminAuth'
 
 export async function GET() {
+  const { response } = await requireAdmin()
+  if (response) return response
+
   const supabase = createAdminClient()
 
   const { data, error } = await supabase
