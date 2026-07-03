@@ -50,6 +50,7 @@ export async function fetchPublicListings(filters: {
   let query = supabase
     .from("listings")
     .select(`*, profiles:profiles(display_name, username)`)
+    .eq("is_hidden", false)
     .order("created_at", { ascending: false });
   if (filters.brand) query = query.ilike("brand", `%${filters.brand}%`);
   if (filters.q)

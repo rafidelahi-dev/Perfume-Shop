@@ -1,19 +1,27 @@
 // server component
-import { redirect } from "next/navigation";
-import { createServerSupabase } from "@/lib/supabaseServer";
+import { redirect, notFound } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
+import type { Metadata } from "next";
+import { Phone, MessageCircle, Facebook, Zap } from "lucide-react";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import DecantOptions from "../../components/DecantOptions";
 import ImageGallery from "./ImageGallery";
-import type { Metadata } from "next";
 
-// ** Importing relevant icons for contact buttons to improve UX **
-import { Phone, MessageCircle, Facebook, Zap } from 'lucide-react'; // Using lucide-react for icons
+export const revalidate = 300;
+
+function createPublicSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
 
 type Props = { params: Promise<{ username: string; id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username, id } = await params;
-  const supabase = await createServerSupabase();
+  const supabase = createPublicSupabase();
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -27,9 +35,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const { data: listing } = await supabase
     .from("listings")
-    .select("brand, perfume_name, type, price, min_price, images")
+    .select("brand, perfume_name, type, price, min_price, decant_options, images")
     .eq("id", id)
     .eq("user_id", profile.id)
+    .eq("is_hidden", false)
     .single();
 
   if (!listing) {
@@ -40,10 +49,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const priceNum = isDecant && listing.min_price != null
     ? Number(listing.min_price)
     : Number(listing.price ?? NaN);
-  const priceText = Number.isFinite(priceNum) ? `TK${priceNum.toFixed(0)}` : "Price on Contact";
+  const priceText = Number.isFinite(priceNum) ? `TK${priceNum.toFixed(0)}` : "price on contact";
+  const displayName = profile.display_name ?? profile.username;
 
-  const title = `${listing.brand} — ${listing.perfume_name} | ${profile.display_name ?? profile.username}`;
-  const description = `${listing.type?.toUpperCase()} • ${priceText} • Sold by ${profile.display_name ?? profile.username} on CloudPerfumeBD`;
+  type DecantOption = { ml: number; price: number };
+  const decantOptions = Array.isArray(listing.decant_options)
+    ? (listing.decant_options as DecantOption[]).sort((a, b) => a.ml - b.ml)
+    : [];
+  const sizeStr = isDecant && decantOptions.length > 0
+    ? decantOptions.map((o) => `${o.ml}ml`).join("/")
+    : null;
+  const typeLabel = isDecant
+    ? `Decant${sizeStr ? ` ${sizeStr}` : ""}`
+    : (listing.type ?? "").charAt(0).toUpperCase() + (listing.type ?? "").slice(1);
+
+  const title = `${listing.brand} ${listing.perfume_name} in Bangladesh — ${typeLabel}`;
+  const description = `Buy ${listing.brand} ${listing.perfume_name} ${typeLabel.toLowerCase()} in Bangladesh from ${displayName}. Starting ${priceText}. Authentic fragrance.`.slice(0, 150);
   const image = Array.isArray(listing.images) && listing.images[0]
     ? (listing.images as string[])[0]
     : undefined;
@@ -51,6 +72,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
+    alternates: { canonical: `https://www.cloudperfumebd.com/perfumes/${username}/${id}` },
     openGraph: {
       title,
       description,
@@ -68,7 +90,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ListingDetailPage({ params }: Props) {
   const { username, id } = await params;
-  const supabase = await createServerSupabase();
+  const supabase = createPublicSupabase();
 
   // 2. Find seller by username
   const { data: profile, error: pErr } = await supabase
@@ -88,8 +110,35 @@ export default async function ListingDetailPage({ params }: Props) {
     `)
     .eq("id", id)
     .eq("user_id", profile.id)
+    .eq("is_hidden", false)
     .single();
-  if (lErr || !listing) redirect(`/perfumes/${username}`);
+  if (lErr || !listing) notFound();
+
+  // Fetch community reviews for this perfume (public, no auth needed)
+  const { data: perfumeReviews } = await supabase
+    .from("reviews")
+    .select("rating, review_text, created_at")
+    .eq("brand", listing.brand ?? "")
+    .eq("perfume_name", listing.perfume_name ?? "")
+    .not("rating", "is", null)
+    .limit(20);
+
+  const ratingMap: Record<string, number> = {
+    love: 5,
+    like: 4,
+    okay: 3,
+    dislike: 2,
+    hate: 1,
+  };
+
+  const numericRatings = (perfumeReviews ?? [])
+    .map((r) => ratingMap[r.rating ?? ""])
+    .filter((n): n is number => n !== undefined);
+
+  const avgRating =
+    numericRatings.length > 0
+      ? numericRatings.reduce((a, b) => a + b, 0) / numericRatings.length
+      : null;
 
   // --- Calculated Properties ---
 
@@ -119,22 +168,47 @@ export default async function ListingDetailPage({ params }: Props) {
       priceCurrency: "BDT",
       price: Number.isFinite(priceToShow) ? priceToShow.toFixed(2) : undefined,
       availability: "https://schema.org/InStock",
-      url: `https://cloudperfumebd.com/perfumes/${username}/${id}`,
+      url: `https://www.cloudperfumebd.com/perfumes/${username}/${id}`,
       seller: {
         "@type": "Person",
         name: profile.display_name ?? profile.username,
-        url: `https://cloudperfumebd.com/perfumes/${username}`,
+        url: `https://www.cloudperfumebd.com/perfumes/${username}`,
       },
     },
+    ...(avgRating !== null
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: avgRating.toFixed(1),
+            reviewCount: numericRatings.length,
+            bestRating: 5,
+            worstRating: 1,
+          },
+          review: (perfumeReviews ?? [])
+            .filter((r) => r.review_text)
+            .slice(0, 3)
+            .map((r) => ({
+              "@type": "Review",
+              reviewRating: {
+                "@type": "Rating",
+                ratingValue: ratingMap[r.rating ?? ""] ?? 3,
+                bestRating: 5,
+                worstRating: 1,
+              },
+              reviewBody: r.review_text,
+              datePublished: r.created_at?.split("T")[0],
+            })),
+        }
+      : {}),
   };
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Perfumes", item: "https://cloudperfumebd.com/perfumes" },
-      { "@type": "ListItem", position: 2, name: profile.display_name ?? profile.username, item: `https://cloudperfumebd.com/perfumes/${username}` },
-      { "@type": "ListItem", position: 3, name: `${listing.brand} — ${listing.perfume_name}`, item: `https://cloudperfumebd.com/perfumes/${username}/${id}` },
+      { "@type": "ListItem", position: 1, name: "Perfumes", item: "https://www.cloudperfumebd.com/perfumes" },
+      { "@type": "ListItem", position: 2, name: profile.display_name ?? profile.username, item: `https://www.cloudperfumebd.com/perfumes/${username}` },
+      { "@type": "ListItem", position: 3, name: `${listing.brand} — ${listing.perfume_name}`, item: `https://www.cloudperfumebd.com/perfumes/${username}/${id}` },
     ],
   };
 
@@ -274,6 +348,7 @@ export default async function ListingDetailPage({ params }: Props) {
           </div>
         </section>
       </main>
+      <Footer />
     </div>
   );
 }

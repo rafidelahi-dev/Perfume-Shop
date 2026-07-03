@@ -41,31 +41,31 @@ const Footer = () => {
               and experience the world&apos;s finest perfumes.
             </p>
             
-            {/* Newsletter */}
+            {/* Journal CTA */}
             <div className="max-w-sm mx-auto sm:mx-0">
-               <h4 className="text-xs font-bold uppercase tracking-widest text-[#d4af37] mb-3">Subscribe</h4>
-               <div className="flex gap-2">
-                 <input 
-                   type="email" 
-                   placeholder="Email address" 
-                   className="flex-1 bg-white/5 border border-white/10 rounded-md px-4 py-2 text-sm focus:outline-none focus:border-[#d4af37] transition-colors"
-                 />
-                 <button className="bg-[#d4af37] text-[#111] px-4 py-2 rounded-md text-sm font-bold hover:bg-[#b8941f] transition-colors">
-                   Join
-                 </button>
-               </div>
+               <h4 className="text-xs font-bold uppercase tracking-widest text-[#d4af37] mb-3">The Journal</h4>
+               <p className="text-gray-400 text-sm mb-4">
+                 Guides, honest reviews, and decant price checks for perfume lovers in Bangladesh.
+               </p>
+               <Link
+                 href="/blog"
+                 className="inline-block bg-[#d4af37] text-[#111] px-5 py-2 rounded-md text-sm font-bold hover:bg-[#b8941f] transition-colors"
+               >
+                 Read Articles
+               </Link>
             </div>
           </div>
 
           {/* Links Section */}
           <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-8">
-            {/* Marketplace */}
+            {/* Discover */}
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-widest text-white mb-4">Marketplace</h3>
+              <h3 className="text-sm font-bold uppercase tracking-widest text-white mb-4">Discover</h3>
               <ul className="space-y-3">
-                <li><Link href="/perfumes" className="text-gray-400 hover:text-[#d4af37] transition-colors text-sm">Explore Fragrances</Link></li>
+                <li><Link href="/perfumes" className="text-gray-400 hover:text-[#d4af37] transition-colors text-sm">Explore Listings</Link></li>
+                <li><Link href="/fragrances" className="text-gray-400 hover:text-[#d4af37] transition-colors text-sm">Fragrance Directory</Link></li>
+                <li><Link href="/blog" className="text-gray-400 hover:text-[#d4af37] transition-colors text-sm">Blog & Guides</Link></li>
                 <li><Link href="/dashboard/listings" className="text-gray-400 hover:text-[#d4af37] transition-colors text-sm">Sell Perfume</Link></li>
-                <li><Link href="/new-arrivals" className="text-gray-400 hover:text-[#d4af37] transition-colors text-sm">New Arrivals</Link></li>
               </ul>
             </div>
 

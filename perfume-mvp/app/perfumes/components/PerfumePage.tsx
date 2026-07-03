@@ -4,6 +4,7 @@ import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import PerfumeGrid from "../components/PerfumeGrid";
 import { useUiStore } from "@/stores/useUiStore";
 import { Sparkles, Filter, X, Search } from "lucide-react";
@@ -41,6 +42,7 @@ async function fetchPerfumes(): Promise<PerfumeListing[]> {
         whatsapp_number
     )
     `)
+    .eq("is_hidden", false)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -60,10 +62,11 @@ async function fetchPerfumes(): Promise<PerfumeListing[]> {
   return Number(p.price ?? NaN);
 }
 
-export default function PerfumesPage() {
+export default function PerfumesPage({ initialListings }: { initialListings?: PerfumeListing[] }) {
   const { data: listings = [], isLoading, error } = useQuery({
     queryKey: ["perfumes"],
     queryFn: fetchPerfumes,
+    initialData: initialListings,
   });
 
   const isOpen = useUiStore((s) => s.isFilterOpen);
@@ -243,10 +246,10 @@ export default function PerfumesPage() {
                 {/* Quick presets */}
                 <div className="mt-2 flex flex-wrap gap-2">
                   {[
-                    { label: "Under TK50", min: null, max: 50 },
-                    { label: "TK50–TK100", min: 50, max: 100 },
-                    { label: "TK100–TK200", min: 100, max: 200 },
-                    { label: "Over TK200", min: 200, max: null },
+                    { label: "Under TK500", min: null, max: 500 },
+                    { label: "TK500–1500", min: 500, max: 1500 },
+                    { label: "TK1500–5000", min: 1500, max: 5000 },
+                    { label: "Over TK5000", min: 5000, max: null },
                   ].map((p) => (
                     <button
                       key={p.label}
@@ -347,6 +350,7 @@ export default function PerfumesPage() {
           error={error}
         />
       </div>
+      <Footer />
     </div>
   );
 }

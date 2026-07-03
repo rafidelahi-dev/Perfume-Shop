@@ -31,14 +31,16 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   // Fetch profile for Header pre-population (avoids client-side flash)
   let displayName: string | null = null;
   let avatarUrl: string | null = null;
+  let isPending = false;
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("display_name, username, avatar_url")
+      .select("display_name, username, avatar_url, status")
       .eq("id", user.id)
       .single();
     displayName = profile?.display_name || profile?.username || "User";
     avatarUrl = profile?.avatar_url ?? null;
+    isPending = profile?.status === 'pending';
   }
 
 
@@ -60,6 +62,13 @@ export default async function DashboardLayout({ children }: { children: ReactNod
         {/* Pass the email/user data safely */}
         <DashboardSidebar email={email} /> 
         <main className="flex-1 lg:ml-64 min-h-[calc(100vh-64px)] p-4 lg:p-6 pt-16 lg:pt-6">
+
+          {isPending && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 text-sm text-amber-800 flex items-start gap-2">
+              <span className="font-semibold shrink-0">Your account is pending approval.</span>
+              <span>You&apos;ll be able to create listings once an admin reviews your profile. Make sure your phone number and a WhatsApp or Facebook contact are filled in.</span>
+            </div>
+          )}
 
           {children}
 

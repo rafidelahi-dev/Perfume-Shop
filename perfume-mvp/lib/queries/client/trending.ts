@@ -57,6 +57,7 @@ export async function fetchPublicPerfumes() {
         contact_number, messenger_link, whatsapp_number
       )
     `)
+    .eq("is_hidden", false)
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data ?? [];

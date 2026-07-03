@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "./providers";
 
-const SITE_URL = "https://cloudperfumebd.com";
+const SITE_URL = "https://www.cloudperfumebd.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

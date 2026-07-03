@@ -5,26 +5,27 @@ import Header from "@/components/Header";
 import Link from "next/link";
 import TrendingSection from "@/components/TrendingSection";
 import HeroCarousel from "@/components/HeroCarousel";
+import LatestArticles from "@/components/LatestArticles";
 
 export const metadata: Metadata = {
-  title: "Cloud PerfumeBD — Bangladesh's Fragrance Marketplace",
+  title: { absolute: "Cloud PerfumeBD — Bangladesh's Fragrance Marketplace" },
   description:
     "Discover, decant & deal — Bangladesh's community-powered marketplace for genuine perfumes. Buy and sell full bottles, partials, and decants.",
-  alternates: { canonical: "https://cloudperfumebd.com" },
+  alternates: { canonical: "https://www.cloudperfumebd.com" },
 };
 
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "Cloud PerfumeBD",
-  url: "https://cloudperfumebd.com",
+  url: "https://www.cloudperfumebd.com",
   description:
     "Bangladesh's community-powered marketplace for genuine perfumes. Discover, buy, and sell full bottles, partials, and decants.",
   potentialAction: {
     "@type": "SearchAction",
     target: {
       "@type": "EntryPoint",
-      urlTemplate: "https://cloudperfumebd.com/perfumes?q={search_term_string}",
+      urlTemplate: "https://www.cloudperfumebd.com/perfumes?q={search_term_string}",
     },
     "query-input": "required name=search_term_string",
   },
@@ -47,7 +48,7 @@ export default function Home() {
         <div className="relative z-10 mx-auto max-w-7xl text-center px-6 sm:px-12 flex flex-col items-center">
 
           <div className="inline-block mb-4 px-4 py-1.5 rounded-full border border-[#d4af37]/30 bg-[#d4af37]/10 backdrop-blur-md">
-            <span className="text-xs font-semibold tracking-widest uppercase text-[#8a7224]">The New Standard</span>
+            <span className="text-xs font-semibold tracking-widest uppercase text-[#8a7224]">Learn · Discover · Trade</span>
           </div>
 
           <h1 className="text-5xl font-light tracking-tight text-[#111] sm:text-7xl lg:text-8xl mb-8">
@@ -56,21 +57,21 @@ export default function Home() {
           </h1>
 
           <p className="mt-2 text-lg sm:text-xl text-[#111] max-w-2xl mx-auto leading-relaxed font-light">
-            {"A community-powered marketplace for genuine perfumes and decants. Explore rare finds, connect with sellers, and indulge your passion for fragrance."}
+            {"Bangladesh's honest home for fragrance — learn what's worth your money, compare real decant prices, and trade with a community of perfume lovers."}
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <Link
               href="/perfumes"
-              className="btn bg-[#1a1a1a] text-white hover:bg-black border-none text-base px-10 py-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+              className="btn hover-lift bg-[#1a1a1a] text-white hover:bg-black border-none text-base px-10 py-4 rounded-full shadow-xl hover:shadow-2xl duration-300"
             >
               Explore Collection
             </Link>
             <Link
-              href="/signup"
-              className="btn bg-white/50 backdrop-blur-md border border-[#1a1a1a]/10 text-[#1a1a1a] hover:bg-white text-base px-10 py-4 rounded-full shadow-sm hover:shadow-md transition-all duration-300"
+              href="/blog"
+              className="btn hover-lift bg-white/50 backdrop-blur-md border border-[#1a1a1a]/10 text-[#1a1a1a] hover:bg-white text-base px-10 py-4 rounded-full shadow-sm hover:shadow-md duration-300"
             >
-              Become a Seller
+              Learn Fragrance
             </Link>
           </div>
 
@@ -82,7 +83,7 @@ export default function Home() {
             </div>
             <div className="flex flex-col items-center gap-2">
               <span className="text-[#d4af37] text-lg">✦</span>
-              <span className="font-bold">Nation wide</span>
+              <span className="font-bold">Nationwide</span>
             </div>
             <div className="flex flex-col items-center gap-2">
               <span className="text-[#d4af37] text-lg">✦</span>
@@ -94,6 +95,9 @@ export default function Home() {
 
       {/* Trending Now */}
       <TrendingSection />
+
+      {/* Latest Articles */}
+      <LatestArticles />
 
       {/* CTA Section */}
       <section className="relative py-24 px-6 sm:px-12 overflow-hidden">

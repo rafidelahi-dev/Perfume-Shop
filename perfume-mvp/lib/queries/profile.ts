@@ -16,6 +16,10 @@ export type Profile = {
   website: string | null;
   location: string | null;
   bio: string | null;
+  status?: 'pending' | 'active' | 'flagged' | 'banned';
+  flag_reason?: string | null;
+  ban_reason?: string | null;
+  status_updated_at?: string | null;
   created_at?: string;
   updated_at?: string;
   email?: string | null;

@@ -8,6 +8,7 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: [
           "/dashboard/",
+          "/superadmin/",
           "/login",
           "/signup",
           "/reset",
@@ -15,6 +16,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: "https://cloudperfumebd.com/sitemap.xml",
+    sitemap: "https://www.cloudperfumebd.com/sitemap.xml",
   };
 }

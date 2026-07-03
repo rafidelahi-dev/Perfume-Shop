@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabaseServer";
+import { createAdminClient } from "@/lib/supabaseAdmin";
+import { rateLimit, clientIp, tooManyRequests } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,18 +16,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Make sure user is logged in
+    // Make sure user is logged in (getUser verifies the JWT server-side)
     const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-    if (sessionError || !session) {
-      console.error("send-contact-otp: no session", sessionError);
+    if (userError || !user) {
+      console.error("send-contact-otp: no user", userError);
       return NextResponse.json(
         { error: "Not authenticated" },
         { status: 401 }
       );
+    }
+
+    // App-level rate limit on top of the DB-level 3-per-10-min limit
+    if (
+      !rateLimit(`otp:${user.id}`, 3, 10 * 60 * 1000) ||
+      !rateLimit(`otp-ip:${clientIp(req)}`, 6, 10 * 60 * 1000)
+    ) {
+      return tooManyRequests("Too many OTP requests, please try again later.");
     }
 
     const apiKey = process.env.BULKSMSBD_API_KEY;
@@ -44,7 +54,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid phone format. Use +8801*********" }, { status: 400 });
     }
 
-    const { data: existing, error: existingError} = await supabase
+    const admin = createAdminClient();
+
+    const { data: existing, error: existingError} = await admin
       .from("profiles")
       .select("id")
       .eq("contact_number", normalized)
@@ -60,15 +72,17 @@ export async function POST(req: NextRequest) {
         )
       }
 
-      if(existing && existing.id !== session.user.id){
+      if(existing && existing.id !== user.id){
         return NextResponse.json(
-          { error: "The phone number is already verfied by another account"},
+          { error: "The phone number is already verified by another account"},
           { status: 409},
         )
       }
 
-    // 1) Ask Supabase to create + store an OTP (does NOT send SMS)
-    const { data: otp, error } = await supabase.rpc("send_contact_otp", {
+    // 1) Create + store an OTP (does NOT send SMS). Service-role-only RPC —
+    // the old authenticated-callable version returned the OTP to the caller.
+    const { data: otp, error } = await admin.rpc("admin_send_contact_otp", {
+      p_user_id: user.id,
       p_phone: phone,
     });
 
