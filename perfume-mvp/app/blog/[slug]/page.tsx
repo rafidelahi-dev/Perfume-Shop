@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import NextImage from 'next/image'
-import { generateHTML } from '@tiptap/core'
+import { renderToHTMLString } from '@tiptap/static-renderer/pm/html-string'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import TiptapLink from '@tiptap/extension-link'
@@ -77,7 +77,10 @@ export default async function BlogPostPage({ params }: Props) {
 
   if (!post) notFound()
 
-  const html = generateHTML(post.content as any, [StarterKit, Image, TiptapLink, Underline])
+  const html = renderToHTMLString({
+    content: post.content as any,
+    extensions: [StarterKit, Image, TiptapLink, Underline],
+  })
 
   const categories: { name: string; slug: string }[] =
     (post as any).blog_post_categories?.map((c: any) => c.blog_categories).filter(Boolean) ?? []
