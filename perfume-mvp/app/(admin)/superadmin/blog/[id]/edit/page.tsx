@@ -109,6 +109,24 @@ export default function AdminEditBlogPage({ params }: Params) {
               </button>
             </>
           )}
+          {(post.status === 'draft' || post.status === 'rejected') && (
+            <button
+              onClick={() => save({ status: 'published', rejection_note: null })}
+              disabled={updateMutation.isPending}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 disabled:opacity-60"
+            >
+              Publish
+            </button>
+          )}
+          {post.status === 'published' && (
+            <button
+              onClick={() => save({ status: 'draft' })}
+              disabled={updateMutation.isPending}
+              className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 disabled:opacity-60"
+            >
+              Unpublish
+            </button>
+          )}
           <button
             onClick={() => save()}
             disabled={updateMutation.isPending}
