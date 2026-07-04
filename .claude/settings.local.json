@@ -42,7 +42,8 @@
       "PowerShell(cd \"E:\\\\Projects\\\\Perfume-Shop\\\\perfume-mvp\"; Get-ChildItem -Recurse -File | Where-Object { $_.FullName -match \"blog\" } | Select-Object -ExpandProperty FullName | Sort-Object)",
       "Bash(npm i *)",
       "Bash(npx update-browserslist-db@latest)",
-      "Bash(npm view *)"
+      "Bash(npm view *)",
+      "Bash(npm audit *)"
     ]
   },
   "enabledPlugins": {
