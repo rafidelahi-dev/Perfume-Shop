@@ -1,16 +1,12 @@
 import { MetadataRoute } from "next";
-import { createClient } from "@supabase/supabase-js";
-import { fragranceCatalog } from "@/lib/fragrance-catalog";
+import { createPublicSupabase } from "@/lib/queries/perfumes";
 
 const SITE_URL = "https://www.cloudperfumebd.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createPublicSupabase();
 
-  const [{ data: profiles }, { data: listings }, { data: blogPosts }] = await Promise.all([
+  const [{ data: profiles }, { data: listings }, { data: blogPosts }, { data: perfumes }] = await Promise.all([
     supabase
       .from("profiles")
       .select("username, updated_at")
@@ -25,6 +21,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .select("slug, updated_at")
       .eq("status", "published")
       .order("published_at", { ascending: false }),
+    supabase
+      .from("perfumes")
+      .select("slug, updated_at"),
   ]);
 
   const staticPages: MetadataRoute.Sitemap = [
@@ -62,9 +61,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       };
     });
 
-  const fragrancePages: MetadataRoute.Sitemap = fragranceCatalog.map((e) => ({
-    url: `${SITE_URL}/fragrance/${e.slug}`,
-    lastModified: new Date(),
+  const fragrancePages: MetadataRoute.Sitemap = (perfumes ?? []).map((p) => ({
+    url: `${SITE_URL}/fragrance/${p.slug}`,
+    lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
     changeFrequency: "weekly" as const,
     priority: 0.7,
   }));

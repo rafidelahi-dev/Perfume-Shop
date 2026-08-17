@@ -2,7 +2,9 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import { fragranceCatalog } from '@/lib/fragrance-catalog'
+import { createPublicSupabase } from '@/lib/queries/perfumes'
+
+export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'Fragrance Directory — Prices & Decants in Bangladesh',
@@ -11,10 +13,28 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://www.cloudperfumebd.com/fragrances' },
 }
 
-export default function FragranceDirectoryPage() {
-  // Group catalog by brand, alphabetical
-  const byBrand = new Map<string, typeof fragranceCatalog>()
-  for (const entry of fragranceCatalog) {
+type DirectoryEntry = { slug: string; name: string; brand: string }
+
+async function fetchDirectoryEntries(): Promise<DirectoryEntry[]> {
+  const supabase = createPublicSupabase()
+  const { data, error } = await supabase
+    .from('perfumes')
+    .select('slug, name, brand')
+    .order('brand', { ascending: true })
+    .order('name', { ascending: true })
+
+  if (error) {
+    console.error('[FragranceDirectory] fetch failed:', error.message)
+    return []
+  }
+  return data ?? []
+}
+
+export default async function FragranceDirectoryPage() {
+  const entries = await fetchDirectoryEntries()
+
+  const byBrand = new Map<string, DirectoryEntry[]>()
+  for (const entry of entries) {
     const list = byBrand.get(entry.brand) ?? []
     list.push(entry)
     byBrand.set(entry.brand, list)
@@ -34,7 +54,7 @@ export default function FragranceDirectoryPage() {
               Fragrance Directory
             </h1>
             <p className="text-gray-500 max-w-2xl">
-              {fragranceCatalog.length} fragrances tracked across {brands.length} brands.
+              {entries.length} fragrances tracked across {brands.length} brands.
               Each page shows live listings and the cheapest decants available in Bangladesh.
             </p>
           </div>
