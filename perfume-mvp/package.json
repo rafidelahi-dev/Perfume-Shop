@@ -6,8 +6,7 @@
     "dev": "next dev",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "next lint",
-    "generate:catalog": "node scripts/generate-fragrance-catalog.mjs"
+    "lint": "next lint"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
