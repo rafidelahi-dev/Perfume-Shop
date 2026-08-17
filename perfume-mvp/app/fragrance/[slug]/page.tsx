@@ -1,53 +1,49 @@
 import { notFound } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { fragranceCatalog, getCatalogEntry } from '@/lib/fragrance-catalog';
-import type { PerfumeCatalogEntry } from '@/lib/fragrance-catalog';
 import BlogPostCard from '@/components/blog/BlogPostCard';
+import SimilarPerfumeCard from '@/components/perfume/SimilarPerfumeCard';
+import {
+  createPublicSupabase,
+  fetchAllPerfumeSlugs,
+  fetchPerfumeBySlug,
+  fetchSimilarPerfumes,
+  fetchPerfumeReviewAggregate,
+  type PerfumeProfile,
+} from '@/lib/queries/perfumes';
 
 export const revalidate = 3600;
 
 const SITE_URL = 'https://www.cloudperfumebd.com';
-
-function createPublicSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-}
+const MIN_REVIEWS_FOR_CHART = 3;
 
 type Props = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
-  return fragranceCatalog.map((e) => ({ slug: e.slug }));
+export async function generateStaticParams() {
+  const slugs = await fetchAllPerfumeSlugs();
+  return slugs.map((e) => ({ slug: e.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const entry = getCatalogEntry(slug);
-  if (!entry) return { title: 'Not Found' };
+  const perfume = await fetchPerfumeBySlug(slug);
+  if (!perfume) return { title: 'Not Found' };
 
-  // Include brand only if name doesn't already start with it
-  const title = entry.name.startsWith(entry.brand)
-    ? `${entry.name} in Bangladesh`
-    : `${entry.brand} ${entry.name} in Bangladesh`;
+  const title = perfume.name.startsWith(perfume.brand)
+    ? `${perfume.name} in Bangladesh`
+    : `${perfume.brand} ${perfume.name} in Bangladesh`;
+  const description =
+    perfume.meta_description ??
+    `${perfume.name} in Bangladesh — compare decant prices from verified sellers.`;
+
   return {
     title,
-    description: entry.metaDescription,
-    alternates: { canonical: `${SITE_URL}/fragrance/${entry.slug}` },
-    openGraph: {
-      title,
-      description: entry.metaDescription,
-      type: 'website',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description: entry.metaDescription,
-    },
+    description,
+    alternates: { canonical: `${SITE_URL}/fragrance/${perfume.slug}` },
+    openGraph: { title, description, type: 'website' },
+    twitter: { card: 'summary_large_image', title, description },
   };
 }
 
@@ -75,13 +71,12 @@ type RelatedPost = {
   cover_image_url: string | null
   published_at: string | null
   blog_post_categories: { blog_categories: { name: string; slug: string } | null }[]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  blog_post_tags: any[]
+  blog_post_tags: { blog_tags: { name: string; slug: string } | null }[]
 }
 
-async function fetchRelatedPosts(entry: PerfumeCatalogEntry): Promise<RelatedPost[]> {
+async function fetchRelatedPosts(perfume: PerfumeProfile): Promise<RelatedPost[]> {
   const supabase = createPublicSupabase();
-  const terms = [entry.name.toLowerCase(), entry.brand.toLowerCase()];
+  const terms = [perfume.name.toLowerCase(), perfume.brand.toLowerCase()];
 
   const { data: posts } = await supabase
     .from('blog_posts')
@@ -96,16 +91,17 @@ async function fetchRelatedPosts(entry: PerfumeCatalogEntry): Promise<RelatedPos
   if (!posts) return [];
 
   return (posts as unknown as RelatedPost[]).filter((p) => {
-    const catSlugs: string[] = p.blog_post_categories?.map((c: any) => c.blog_categories?.slug ?? '').filter(Boolean) ?? [];
-    const tagSlugs: string[] = p.blog_post_tags?.map((t: any) => t.blog_tags?.slug ?? '').filter(Boolean) ?? [];
+    const catSlugs = p.blog_post_categories?.map((c) => c.blog_categories?.slug ?? '').filter(Boolean) ?? [];
+    const tagSlugs = p.blog_post_tags?.map((t) => t.blog_tags?.slug ?? '').filter(Boolean) ?? [];
     const all = [...catSlugs, ...tagSlugs];
     return terms.some((term) => all.some((s) => s.includes(term) || term.includes(s)));
   }).slice(0, 2);
 }
 
-async function fetchListings(entry: PerfumeCatalogEntry): Promise<FragranceListing[]> {
+async function fetchListings(perfume: PerfumeProfile): Promise<FragranceListing[]> {
   const supabase = createPublicSupabase();
-  const filter = entry.searchTerms.map((t) => `perfume_name.ilike.%${t}%`).join(',');
+  const terms = perfume.search_terms.length > 0 ? perfume.search_terms : [perfume.name];
+  const filter = terms.map((t) => `perfume_name.ilike.%${t}%`).join(',');
   const { data, error } = await supabase
     .from('listings')
     .select('id, perfume_name, price, min_price, type, profiles!inner(display_name, username)')
@@ -123,15 +119,73 @@ async function fetchListings(entry: PerfumeCatalogEntry): Promise<FragranceListi
   );
 }
 
+const LONGEVITY_ORDER = ['0-2h', '2-5h', '5-7h', '7-10h', '10h+'] as const;
+const GENDER_ORDER = ['very_masculine', 'masculine', 'unisex', 'feminine', 'very_feminine'] as const;
+const GENDER_LABELS: Record<string, string> = {
+  very_masculine: 'Very Masc.',
+  masculine: 'Masculine',
+  unisex: 'Unisex',
+  feminine: 'Feminine',
+  very_feminine: 'Very Fem.',
+};
+const OCCASION_ORDER = ['Winter', 'Spring', 'Summer', 'Fall', 'Day', 'Night'] as const;
+
+function DistributionBar({
+  counts,
+  order,
+  labels,
+  total,
+}: {
+  counts: Record<string, number>;
+  order: readonly string[];
+  labels?: Record<string, string>;
+  total: number;
+}) {
+  return (
+    <div className="space-y-2">
+      {order.map((key) => {
+        const count = counts[key] ?? 0;
+        const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+        return (
+          <div key={key} className="flex items-center gap-3 text-xs">
+            <span className="w-16 shrink-0 text-gray-500">{labels?.[key] ?? key}</span>
+            <div className="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
+              <div className="h-full bg-[#d4af37]" style={{ width: `${pct}%` }} />
+            </div>
+            <span className="w-8 shrink-0 text-right text-gray-400">{count}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function NoteTier({ label, notes }: { label: string; notes: string[] }) {
+  return (
+    <div>
+      <p className="text-xs uppercase tracking-widest text-gray-400 mb-1.5">{label}</p>
+      {notes.length > 0 ? (
+        <p className="text-sm text-[#1a1a1a] capitalize">{notes.join(', ')}</p>
+      ) : (
+        <p className="text-sm text-gray-400 italic">Not yet documented</p>
+      )}
+    </div>
+  );
+}
+
 export default async function FragrancePage({ params }: Props) {
   const { slug } = await params;
-  const entry = getCatalogEntry(slug);
-  if (!entry) notFound();
+  const perfume = await fetchPerfumeBySlug(slug);
+  if (!perfume) notFound();
 
-  const [listings, relatedPosts] = await Promise.all([
-    fetchListings(entry),
-    fetchRelatedPosts(entry),
+  const [listings, relatedPosts, similarPerfumes, aggregate] = await Promise.all([
+    fetchListings(perfume),
+    fetchRelatedPosts(perfume),
+    fetchSimilarPerfumes(perfume),
+    fetchPerfumeReviewAggregate(perfume.id),
   ]);
+
+  const hasEnoughReviews = aggregate.review_count >= MIN_REVIEWS_FOR_CHART;
 
   const prices = listings.map(effectivePrice).filter(Number.isFinite);
   const lowPrice = prices.length > 0 ? Math.min(...prices) : null;
@@ -140,9 +194,9 @@ export default async function FragrancePage({ params }: Props) {
   const productSchema = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: entry.name,
-    brand: { '@type': 'Brand', name: entry.brand },
-    description: entry.metaDescription,
+    name: perfume.name,
+    brand: { '@type': 'Brand', name: perfume.brand },
+    description: perfume.meta_description ?? undefined,
     ...(listings.length > 0 && {
       offers: {
         '@type': 'AggregateOffer',
@@ -164,15 +218,62 @@ export default async function FragrancePage({ params }: Props) {
       <main className="mx-auto max-w-4xl px-4 pb-16 pt-24">
         <div className="mb-8">
           <p className="text-xs uppercase tracking-widest text-[#d4af37] font-semibold mb-1">
-            {entry.brand}
+            {perfume.brand}
           </p>
           <h1 className="text-3xl font-serif font-bold text-[#1a1a1a] mb-2">
-            {entry.name} Decants in Bangladesh
+            {perfume.name} Decants in Bangladesh
           </h1>
           <p className="text-gray-500 text-sm">
-            Find the cheapest {entry.name} decants from verified sellers across Bangladesh.
+            Find the cheapest {perfume.name} decants from verified sellers across Bangladesh.
           </p>
+          {perfume.house_description && (
+            <p className="text-gray-600 text-sm mt-3 max-w-2xl">{perfume.house_description}</p>
+          )}
         </div>
+
+        <section className="mb-12 rounded-2xl border border-black/5 bg-white p-6">
+          <h2 className="text-lg font-serif font-semibold text-[#1a1a1a] mb-4">Note Pyramid</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <NoteTier label="Top Notes" notes={perfume.top_notes} />
+            <NoteTier label="Heart Notes" notes={perfume.heart_notes} />
+            <NoteTier label="Base Notes" notes={perfume.base_notes} />
+          </div>
+        </section>
+
+        <section className="mb-12 rounded-2xl border border-black/5 bg-white p-6">
+          <h2 className="text-lg font-serif font-semibold text-[#1a1a1a] mb-4">Community Read</h2>
+          {hasEnoughReviews ? (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div>
+                <p className="text-xs uppercase tracking-widest text-gray-400 mb-2">Longevity</p>
+                <DistributionBar
+                  counts={aggregate.longevity_counts}
+                  order={LONGEVITY_ORDER}
+                  total={aggregate.review_count}
+                />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-widest text-gray-400 mb-2">Gender Lean</p>
+                <DistributionBar
+                  counts={aggregate.gender_counts}
+                  order={GENDER_ORDER}
+                  labels={GENDER_LABELS}
+                  total={aggregate.review_count}
+                />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-widest text-gray-400 mb-2">Best Worn</p>
+                <DistributionBar
+                  counts={aggregate.occasion_counts}
+                  order={OCCASION_ORDER}
+                  total={aggregate.review_count}
+                />
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400 italic">Not enough reviews yet.</p>
+          )}
+        </section>
 
         {listings.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
@@ -209,6 +310,17 @@ export default async function FragrancePage({ params }: Props) {
               );
             })}
           </ul>
+        )}
+
+        {similarPerfumes.length > 0 && (
+          <div className="mt-16">
+            <h2 className="text-xl font-serif font-semibold text-[#1a1a1a] mb-6">Similar Perfumes</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {similarPerfumes.map((p) => (
+                <SimilarPerfumeCard key={p.id} slug={p.slug} name={p.name} brand={p.brand} accords={p.accords} />
+              ))}
+            </div>
+          </div>
         )}
 
         {relatedPosts.length > 0 && (
