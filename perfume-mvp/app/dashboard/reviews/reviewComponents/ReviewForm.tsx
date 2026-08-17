@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import type { ReviewInsert } from "@/lib/queries/reviews";
-import ComboBox from "@/components/ComboBox";
-import { usePerfumeAutocomplete } from "@/lib/hooks/usePerfumeAutocomplete";
+import PerfumeComboBox from "@/components/perfume/PerfumeComboBox";
 
 const CATEGORIES = [
   "Floral", "Woody", "Oriental/Amber", "Fresh", "Aromatic",
@@ -60,9 +59,6 @@ export default function ReviewForm({
     form.gender ? GENDERS.findIndex((g) => g.value === form.gender) : null
   );
 
-  const { brandSuggestions, nameSuggestions, onNameSelect } =
-    usePerfumeAutocomplete();
-
   function toggleWear(option: string) {
     const lower = option.toLowerCase();
     setForm((f) => ({
@@ -114,34 +110,23 @@ export default function ReviewForm({
         </label>
       </div>
 
-      {/* Brand + Name */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <ComboBox
-            label="Brand"
-            placeholder="e.g. Dior"
-            value={form.brand}
-            onChange={(val) => setForm((f) => ({ ...f, brand: val }))}
-            suggestions={brandSuggestions(form.brand)}
-            required
-            inputClassName="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
-          />
-        </div>
-        <div>
-          <ComboBox
-            label="Perfume Name"
-            placeholder="e.g. Sauvage EDP"
-            value={form.perfume_name}
-            onChange={(val) => setForm((f) => ({ ...f, perfume_name: val }))}
-            onSelect={(name) => {
-              const backfill = onNameSelect(name, form.brand);
-              setForm((f) => ({ ...f, brand: backfill.brand }));
-            }}
-            suggestions={nameSuggestions(form.brand, form.perfume_name)}
-            required
-            inputClassName="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
-          />
-        </div>
+      {/* Perfume */}
+      <div>
+        <PerfumeComboBox
+          value={form.perfume_name}
+          onChange={(v) => setForm((f) => ({ ...f, perfume_name: v, perfume_id: null }))}
+          onSelect={(match) =>
+            setForm((f) => ({
+              ...f,
+              perfume_id: match?.id ?? null,
+              perfume_name: match?.name ?? f.perfume_name,
+              brand: match?.brand ?? f.brand,
+            }))
+          }
+          label="Perfume"
+          placeholder="Start typing a perfume or brand…"
+          required
+        />
       </div>
 
       {/* Category + Sub-category */}

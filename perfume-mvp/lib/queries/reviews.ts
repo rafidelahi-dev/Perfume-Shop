@@ -4,6 +4,7 @@ import { getSessionUserId } from "./auth";
 export type Review = {
   id: string;
   user_id: string;
+  perfume_id: string | null;
   perfume_name: string;
   brand: string;
   category: string;

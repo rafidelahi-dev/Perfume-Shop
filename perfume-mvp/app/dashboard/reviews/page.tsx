@@ -16,6 +16,7 @@ import ReviewForm from "./reviewComponents/ReviewForm";
 import ReviewList from "./reviewComponents/ReviewList";
 
 const EMPTY_FORM: ReviewInsert = {
+  perfume_id: null,
   perfume_name: "",
   brand: "",
   category: "",
@@ -86,7 +87,6 @@ export default function MyReviewsPage() {
 
   function validate(): string | null {
     if (!form.images.length) return "Please upload at least one image.";
-    if (!form.brand.trim()) return "Brand is required.";
     if (!form.perfume_name.trim()) return "Perfume name is required.";
     if (!form.category) return "Category is required.";
     return null;
