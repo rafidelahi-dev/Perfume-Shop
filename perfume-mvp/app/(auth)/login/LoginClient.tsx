@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
+import { signInSmart } from "@/lib/queries/client/auth";
 
 type LoginClientProps = {
   nextPath: string;
@@ -12,7 +13,7 @@ type LoginClientProps = {
 export default function LoginClient({ nextPath }: LoginClientProps) {
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +30,7 @@ export default function LoginClient({ nextPath }: LoginClientProps) {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await signInSmart(identifier, password);
 
     if (error) {
       setError(error.message);
@@ -93,7 +94,7 @@ export default function LoginClient({ nextPath }: LoginClientProps) {
 
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-gray-200" />
-            <span className="text-xs text-gray-400">or with email</span>
+            <span className="text-xs text-gray-400">or with email/phone</span>
             <div className="h-px flex-1 bg-gray-200" />
           </div>
 
@@ -101,10 +102,10 @@ export default function LoginClient({ nextPath }: LoginClientProps) {
           <form onSubmit={onSubmit} className="space-y-3">
             <input
               className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
-              placeholder="Email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              type="email"
+              placeholder="Email or phone number (01XXXXXXXXX)"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              type="text"
               required
             />
             <input

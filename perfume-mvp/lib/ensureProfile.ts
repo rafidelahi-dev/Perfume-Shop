@@ -15,7 +15,7 @@ export async function ensureProfile() {
   // try to fetch profile
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, username, display_name, full_name, avatar_url, email")
+    .select("id, username, display_name, full_name, avatar_url, email, contact_number, phone_verified")
     .eq("id", user.id)
     .single();
 
@@ -28,6 +28,14 @@ export async function ensureProfile() {
       .eq("id", user.id);
       profile.email = user.email;
 
+    }
+    if(!profile.contact_number && user.phone){
+      await supabase
+      .from("profiles")
+      .update({ contact_number: user.phone, phone_verified: !!user.phone_confirmed_at })
+      .eq("id", user.id);
+      profile.contact_number = user.phone;
+      profile.phone_verified = !!user.phone_confirmed_at;
     }
     return profile;
   }
@@ -55,6 +63,8 @@ export async function ensureProfile() {
       display_name: displayName,
       full_name: user.user_metadata?.name || null,
       avatar_url: avatar,
+      contact_number: user.phone || null,
+      phone_verified: !!user.phone_confirmed_at,
     })
     .select()
     .single();

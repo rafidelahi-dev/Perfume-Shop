@@ -4,9 +4,20 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
+import { signUpWithPhone, verifyPhoneOtp } from "@/lib/queries/client/auth";
 
 export default function SignupClient() {
   const router = useRouter();
+
+  // signup mode: phone shown first (matches Daraz/BD market norms)
+  const [mode, setMode] = useState<"phone" | "email">("phone");
+
+  // phone-tab-only
+  const [phone, setPhone] = useState("");
+  const [otpStep, setOtpStep] = useState(false);
+  const [otpToken, setOtpToken] = useState("");
+  const [otpError, setOtpError] = useState<string | null>(null);
+  const [otpLoading, setOtpLoading] = useState(false);
 
   // required
   const [email, setEmail] = useState("");
@@ -73,20 +84,37 @@ export default function SignupClient() {
       return;
     }
 
+    const metadata = {
+      username,
+      display_name: displayName,
+      full_name: fullName,
+      contact_number: contactNumber,
+      whatsappNumber: whatsappNumber,
+      facebook_link: facebookLink,
+      messenger_link: messengerLink,
+    };
+
+    if (mode === "phone") {
+      const { error: signErr } = await signUpWithPhone(phone, password, {
+        data: metadata,
+      });
+
+      if (signErr) {
+        console.error("signUpWithPhone error:", signErr);
+        setError(signErr.message);
+        setLoading(false);
+        return;
+      }
+
+      setOtpStep(true);
+      setLoading(false);
+      return;
+    }
+
     const { error: signErr } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: {
-          username,
-          display_name: displayName,
-          full_name: fullName,
-          contact_number: contactNumber,
-          whatsappNumber: whatsappNumber,
-          facebook_link: facebookLink,
-          messenger_link: messengerLink,
-        },
-      },
+      options: { data: metadata },
     });
 
     if (signErr) {
@@ -98,6 +126,24 @@ export default function SignupClient() {
 
     router.push("/verify-email");
     setLoading(false);
+  }
+
+  async function onVerifyOtp(e: React.FormEvent) {
+    e.preventDefault();
+    setOtpLoading(true);
+    setOtpError(null);
+
+    const { error: verifyErr } = await verifyPhoneOtp(phone, otpToken);
+
+    if (verifyErr) {
+      console.error("verifyPhoneOtp error:", verifyErr);
+      setOtpError(verifyErr.message);
+      setOtpLoading(false);
+      return;
+    }
+
+    router.push("/");
+    setOtpLoading(false);
   }
 
   async function signInWithOAuth(provider: "google") {
@@ -116,6 +162,58 @@ export default function SignupClient() {
     } finally {
       setOauthLoading(null);
     }
+  }
+
+  if (otpStep) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-8 px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-[#DFC738] p-6 text-center">
+            <h1 className="text-2xl font-bold text-white mb-2">Verify Your Phone</h1>
+            <p className="text-white text-sm">
+              Enter the code sent to {phone}
+            </p>
+          </div>
+          <div className="p-6">
+            <form onSubmit={onVerifyOtp} className="space-y-4">
+              <input
+                className="w-full border border-gray-300 rounded-lg p-3 text-sm text-center tracking-widest focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                placeholder="6-digit code"
+                inputMode="numeric"
+                value={otpToken}
+                onChange={(e) => setOtpToken(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                required
+              />
+
+              {otpError && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-700">{otpError}</p>
+                </div>
+              )}
+
+              <button
+                disabled={otpLoading}
+                className="w-full bg-[#d4af37] text-white rounded-lg p-3 font-medium hover:bg-gray-800 disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm"
+              >
+                {otpLoading ? "Verifying..." : "Verify & Create Account"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setOtpStep(false);
+                  setOtpToken("");
+                  setOtpError(null);
+                }}
+                className="w-full text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Back
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -151,8 +249,30 @@ export default function SignupClient() {
 
           <div className="flex items-center gap-3 mb-6">
             <div className="h-px flex-1 bg-gray-200" />
-            <span className="text-sm text-gray-500">or with email</span>
+            <span className="text-sm text-gray-500">or with phone/email</span>
             <div className="h-px flex-1 bg-gray-200" />
+          </div>
+
+          {/* Phone / Email tabs — phone first, matches BD-market norms (Daraz etc.) */}
+          <div className="flex mb-4 border border-gray-200 rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setMode("phone")}
+              className={`flex-1 p-2.5 text-sm font-medium transition-colors ${
+                mode === "phone" ? "bg-gray-900 text-white" : "bg-white text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              Phone
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("email")}
+              className={`flex-1 p-2.5 text-sm font-medium transition-colors ${
+                mode === "email" ? "bg-gray-900 text-white" : "bg-white text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              Email
+            </button>
           </div>
 
           <form onSubmit={onSubmit} className="space-y-4">
@@ -160,16 +280,27 @@ export default function SignupClient() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-4">
                 <div>
-                  <input
-                    className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
-                    placeholder="Email address"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
+                  {mode === "phone" ? (
+                    <input
+                      className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                      placeholder="Phone number (01XXXXXXXXX)"
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      required
+                    />
+                  ) : (
+                    <input
+                      className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                      placeholder="Email address"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  )}
                 </div>
-                
+
                 <div>
                   <input
                     className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
