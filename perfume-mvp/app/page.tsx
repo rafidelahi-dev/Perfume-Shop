@@ -7,6 +7,7 @@ import Link from "next/link";
 import TrendingSection from "@/components/TrendingSection";
 import HeroCarousel from "@/components/HeroCarousel";
 import LatestArticles from "@/components/LatestArticles";
+import { SITE_URL, SUPPORT_EMAIL, SOCIAL_LINKS } from "@/lib/site";
 
 export const revalidate = 60;
 
@@ -53,6 +54,18 @@ const websiteSchema = {
   },
 };
 
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Cloud PerfumeBD",
+  url: SITE_URL,
+  logo: `${SITE_URL}/logo.png`,
+  email: SUPPORT_EMAIL,
+  ...([SOCIAL_LINKS.facebook, SOCIAL_LINKS.instagram].filter(Boolean).length > 0 && {
+    sameAs: [SOCIAL_LINKS.facebook, SOCIAL_LINKS.instagram].filter(Boolean),
+  }),
+};
+
 export default async function Home() {
   const initialTrending = await fetchInitialTrending();
 
@@ -61,6 +74,10 @@ export default async function Home() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
       />
       <Header />
 

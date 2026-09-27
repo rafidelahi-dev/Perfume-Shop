@@ -1,3 +1,10 @@
+## Project Goal
+
+**Read `docs/GOAL.md` first for the business goal, market/SWOT, and SEO
+strategy this platform serves.** All feature/content decisions should
+trace back to it: community + BD-climate content first, shop is the
+monetization layer, not the product.
+
 <!-- code-review-graph MCP tools -->
 ## MCP Tools: code-review-graph
 

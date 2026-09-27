@@ -202,10 +202,69 @@ export default async function FragrancePage({ params }: Props) {
         '@type': 'AggregateOffer',
         priceCurrency: 'BDT',
         offerCount: listings.length,
+        availability: 'https://schema.org/InStock',
         ...(lowPrice !== null && { lowPrice: lowPrice.toFixed(2) }),
         ...(highPrice !== null && { highPrice: highPrice.toFixed(2) }),
       },
     }),
+    ...(listings.length === 0 && {
+      offers: {
+        '@type': 'Offer',
+        priceCurrency: 'BDT',
+        availability: 'https://schema.org/OutOfStock',
+      },
+    }),
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Fragrances', item: `${SITE_URL}/fragrances` },
+      { '@type': 'ListItem', position: 3, name: perfume.name, item: `${SITE_URL}/fragrance/${perfume.slug}` },
+    ],
+  };
+
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: `Is ${perfume.name} available in Bangladesh?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text:
+            listings.length > 0
+              ? `Yes, ${perfume.name} by ${perfume.brand} is currently available from ${listings.length} verified seller${listings.length > 1 ? 's' : ''} on Cloud PerfumeBD.`
+              : `${perfume.name} by ${perfume.brand} has no active listings right now, but you can check back as sellers list new stock.`,
+        },
+      },
+      {
+        '@type': 'Question',
+        name: `Can I buy a decant of ${perfume.name}?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: `Yes, sellers on Cloud PerfumeBD offer ${perfume.name} as full bottles, partials, and decants in smaller sizes, so you can try it before committing to a full bottle.`,
+        },
+      },
+      ...(lowPrice !== null
+        ? [
+            {
+              '@type': 'Question',
+              name: `What is the price of ${perfume.name} in Bangladesh?`,
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text:
+                  highPrice !== null && highPrice !== lowPrice
+                    ? `${perfume.name} decant and bottle prices on Cloud PerfumeBD currently range from TK${lowPrice.toFixed(0)} to TK${highPrice.toFixed(0)}, depending on size and seller.`
+                    : `${perfume.name} is currently listed from TK${lowPrice.toFixed(0)} on Cloud PerfumeBD.`,
+              },
+            },
+          ]
+        : []),
+    ],
   };
 
   return (
@@ -213,6 +272,14 @@ export default async function FragrancePage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <Header />
       <main className="mx-auto max-w-4xl px-4 pb-16 pt-24">
