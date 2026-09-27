@@ -87,6 +87,8 @@ export type ReviewAggregate = {
   longevity_counts: Record<string, number>;
   gender_counts: Record<string, number>;
   occasion_counts: Record<string, number>;
+  rating_avg: number | null;
+  rating_count: number;
 };
 
 export async function fetchPerfumeReviewAggregate(perfumeId: string): Promise<ReviewAggregate> {
@@ -97,7 +99,14 @@ export async function fetchPerfumeReviewAggregate(perfumeId: string): Promise<Re
 
   if (error || !data) {
     console.error("[perfumes] fetchPerfumeReviewAggregate failed:", error?.message);
-    return { review_count: 0, longevity_counts: {}, gender_counts: {}, occasion_counts: {} };
+    return {
+      review_count: 0,
+      longevity_counts: {},
+      gender_counts: {},
+      occasion_counts: {},
+      rating_avg: null,
+      rating_count: 0,
+    };
   }
   return data as ReviewAggregate;
 }

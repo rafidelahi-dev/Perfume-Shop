@@ -13,11 +13,11 @@ const CATEGORIES = [
 const WEAR_OPTIONS = ["Winter", "Spring", "Summer", "Fall", "Day", "Night"];
 
 const RATINGS: { value: ReviewInsert["rating"]; label: string; emoji: string; color: string }[] = [
-  { value: "love",    label: "Love",    emoji: "❤️",  color: "bg-red-100 border-red-400 text-red-700" },
-  { value: "like",    label: "Like",    emoji: "👍",  color: "bg-green-100 border-green-400 text-green-700" },
-  { value: "okay",    label: "Okay",    emoji: "😐",  color: "bg-yellow-100 border-yellow-400 text-yellow-700" },
-  { value: "dislike", label: "Dislike", emoji: "👎",  color: "bg-orange-100 border-orange-400 text-orange-700" },
-  { value: "hate",    label: "Hate",    emoji: "💀",  color: "bg-gray-100 border-gray-400 text-gray-700" },
+  { value: 5, label: "Love",    emoji: "❤️",  color: "bg-red-100 border-red-400 text-red-700" },
+  { value: 4, label: "Like",    emoji: "👍",  color: "bg-green-100 border-green-400 text-green-700" },
+  { value: 3, label: "Okay",    emoji: "😐",  color: "bg-yellow-100 border-yellow-400 text-yellow-700" },
+  { value: 2, label: "Dislike", emoji: "👎",  color: "bg-orange-100 border-orange-400 text-orange-700" },
+  { value: 1, label: "Hate",    emoji: "💀",  color: "bg-gray-100 border-gray-400 text-gray-700" },
 ];
 
 const GENDERS: { value: ReviewInsert["gender"]; label: string }[] = [

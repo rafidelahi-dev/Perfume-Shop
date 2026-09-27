@@ -61,3 +61,51 @@ AS $$
 $$;
 
 GRANT EXECUTE ON FUNCTION public.get_perfume_review_aggregate(uuid) TO anon, authenticated;
+
+-- Numeric rating scale (love=5 ... hate=1), added to unlock schema.org
+-- AggregateRating on the fragrance page. Table had 0 rows at migration time,
+-- so the enum -> smallint switch needed no data backfill.
+ALTER TABLE public.reviews DROP COLUMN rating;
+ALTER TABLE public.reviews ADD COLUMN rating smallint CHECK (rating BETWEEN 1 AND 5);
+
+DROP FUNCTION public.get_perfume_review_aggregate(uuid);
+
+CREATE FUNCTION public.get_perfume_review_aggregate(p_perfume_id uuid)
+RETURNS TABLE (
+  review_count bigint,
+  longevity_counts jsonb,
+  gender_counts jsonb,
+  occasion_counts jsonb,
+  rating_avg numeric,
+  rating_count bigint
+)
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT
+    (SELECT count(*) FROM public.reviews WHERE perfume_id = p_perfume_id) AS review_count,
+    (SELECT coalesce(jsonb_object_agg(longevity, cnt), '{}'::jsonb)
+       FROM (
+         SELECT longevity, count(*) cnt FROM public.reviews
+         WHERE perfume_id = p_perfume_id AND longevity IS NOT NULL
+         GROUP BY longevity
+       ) s) AS longevity_counts,
+    (SELECT coalesce(jsonb_object_agg(gender, cnt), '{}'::jsonb)
+       FROM (
+         SELECT gender, count(*) cnt FROM public.reviews
+         WHERE perfume_id = p_perfume_id AND gender IS NOT NULL
+         GROUP BY gender
+       ) s) AS gender_counts,
+    (SELECT coalesce(jsonb_object_agg(occasion, cnt), '{}'::jsonb)
+       FROM (
+         SELECT unnest(when_to_wear) occasion, count(*) cnt FROM public.reviews
+         WHERE perfume_id = p_perfume_id
+         GROUP BY occasion
+       ) s) AS occasion_counts,
+    (SELECT avg(rating) FROM public.reviews WHERE perfume_id = p_perfume_id AND rating IS NOT NULL) AS rating_avg,
+    (SELECT count(*) FROM public.reviews WHERE perfume_id = p_perfume_id AND rating IS NOT NULL) AS rating_count;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_perfume_review_aggregate(uuid) TO anon, authenticated;

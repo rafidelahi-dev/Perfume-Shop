@@ -3,12 +3,12 @@
 import { Trash2 } from "lucide-react";
 import type { Review } from "@/lib/queries/reviews";
 
-const RATING_DISPLAY: Record<string, { emoji: string; label: string; color: string }> = {
-  love:    { emoji: "❤️",  label: "Love",    color: "text-red-600" },
-  like:    { emoji: "👍",  label: "Like",    color: "text-green-600" },
-  okay:    { emoji: "😐",  label: "Okay",    color: "text-yellow-600" },
-  dislike: { emoji: "👎",  label: "Dislike", color: "text-orange-600" },
-  hate:    { emoji: "💀",  label: "Hate",    color: "text-gray-600" },
+const RATING_DISPLAY: Record<number, { emoji: string; label: string; color: string }> = {
+  5: { emoji: "❤️",  label: "Love",    color: "text-red-600" },
+  4: { emoji: "👍",  label: "Like",    color: "text-green-600" },
+  3: { emoji: "😐",  label: "Okay",    color: "text-yellow-600" },
+  2: { emoji: "👎",  label: "Dislike", color: "text-orange-600" },
+  1: { emoji: "💀",  label: "Hate",    color: "text-gray-600" },
 };
 
 const GENDER_LABEL: Record<string, string> = {

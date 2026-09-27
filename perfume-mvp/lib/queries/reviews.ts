@@ -11,7 +11,7 @@ export type Review = {
   sub_category: string | null;
   images: string[];
   review_text: string | null;
-  rating: "love" | "like" | "okay" | "dislike" | "hate" | null;
+  rating: 1 | 2 | 3 | 4 | 5 | null;
   when_to_wear: string[];
   gender: "very_masculine" | "masculine" | "unisex" | "feminine" | "very_feminine" | null;
   longevity: "0-2h" | "2-5h" | "5-7h" | "7-10h" | "10h+" | null;

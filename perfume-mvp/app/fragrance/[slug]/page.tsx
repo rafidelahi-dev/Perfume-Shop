@@ -214,6 +214,15 @@ export default async function FragrancePage({ params }: Props) {
         availability: 'https://schema.org/OutOfStock',
       },
     }),
+    ...(aggregate.rating_count > 0 && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: aggregate.rating_avg?.toFixed(1),
+        ratingCount: aggregate.rating_count,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }),
   };
 
   const breadcrumbSchema = {
@@ -309,6 +318,12 @@ export default async function FragrancePage({ params }: Props) {
 
         <section className="mb-12 rounded-2xl border border-black/5 bg-white p-6">
           <h2 className="text-lg font-serif font-semibold text-[#1a1a1a] mb-4">Community Read</h2>
+          {aggregate.rating_count > 0 && (
+            <p className="text-sm text-gray-600 mb-4">
+              <span className="text-[#d4af37] font-semibold">★ {aggregate.rating_avg?.toFixed(1)}</span>
+              {' '}average from {aggregate.rating_count} rating{aggregate.rating_count > 1 ? 's' : ''}
+            </p>
+          )}
           {hasEnoughReviews ? (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div>
