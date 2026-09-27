@@ -15,6 +15,8 @@ export type Review = {
   when_to_wear: string[];
   gender: "very_masculine" | "masculine" | "unisex" | "feminine" | "very_feminine" | null;
   longevity: "0-2h" | "2-5h" | "5-7h" | "7-10h" | "10h+" | null;
+  climate_season: ("summer" | "monsoon" | "winter")[];
+  environment: "ac_office" | "outdoors" | "mixed" | null;
   created_at: string;
   updated_at: string;
 };

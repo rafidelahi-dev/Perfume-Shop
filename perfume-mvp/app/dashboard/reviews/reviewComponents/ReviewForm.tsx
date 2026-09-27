@@ -10,7 +10,19 @@ const CATEGORIES = [
   "Fougere", "Chypre", "Gourmand", "Leather", "Citrus", "Other",
 ];
 
-const WEAR_OPTIONS = ["Winter", "Spring", "Summer", "Fall", "Day", "Night"];
+const WEAR_OPTIONS = ["Office", "University", "Wedding", "Jummah", "Date Night", "Casual"];
+
+const CLIMATE_SEASONS: { value: "summer" | "monsoon" | "winter"; label: string }[] = [
+  { value: "summer", label: "Summer" },
+  { value: "monsoon", label: "Monsoon" },
+  { value: "winter", label: "Winter" },
+];
+
+const ENVIRONMENTS: { value: NonNullable<ReviewInsert["environment"]>; label: string }[] = [
+  { value: "ac_office", label: "AC / Office" },
+  { value: "outdoors", label: "Outdoors" },
+  { value: "mixed", label: "Mixed" },
+];
 
 const RATINGS: { value: ReviewInsert["rating"]; label: string; emoji: string; color: string }[] = [
   { value: 5, label: "Love",    emoji: "❤️",  color: "bg-red-100 border-red-400 text-red-700" },
@@ -66,6 +78,15 @@ export default function ReviewForm({
       when_to_wear: f.when_to_wear.includes(lower)
         ? f.when_to_wear.filter((w) => w !== lower)
         : [...f.when_to_wear, lower],
+    }));
+  }
+
+  function toggleClimateSeason(value: "summer" | "monsoon" | "winter") {
+    setForm((f) => ({
+      ...f,
+      climate_season: f.climate_season.includes(value)
+        ? f.climate_season.filter((s) => s !== value)
+        : [...f.climate_season, value],
     }));
   }
 
@@ -276,6 +297,54 @@ export default function ReviewForm({
               }`}
             >
               {l.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* BD Climate */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          BD Climate <span className="text-gray-400 font-normal">(optional, pick multiple)</span>
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {CLIMATE_SEASONS.map((s) => (
+            <button
+              key={s.value}
+              type="button"
+              onClick={() => toggleClimateSeason(s.value)}
+              className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-all ${
+                form.climate_season.includes(s.value)
+                  ? "bg-gray-900 text-white border-gray-900"
+                  : "border-gray-200 text-gray-600 hover:border-gray-400 bg-gray-50"
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Environment */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Worn In <span className="text-gray-400 font-normal">(optional)</span>
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {ENVIRONMENTS.map((e) => (
+            <button
+              key={e.value}
+              type="button"
+              onClick={() =>
+                setForm((f) => ({ ...f, environment: f.environment === e.value ? null : e.value }))
+              }
+              className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-all ${
+                form.environment === e.value
+                  ? "bg-gray-900 text-white border-gray-900"
+                  : "border-gray-200 text-gray-600 hover:border-gray-400 bg-gray-50"
+              }`}
+            >
+              {e.label}
             </button>
           ))}
         </div>

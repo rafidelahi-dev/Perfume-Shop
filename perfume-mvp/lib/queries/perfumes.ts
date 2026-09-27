@@ -89,6 +89,8 @@ export type ReviewAggregate = {
   occasion_counts: Record<string, number>;
   rating_avg: number | null;
   rating_count: number;
+  climate_counts: Record<string, number>;
+  environment_counts: Record<string, number>;
 };
 
 export async function fetchPerfumeReviewAggregate(perfumeId: string): Promise<ReviewAggregate> {
@@ -106,6 +108,8 @@ export async function fetchPerfumeReviewAggregate(perfumeId: string): Promise<Re
       occasion_counts: {},
       rating_avg: null,
       rating_count: 0,
+      climate_counts: {},
+      environment_counts: {},
     };
   }
   return data as ReviewAggregate;

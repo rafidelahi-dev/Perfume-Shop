@@ -128,7 +128,27 @@ const GENDER_LABELS: Record<string, string> = {
   feminine: 'Feminine',
   very_feminine: 'Very Fem.',
 };
-const OCCASION_ORDER = ['Winter', 'Spring', 'Summer', 'Fall', 'Day', 'Night'] as const;
+const OCCASION_ORDER = ['office', 'university', 'wedding', 'jummah', 'date night', 'casual'] as const;
+const OCCASION_LABELS: Record<string, string> = {
+  office: 'Office',
+  university: 'University',
+  wedding: 'Wedding',
+  jummah: 'Jummah',
+  'date night': 'Date Night',
+  casual: 'Casual',
+};
+const CLIMATE_ORDER = ['summer', 'monsoon', 'winter'] as const;
+const CLIMATE_LABELS: Record<string, string> = {
+  summer: 'Summer',
+  monsoon: 'Monsoon',
+  winter: 'Winter',
+};
+const ENVIRONMENT_ORDER = ['ac_office', 'outdoors', 'mixed'] as const;
+const ENVIRONMENT_LABELS: Record<string, string> = {
+  ac_office: 'AC / Office',
+  outdoors: 'Outdoors',
+  mixed: 'Mixed',
+};
 
 function DistributionBar({
   counts,
@@ -348,6 +368,25 @@ export default async function FragrancePage({ params }: Props) {
                 <DistributionBar
                   counts={aggregate.occasion_counts}
                   order={OCCASION_ORDER}
+                  labels={OCCASION_LABELS}
+                  total={aggregate.review_count}
+                />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-widest text-gray-400 mb-2">BD Climate Performance</p>
+                <DistributionBar
+                  counts={aggregate.climate_counts}
+                  order={CLIMATE_ORDER}
+                  labels={CLIMATE_LABELS}
+                  total={aggregate.review_count}
+                />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-widest text-gray-400 mb-2">Worn In</p>
+                <DistributionBar
+                  counts={aggregate.environment_counts}
+                  order={ENVIRONMENT_ORDER}
+                  labels={ENVIRONMENT_LABELS}
                   total={aggregate.review_count}
                 />
               </div>

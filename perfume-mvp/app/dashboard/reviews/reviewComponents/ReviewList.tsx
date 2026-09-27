@@ -11,6 +11,18 @@ const RATING_DISPLAY: Record<number, { emoji: string; label: string; color: stri
   1: { emoji: "💀",  label: "Hate",    color: "text-gray-600" },
 };
 
+const CLIMATE_LABEL: Record<string, string> = {
+  summer: "Summer",
+  monsoon: "Monsoon",
+  winter: "Winter",
+};
+
+const ENVIRONMENT_LABEL: Record<string, string> = {
+  ac_office: "AC / Office",
+  outdoors: "Outdoors",
+  mixed: "Mixed",
+};
+
 const GENDER_LABEL: Record<string, string> = {
   very_masculine: "Very Masculine",
   masculine:      "Masculine",
@@ -116,6 +128,16 @@ export default function ReviewList({ items, isLoading, error, onDelete }: Props)
                   {GENDER_LABEL[r.gender]}
                 </span>
               )}
+              {r.environment && (
+                <span className="text-xs bg-cyan-50 text-cyan-700 rounded-md px-2 py-0.5">
+                  {ENVIRONMENT_LABEL[r.environment]}
+                </span>
+              )}
+              {r.climate_season.map((s) => (
+                <span key={s} className="text-xs bg-teal-50 text-teal-700 rounded-md px-2 py-0.5">
+                  {CLIMATE_LABEL[s]}
+                </span>
+              ))}
             </div>
 
             {/* When to wear */}

@@ -27,6 +27,8 @@ const EMPTY_FORM: ReviewInsert = {
   when_to_wear: [],
   gender: null,
   longevity: null,
+  climate_season: [],
+  environment: null,
 };
 
 export default function MyReviewsPage() {
