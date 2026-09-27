@@ -6,6 +6,27 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { signUpWithPhone, verifyPhoneOtp } from "@/lib/queries/client/auth";
 
+function fireCompleteRegistration(userData: { email?: string; phone?: string }) {
+  const eventId =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random()}`;
+
+  const fbq = (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq;
+  fbq?.("track", "CompleteRegistration", {}, { eventID: eventId });
+
+  fetch("/api/capi/complete-registration", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      eventId,
+      email: userData.email,
+      phone: userData.phone,
+      sourceUrl: window.location.href,
+    }),
+  }).catch(() => {});
+}
+
 export default function SignupClient() {
   const router = useRouter();
 
@@ -124,6 +145,7 @@ export default function SignupClient() {
       return;
     }
 
+    fireCompleteRegistration({ email });
     router.push("/verify-email");
     setLoading(false);
   }
@@ -142,6 +164,7 @@ export default function SignupClient() {
       return;
     }
 
+    fireCompleteRegistration({ phone });
     router.push("/");
     setOtpLoading(false);
   }
