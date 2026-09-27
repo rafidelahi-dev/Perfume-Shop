@@ -110,6 +110,18 @@ fbq('track', 'PageView');`}
             />
           </noscript>
         )}
+        {META_PIXEL_ID && (
+          <noscript>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              height="1"
+              width="1"
+              style={{ display: "none" }}
+              src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+              alt=""
+            />
+          </noscript>
+        )}
 
         {/* Background Layer */}
         <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
