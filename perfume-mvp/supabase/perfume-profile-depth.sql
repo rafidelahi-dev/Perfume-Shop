@@ -276,3 +276,51 @@ ALTER TABLE public.demand_requests ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "demand_requests_public_insert" ON public.demand_requests
   FOR INSERT TO anon, authenticated WITH CHECK (true);
+
+-- Trust/brand phase: public review list + moderation. owns_bottle is
+-- self-attested at submission time (no orders/purchases table exists,
+-- so "verified purchase" cannot be honestly claimed). is_flagged /
+-- flag_reason / flagged_at / is_hidden mirror the existing `listings`
+-- moderation columns. get_perfume_reviews is a SECURITY DEFINER RPC
+-- (same pattern as get_perfume_review_aggregate / get_perfume_price_history)
+-- since `reviews` has no public-read RLS policy by design.
+ALTER TABLE public.reviews
+  ADD COLUMN owns_bottle boolean NOT NULL DEFAULT false,
+  ADD COLUMN is_flagged boolean NOT NULL DEFAULT false,
+  ADD COLUMN flag_reason text,
+  ADD COLUMN flagged_at timestamptz,
+  ADD COLUMN is_hidden boolean NOT NULL DEFAULT false;
+
+CREATE FUNCTION public.get_perfume_reviews(
+  p_perfume_id uuid,
+  p_limit int DEFAULT 20,
+  p_offset int DEFAULT 0
+)
+RETURNS TABLE (
+  id uuid,
+  rating smallint,
+  review_text text,
+  images text[],
+  longevity text,
+  gender text,
+  when_to_wear text[],
+  climate_season text[],
+  environment text,
+  owns_bottle boolean,
+  created_at timestamptz
+)
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT id, rating, review_text, images, longevity, gender,
+         when_to_wear, climate_season, environment, owns_bottle, created_at
+  FROM public.reviews
+  WHERE perfume_id = p_perfume_id
+    AND is_hidden = false
+  ORDER BY created_at DESC
+  LIMIT p_limit OFFSET p_offset;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_perfume_reviews(uuid, int, int) TO anon, authenticated;
