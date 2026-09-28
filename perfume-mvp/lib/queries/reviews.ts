@@ -17,6 +17,11 @@ export type Review = {
   longevity: "0-2h" | "2-5h" | "5-7h" | "7-10h" | "10h+" | null;
   climate_season: ("summer" | "monsoon" | "winter")[];
   environment: "ac_office" | "outdoors" | "mixed" | null;
+  owns_bottle: boolean;
+  is_flagged: boolean;
+  flag_reason: string | null;
+  flagged_at: string | null;
+  is_hidden: boolean;
   created_at: string;
   updated_at: string;
 };

@@ -133,6 +133,32 @@ export async function fetchPerfumePriceHistory(perfumeId: string): Promise<Price
   return (data ?? []) as PricePoint[];
 }
 
+export type PublicReview = {
+  id: string;
+  rating: 1 | 2 | 3 | 4 | 5 | null;
+  review_text: string | null;
+  images: string[];
+  longevity: "0-2h" | "2-5h" | "5-7h" | "7-10h" | "10h+" | null;
+  gender: "very_masculine" | "masculine" | "unisex" | "feminine" | "very_feminine" | null;
+  when_to_wear: string[];
+  climate_season: ("summer" | "monsoon" | "winter")[];
+  environment: "ac_office" | "outdoors" | "mixed" | null;
+  owns_bottle: boolean;
+  created_at: string;
+};
+
+export async function fetchPerfumeReviews(perfumeId: string): Promise<PublicReview[]> {
+  const supabase = createPublicSupabase();
+  const { data, error } = await supabase.rpc("get_perfume_reviews", {
+    p_perfume_id: perfumeId,
+  });
+  if (error) {
+    console.error("[perfumes] fetchPerfumeReviews failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as PublicReview[];
+}
+
 export async function submitDemandRequest(
   perfumeId: string,
   requestType: "notify" | "decant"
