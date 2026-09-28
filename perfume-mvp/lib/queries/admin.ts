@@ -102,3 +102,56 @@ export function useDeleteListing() {
     onError: () => toast.error('Failed to remove listing. Please try again.'),
   })
 }
+
+// ─── Reviews ─────────────────────────────────────────────────────────────────
+
+export type AdminReview = {
+  id: string
+  perfume_name: string
+  brand: string
+  rating: 1 | 2 | 3 | 4 | 5 | null
+  review_text: string | null
+  owns_bottle: boolean
+  created_at: string
+  is_flagged: boolean
+  flag_reason: string | null
+  flagged_at: string | null
+  is_hidden: boolean
+  user_id: string
+  profiles: { display_name: string | null; username: string | null } | null
+}
+
+async function fetchAdminReviews(): Promise<AdminReview[]> {
+  const res = await fetch('/api/admin/reviews')
+  if (!res.ok) throw new Error('Failed to fetch reviews')
+  return res.json()
+}
+
+export function useAdminReviews() {
+  return useQuery({ queryKey: qk.adminReviews(), queryFn: fetchAdminReviews })
+}
+
+export function useReviewAction() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, action, reason }: { id: string; action: 'flag' | 'unflag'; reason?: string }) =>
+      fetch(`/api/admin/reviews/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, reason }),
+      }).then((r) => { if (!r.ok) throw new Error('Failed') }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.adminReviews() }),
+    onError: () => toast.error('Action failed. Please try again.'),
+  })
+}
+
+export function useDeleteReview() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      fetch(`/api/admin/reviews/${id}`, { method: 'DELETE' })
+        .then((r) => { if (!r.ok) throw new Error('Failed') }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.adminReviews() }),
+    onError: () => toast.error('Failed to remove review. Please try again.'),
+  })
+}

@@ -16,4 +16,5 @@ export const qk = {
   adminBlogTags: () => ['admin', 'blog', 'tags'] as const,
   dashboardBlogPosts: (userId?: string | null) => ['dashboard', 'blog', 'posts', userId] as const,
   adminPerfumes: () => ['admin', 'perfumes'] as const,
+  adminReviews: () => ['admin', 'reviews'] as const,
 };
