@@ -2,14 +2,15 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Users, List, FileText, Droplet } from 'lucide-react'
-import { useAdminSellers } from '@/lib/queries/admin'
+import { Users, List, FileText, Droplet, MessageSquare } from 'lucide-react'
+import { useAdminSellers, useAdminReviews } from '@/lib/queries/admin'
 import { useAdminBlogPosts } from '@/lib/queries/blog'
 import { useAdminPerfumes } from '@/lib/queries/adminPerfumes'
 
 const NAV = [
   { href: '/superadmin/sellers',  label: 'Sellers',  icon: Users },
   { href: '/superadmin/listings', label: 'Listings', icon: List },
+  { href: '/superadmin/reviews',  label: 'Reviews',  icon: MessageSquare },
   { href: '/superadmin/blog',     label: 'Blog',     icon: FileText },
   { href: '/superadmin/perfumes', label: 'Perfumes', icon: Droplet },
 ]
@@ -20,10 +21,12 @@ export default function AdminSidebar() {
   const { data: sellers = [] } = useAdminSellers()
   const { data: blogPosts = [] } = useAdminBlogPosts()
   const { data: perfumes = [] } = useAdminPerfumes()
+  const { data: reviews = [] } = useAdminReviews()
 
   const pendingCount = sellers.filter((s) => s.status === 'pending').length
   const blogPendingCount = blogPosts.filter((p) => p.status === 'pending_review').length
   const unverifiedPerfumeCount = perfumes.filter((p) => !p.is_verified).length
+  const flaggedReviewCount = reviews.filter((r) => r.is_flagged).length
 
   return (
     <aside className="w-56 min-h-screen bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
@@ -60,6 +63,11 @@ export default function AdminSidebar() {
               {href === '/superadmin/perfumes' && unverifiedPerfumeCount > 0 && (
                 <span className="bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full leading-none">
                   {unverifiedPerfumeCount}
+                </span>
+              )}
+              {href === '/superadmin/reviews' && flaggedReviewCount > 0 && (
+                <span className="bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full leading-none">
+                  {flaggedReviewCount}
                 </span>
               )}
             </Link>
