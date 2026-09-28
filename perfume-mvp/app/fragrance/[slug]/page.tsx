@@ -11,6 +11,7 @@ import {
   fetchPerfumeBySlug,
   fetchSimilarPerfumes,
   fetchPerfumeReviewAggregate,
+  fetchPerfumePriceHistory,
   type PerfumeProfile,
 } from '@/lib/queries/perfumes';
 
@@ -61,6 +62,11 @@ function effectivePrice(listing: FragranceListing): number {
     return Number(listing.min_price);
   }
   return Number(listing.price ?? NaN);
+}
+
+function formatMonth(month: string): string {
+  const [year, mon] = month.split('-').map(Number);
+  return new Date(year, mon - 1, 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 }
 
 type RelatedPost = {
@@ -198,12 +204,15 @@ export default async function FragrancePage({ params }: Props) {
   const perfume = await fetchPerfumeBySlug(slug);
   if (!perfume) notFound();
 
-  const [listings, relatedPosts, similarPerfumes, aggregate] = await Promise.all([
+  const [listings, relatedPosts, similarPerfumes, aggregate, priceHistory] = await Promise.all([
     fetchListings(perfume),
     fetchRelatedPosts(perfume),
     fetchSimilarPerfumes(perfume),
     fetchPerfumeReviewAggregate(perfume.id),
+    fetchPerfumePriceHistory(perfume.id),
   ]);
+
+  const hasPriceTrend = priceHistory.length >= 2;
 
   const hasEnoughReviews = aggregate.review_count >= MIN_REVIEWS_FOR_CHART;
 
@@ -395,6 +404,20 @@ export default async function FragrancePage({ params }: Props) {
             <p className="text-sm text-gray-400 italic">Not enough reviews yet.</p>
           )}
         </section>
+
+        {hasPriceTrend && (
+          <section className="mb-8 rounded-2xl border border-black/5 bg-white p-6">
+            <h2 className="text-lg font-serif font-semibold text-[#1a1a1a] mb-4">Price Trend</h2>
+            <ul className="space-y-1">
+              {priceHistory.map((point) => (
+                <li key={point.month} className="flex justify-between text-sm text-gray-600">
+                  <span>{formatMonth(point.month)}</span>
+                  <span className="font-medium text-[#1a1a1a]">TK{point.avg_price.toFixed(0)} avg</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {listings.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
