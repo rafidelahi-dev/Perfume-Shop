@@ -10,7 +10,18 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   const { id } = await params
   const body = await req.json()
-  const { top_notes, heart_notes, base_notes, accords, gender_lean, house_description, is_verified } = body
+  const {
+    top_notes,
+    heart_notes,
+    base_notes,
+    accords,
+    gender_lean,
+    house_description,
+    is_verified,
+    authenticity_batch_code,
+    authenticity_packaging_notes,
+    authenticity_other_notes,
+  } = body
 
   const supabase = createAdminClient()
   const updates: Record<string, unknown> = {}
@@ -21,6 +32,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (gender_lean !== undefined) updates.gender_lean = gender_lean
   if (house_description !== undefined) updates.house_description = house_description
   if (is_verified !== undefined) updates.is_verified = is_verified
+  if (authenticity_batch_code !== undefined) updates.authenticity_batch_code = authenticity_batch_code
+  if (authenticity_packaging_notes !== undefined) updates.authenticity_packaging_notes = authenticity_packaging_notes
+  if (authenticity_other_notes !== undefined) updates.authenticity_other_notes = authenticity_other_notes
 
   const { data, error } = await supabase
     .from('perfumes')

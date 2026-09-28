@@ -19,6 +19,9 @@ function PerfumeRow({ perfume }: { perfume: AdminPerfume }) {
   const [baseNotes, setBaseNotes] = useState(arrayToText(perfume.base_notes))
   const [accords, setAccords] = useState(arrayToText(perfume.accords))
   const [description, setDescription] = useState(perfume.house_description ?? '')
+  const [batchCode, setBatchCode] = useState(perfume.authenticity_batch_code ?? '')
+  const [packagingNotes, setPackagingNotes] = useState(perfume.authenticity_packaging_notes ?? '')
+  const [otherNotes, setOtherNotes] = useState(perfume.authenticity_other_notes ?? '')
 
   function save(extra: Partial<{ is_verified: boolean }> = {}) {
     update.mutate({
@@ -28,6 +31,9 @@ function PerfumeRow({ perfume }: { perfume: AdminPerfume }) {
       base_notes: textToArray(baseNotes),
       accords: textToArray(accords),
       house_description: description,
+      authenticity_batch_code: batchCode,
+      authenticity_packaging_notes: packagingNotes,
+      authenticity_other_notes: otherNotes,
       ...extra,
     })
   }
@@ -87,6 +93,39 @@ function PerfumeRow({ perfume }: { perfume: AdminPerfume }) {
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          rows={2}
+          className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
+        />
+      </label>
+
+      <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">
+        Authenticity guide (fake-spotting)
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+        <label className="text-xs text-gray-500">
+          Batch code
+          <input
+            value={batchCode}
+            onChange={(e) => setBatchCode(e.target.value)}
+            placeholder="e.g. where to find it, format"
+            className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
+          />
+        </label>
+        <label className="text-xs text-gray-500">
+          Cap / box print notes
+          <input
+            value={packagingNotes}
+            onChange={(e) => setPackagingNotes(e.target.value)}
+            placeholder="e.g. cap texture, box print quality"
+            className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
+          />
+        </label>
+      </div>
+      <label className="text-xs text-gray-500 block mb-3">
+        Other authenticity notes
+        <textarea
+          value={otherNotes}
+          onChange={(e) => setOtherNotes(e.target.value)}
           rows={2}
           className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
         />

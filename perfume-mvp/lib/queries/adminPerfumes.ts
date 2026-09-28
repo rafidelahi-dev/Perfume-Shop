@@ -14,10 +14,25 @@ export type AdminPerfume = {
   gender_lean: string | null
   house_description: string | null
   is_verified: boolean
+  authenticity_batch_code: string | null
+  authenticity_packaging_notes: string | null
+  authenticity_other_notes: string | null
 }
 
 export type AdminPerfumeUpdate = Partial<
-  Pick<AdminPerfume, 'top_notes' | 'heart_notes' | 'base_notes' | 'accords' | 'gender_lean' | 'house_description' | 'is_verified'>
+  Pick<
+    AdminPerfume,
+    | 'top_notes'
+    | 'heart_notes'
+    | 'base_notes'
+    | 'accords'
+    | 'gender_lean'
+    | 'house_description'
+    | 'is_verified'
+    | 'authenticity_batch_code'
+    | 'authenticity_packaging_notes'
+    | 'authenticity_other_notes'
+  >
 >
 
 async function fetchAdminPerfumes(): Promise<AdminPerfume[]> {

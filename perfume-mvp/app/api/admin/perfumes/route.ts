@@ -9,7 +9,7 @@ export async function GET() {
   const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('perfumes')
-    .select('id, slug, name, brand, top_notes, heart_notes, base_notes, accords, gender_lean, house_description, is_verified')
+    .select('id, slug, name, brand, top_notes, heart_notes, base_notes, accords, gender_lean, house_description, is_verified, authenticity_batch_code, authenticity_packaging_notes, authenticity_other_notes')
     .order('is_verified', { ascending: true })
     .order('brand', { ascending: true })
     .order('name', { ascending: true })

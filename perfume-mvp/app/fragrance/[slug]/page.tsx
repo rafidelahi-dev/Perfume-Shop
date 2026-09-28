@@ -405,6 +405,34 @@ export default async function FragrancePage({ params }: Props) {
           )}
         </section>
 
+        {(perfume.authenticity_batch_code || perfume.authenticity_packaging_notes || perfume.authenticity_other_notes) && (
+          <section className="mb-8 rounded-2xl border border-black/5 bg-white p-6">
+            <h2 className="text-lg font-serif font-semibold text-[#1a1a1a] mb-4">
+              How to Spot a Fake {perfume.name}
+            </h2>
+            <div className="space-y-3 text-sm text-gray-600">
+              {perfume.authenticity_batch_code && (
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Batch Code</p>
+                  <p>{perfume.authenticity_batch_code}</p>
+                </div>
+              )}
+              {perfume.authenticity_packaging_notes && (
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Cap &amp; Box Print</p>
+                  <p>{perfume.authenticity_packaging_notes}</p>
+                </div>
+              )}
+              {perfume.authenticity_other_notes && (
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Other Signs</p>
+                  <p>{perfume.authenticity_other_notes}</p>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
         {hasPriceTrend && (
           <section className="mb-8 rounded-2xl border border-black/5 bg-white p-6">
             <h2 className="text-lg font-serif font-semibold text-[#1a1a1a] mb-4">Price Trend</h2>

@@ -22,10 +22,13 @@ export type PerfumeProfile = {
   gender_lean: "very_masculine" | "masculine" | "unisex" | "feminine" | "very_feminine" | null;
   house_description: string | null;
   is_verified: boolean;
+  authenticity_batch_code: string | null;
+  authenticity_packaging_notes: string | null;
+  authenticity_other_notes: string | null;
 };
 
 const PROFILE_COLUMNS =
-  "id, slug, name, brand, meta_title, meta_description, top_notes, heart_notes, base_notes, accords, search_terms, gender_lean, house_description, is_verified";
+  "id, slug, name, brand, meta_title, meta_description, top_notes, heart_notes, base_notes, accords, search_terms, gender_lean, house_description, is_verified, authenticity_batch_code, authenticity_packaging_notes, authenticity_other_notes";
 
 export async function fetchAllPerfumeSlugs(): Promise<{ slug: string }[]> {
   const supabase = createPublicSupabase();

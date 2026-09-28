@@ -250,3 +250,11 @@ AS $$
 $$;
 
 GRANT EXECUTE ON FUNCTION public.get_perfume_price_history(uuid) TO anon, authenticated;
+
+-- Fake-spotting authenticity guide fields (GOAL.md: batch code, cap,
+-- box print). Free text set by admin per perfume, shown on the
+-- fragrance page once any field is filled in.
+ALTER TABLE public.perfumes
+  ADD COLUMN authenticity_batch_code text,
+  ADD COLUMN authenticity_packaging_notes text,
+  ADD COLUMN authenticity_other_notes text;
