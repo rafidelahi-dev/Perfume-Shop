@@ -350,6 +350,19 @@ export default function ReviewForm({
         </div>
       </div>
 
+      {/* Owns bottle */}
+      <div>
+        <label className="flex items-center gap-2 text-sm text-gray-700">
+          <input
+            type="checkbox"
+            checked={form.owns_bottle}
+            onChange={(e) => setForm((f) => ({ ...f, owns_bottle: e.target.checked }))}
+            className="rounded border-gray-300"
+          />
+          I own (or owned) this bottle
+        </label>
+      </div>
+
       {error && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
           {error}

@@ -29,6 +29,11 @@ const EMPTY_FORM: ReviewInsert = {
   longevity: null,
   climate_season: [],
   environment: null,
+  owns_bottle: false,
+  is_flagged: false,
+  flag_reason: null,
+  flagged_at: null,
+  is_hidden: false,
 };
 
 export default function MyReviewsPage() {
