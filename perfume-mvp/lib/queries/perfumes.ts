@@ -132,3 +132,17 @@ export async function fetchPerfumePriceHistory(perfumeId: string): Promise<Price
   }
   return (data ?? []) as PricePoint[];
 }
+
+export async function submitDemandRequest(
+  perfumeId: string,
+  requestType: "notify" | "decant"
+): Promise<void> {
+  const supabase = createPublicSupabase();
+  const { data: userData } = await supabase.auth.getUser();
+  const { error } = await supabase.from("demand_requests").insert({
+    perfume_id: perfumeId,
+    request_type: requestType,
+    user_id: userData.user?.id ?? null,
+  });
+  if (error) throw new Error(error.message);
+}

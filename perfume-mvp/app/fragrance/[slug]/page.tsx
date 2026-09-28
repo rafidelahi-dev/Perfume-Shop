@@ -5,6 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BlogPostCard from '@/components/blog/BlogPostCard';
 import SimilarPerfumeCard from '@/components/perfume/SimilarPerfumeCard';
+import DemandRequestButtons from '@/components/perfume/DemandRequestButtons';
 import {
   createPublicSupabase,
   fetchAllPerfumeSlugs,
@@ -452,6 +453,7 @@ export default async function FragrancePage({ params }: Props) {
             <p className="text-gray-500 font-light">
               No listings yet — check back soon as more sellers join.
             </p>
+            <DemandRequestButtons perfumeId={perfume.id} />
           </div>
         ) : (
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

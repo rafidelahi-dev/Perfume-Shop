@@ -258,3 +258,21 @@ ALTER TABLE public.perfumes
   ADD COLUMN authenticity_batch_code text,
   ADD COLUMN authenticity_packaging_notes text,
   ADD COLUMN authenticity_other_notes text;
+
+-- Demand capture: "Notify me" / "Request a decant" clicks on
+-- out-of-stock perfumes. Public insert-only (no public read) — every
+-- click is a free demand signal per GOAL.md, no contact form required.
+CREATE TABLE public.demand_requests (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  perfume_id uuid NOT NULL REFERENCES public.perfumes(id) ON DELETE CASCADE,
+  request_type text NOT NULL CHECK (request_type IN ('notify', 'decant')),
+  user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_demand_requests_perfume_id ON public.demand_requests(perfume_id);
+
+ALTER TABLE public.demand_requests ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "demand_requests_public_insert" ON public.demand_requests
+  FOR INSERT TO anon, authenticated WITH CHECK (true);
