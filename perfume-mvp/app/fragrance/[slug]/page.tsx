@@ -13,6 +13,7 @@ import {
   fetchSimilarPerfumes,
   fetchPerfumeReviewAggregate,
   fetchPerfumePriceHistory,
+  fetchPerfumeReviews,
   type PerfumeProfile,
 } from '@/lib/queries/perfumes';
 
@@ -69,6 +70,26 @@ function formatMonth(month: string): string {
   const [year, mon] = month.split('-').map(Number);
   return new Date(year, mon - 1, 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 }
+
+const RATING_DISPLAY: Record<number, { emoji: string; label: string }> = {
+  5: { emoji: '❤️', label: 'Love' },
+  4: { emoji: '👍', label: 'Like' },
+  3: { emoji: '😐', label: 'Okay' },
+  2: { emoji: '👎', label: 'Dislike' },
+  1: { emoji: '💀', label: 'Hate' },
+};
+
+const CLIMATE_LABEL: Record<string, string> = {
+  summer: 'Summer',
+  monsoon: 'Monsoon',
+  winter: 'Winter',
+};
+
+const ENVIRONMENT_LABEL: Record<string, string> = {
+  ac_office: 'AC / Office',
+  outdoors: 'Outdoors',
+  mixed: 'Mixed',
+};
 
 type RelatedPost = {
   id: string
@@ -205,12 +226,13 @@ export default async function FragrancePage({ params }: Props) {
   const perfume = await fetchPerfumeBySlug(slug);
   if (!perfume) notFound();
 
-  const [listings, relatedPosts, similarPerfumes, aggregate, priceHistory] = await Promise.all([
+  const [listings, relatedPosts, similarPerfumes, aggregate, priceHistory, reviews] = await Promise.all([
     fetchListings(perfume),
     fetchRelatedPosts(perfume),
     fetchSimilarPerfumes(perfume),
     fetchPerfumeReviewAggregate(perfume.id),
     fetchPerfumePriceHistory(perfume.id),
+    fetchPerfumeReviews(perfume.id),
   ]);
 
   const hasPriceTrend = priceHistory.length >= 2;
@@ -442,6 +464,61 @@ export default async function FragrancePage({ params }: Props) {
                 <li key={point.month} className="flex justify-between text-sm text-gray-600">
                   <span>{formatMonth(point.month)}</span>
                   <span className="font-medium text-[#1a1a1a]">TK{point.avg_price.toFixed(0)} avg</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {reviews.length > 0 && (
+          <section className="mb-8 rounded-2xl border border-black/5 bg-white p-6">
+            <h2 className="text-lg font-serif font-semibold text-[#1a1a1a] mb-4">Reviews</h2>
+            <ul className="space-y-4">
+              {reviews.map((r) => (
+                <li key={r.id} className="border-b border-black/5 pb-4 last:border-0 last:pb-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                    {r.rating && (
+                      <span className="text-xs font-medium text-gray-700">
+                        {RATING_DISPLAY[r.rating]?.emoji} {RATING_DISPLAY[r.rating]?.label}
+                      </span>
+                    )}
+                    {r.owns_bottle && (
+                      <span className="text-xs bg-green-50 text-green-700 rounded-md px-2 py-0.5">
+                        Owns bottle
+                      </span>
+                    )}
+                    {r.longevity && (
+                      <span className="text-xs bg-blue-50 text-blue-700 rounded-md px-2 py-0.5">
+                        {r.longevity}
+                      </span>
+                    )}
+                    {r.environment && (
+                      <span className="text-xs bg-cyan-50 text-cyan-700 rounded-md px-2 py-0.5">
+                        {ENVIRONMENT_LABEL[r.environment]}
+                      </span>
+                    )}
+                    {r.climate_season.map((s) => (
+                      <span key={s} className="text-xs bg-teal-50 text-teal-700 rounded-md px-2 py-0.5">
+                        {CLIMATE_LABEL[s]}
+                      </span>
+                    ))}
+                  </div>
+                  {r.review_text && (
+                    <p className="text-sm text-gray-600">{r.review_text}</p>
+                  )}
+                  {r.images.length > 0 && (
+                    <div className="mt-2 flex gap-2">
+                      {r.images.slice(0, 4).map((src) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          key={src}
+                          src={src}
+                          alt=""
+                          className="w-16 h-16 rounded-lg object-cover border border-gray-100"
+                        />
+                      ))}
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
