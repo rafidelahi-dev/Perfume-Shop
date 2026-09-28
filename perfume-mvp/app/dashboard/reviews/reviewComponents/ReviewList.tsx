@@ -84,6 +84,12 @@ export default function ReviewList({ items, isLoading, error, onDelete }: Props)
           )}
 
           <div className="flex-1 min-w-0">
+            {r.is_flagged && (
+              <div className="mb-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                Flagged by moderators{r.flag_reason ? `: ${r.flag_reason}` : "."}
+              </div>
+            )}
+
             {/* Name + Brand */}
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
