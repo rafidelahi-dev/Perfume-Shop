@@ -5,6 +5,10 @@ strategy this platform serves.** All feature/content decisions should
 trace back to it: community + BD-climate content first, shop is the
 monetization layer, not the product.
 
+**Whenever a new workflow, role, or decision path is added to the
+superadmin panel or the user/seller experience, update `docs/WORKFLOWS.md`**
+(Mermaid diagrams of every existing use case/flow) in the same change.
+
 <!-- code-review-graph MCP tools -->
 ## MCP Tools: code-review-graph
 
