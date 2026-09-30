@@ -48,23 +48,26 @@ actually has right now (2026-09-29).
   (same admin auth guard, same UI components), so it's one consistent
   system to operate, not two.
 
-## 3. Where that leaves the site (honest numbers, live DB)
+## 3. Where that leaves the site (honest numbers, live DB, checked 2026-10-01)
 
 | Metric | Current |
 |---|---|
 | Perfume catalog pages | 252 |
 | Verified perfumes (authenticity guide filled in) | 0 |
 | Real seller listings | 14, all from 1 seller |
+| Sellers: pending approval | **3 — waiting right now, go approve/reject them today** |
+| Sellers: active | 7 |
 | Real reviews | 0 |
-| "Notify me" / demand-request signals logged | 0 |
+| "Notify me" / demand-request signals logged | 1 |
 
 **Read this plainly**: the engine is world-class for its stage — the
 catalog is already past the "top 100" target `GOAL.md` set, the schema
 captures data no BD competitor captures, and moderation is real. But it
-is an empty engine. Nobody has driven it yet. Zero reviews and zero
-demand signals means the "own the BD fragrance data" moat doesn't exist
-yet — it only exists once real people leave real data. That's what the
-daily playbooks below are for.
+is an empty engine. Nobody has driven it yet. Zero reviews means the
+"own the BD fragrance data" moat doesn't exist yet — it only exists once
+real people leave real data. And **3 pending seller signups are sitting
+unreviewed right now** — every day they wait is a person who tried to
+join and got silence. That's what the daily playbooks below are for.
 
 ---
 
@@ -109,12 +112,12 @@ proven tactic (Amazon, Fragrantica both do it), **as long as every page
 has real content**: notes, BD-climate expectations once reviews exist,
 a fake-spotting guide, similar-perfume links. A perfume page with
 nothing but "not in stock" is what Google calls a thin/spam page and
-will actively hurt you. Right now there's no "add perfume" button in
-the superadmin UI yet (perfumes are added via direct database insert) —
-that's a real gap; if you want to add catalog entries yourself
-regularly, say so and it's a small admin feature to build. Until then,
-new catalog perfumes are a request to make in this session, not a daily
-UI task.
+will actively hurt you. **This is now a daily UI task, not a request to make in chat**:
+`/superadmin/perfumes` has full CRUD as of 2026-09-29 — an "Add new
+perfume" form (brand + name required, slug auto-generated), inline
+editing of every content/SEO field, verify (fill authenticity guide),
+and delete (blocked if listings still reference it). Use it directly
+for the "add 3 pages a week" task in the social playbook below.
 
 ---
 
