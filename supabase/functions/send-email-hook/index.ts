@@ -90,7 +90,23 @@ Deno.serve(async (req: Request) => {
     return new Response(JSON.stringify({ error: "malformed payload" }), { status: 400 });
   }
 
-  const confirmUrl = `${supabaseUrl}/auth/v1/verify?token=${tokenHash}&type=${copy.verifyType}&redirect_to=${encodeURIComponent(redirectTo || siteUrl || "")}`;
+  // Recovery links point at our own app instead of straight at Supabase's
+  // /auth/v1/verify: email link-scanners (Outlook Safe Links, antivirus
+  // gateways) GET every link in a message to prescan it, which silently
+  // consumes a single-use OTP token before the human clicks. Our app page
+  // only calls verifyOtp() from client JS, which scanners don't execute.
+  let confirmUrl: string;
+  if (actionType === "recovery") {
+    let appOrigin = "https://www.cloudperfumebd.com";
+    try {
+      if (redirectTo) appOrigin = new URL(redirectTo).origin;
+    } catch {
+      // keep fallback
+    }
+    confirmUrl = `${appOrigin}/reset/confirm?token_hash=${tokenHash}&type=recovery`;
+  } else {
+    confirmUrl = `${supabaseUrl}/auth/v1/verify?token=${tokenHash}&type=${copy.verifyType}&redirect_to=${encodeURIComponent(redirectTo || siteUrl || "")}`;
+  }
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">

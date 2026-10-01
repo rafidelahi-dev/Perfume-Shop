@@ -1,58 +1,41 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { withTimeout } from "@/lib/queries/auth";
 
 export default function ResetUpdateClient() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [allowed, setAllowed] = useState(false);
 
-  // supabase-js uses PKCE: the reset link lands here as ?code=..., which
-  // must be exchanged for a session — it isn't auto-detected like the old
-  // hash-fragment flow. Supabase also appends ?error_description=... here
-  // directly (no code) when the link itself is already expired/used.
+  // By the time a user lands here, /reset/confirm has already verified the
+  // token and established the session — this page only needs to check it.
   useEffect(() => {
     let cancelled = false;
-    const code = searchParams.get("code");
-    const errorDescription = searchParams.get("error_description");
-
-    if (errorDescription) {
-      setErr(errorDescription.replace(/\+/g, " "));
-      return;
-    }
-
-    if (!code) {
-      setErr("Reset link is invalid or expired. Please request a new link.");
-      return;
-    }
 
     withTimeout(
-      supabase.auth.exchangeCodeForSession(code),
+      supabase.auth.getSession(),
       4000,
-      { data: { session: null, user: null }, error: null } as unknown as Awaited<
-        ReturnType<typeof supabase.auth.exchangeCodeForSession>
-      >
-    ).then(({ data, error }) => {
+      { data: { session: null } } as Awaited<ReturnType<typeof supabase.auth.getSession>>
+    ).then(({ data }) => {
       if (cancelled) return;
 
-      if (error || !data.session) {
-        setErr("Reset link is invalid or expired. Please request a new link.");
-      } else {
+      if (data.session) {
         setAllowed(true);
+      } else {
+        setErr("Reset link is invalid or expired. Please request a new link.");
       }
     });
 
     return () => {
       cancelled = true;
     };
-  }, [searchParams]);
+  }, []);
 
   async function handleUpdate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
