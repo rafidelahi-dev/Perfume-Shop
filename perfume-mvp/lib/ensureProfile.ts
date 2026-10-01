@@ -1,8 +1,13 @@
 import { supabase } from "@/lib/supabaseClient";
+import { withTimeout } from "@/lib/queries/auth";
 
 /** Call this after login/signup or on app start. */
 export async function ensureProfile() {
-  const { data, error: userError } = await supabase.auth.getUser();
+  const { data, error: userError } = await withTimeout(
+    supabase.auth.getUser(),
+    4000,
+    { data: { user: null }, error: null } as unknown as Awaited<ReturnType<typeof supabase.auth.getUser>>
+  );
 
   if (userError) {
     console.warn("ensureProfile getUser error:", userError.message);

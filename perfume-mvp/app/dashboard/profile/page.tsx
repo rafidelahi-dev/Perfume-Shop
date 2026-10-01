@@ -15,6 +15,7 @@ import {
 import { uploadToBucket } from "@/lib/queries/storage";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
+import { withTimeout } from "@/lib/queries/auth";
 import ConfirmDialog from "@/components/ConfirmDialog";
 
 export default function ProfilePage() {
@@ -61,7 +62,11 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser();
+      const { data } = await withTimeout(
+        supabase.auth.getUser(),
+        4000,
+        { data: { user: null } } as Awaited<ReturnType<typeof supabase.auth.getUser>>
+      );
       setUserId(data.user?.id || null);
     };
     fetchUser();
@@ -161,7 +166,11 @@ export default function ProfilePage() {
 
     try {
       // 🔒 Just make sure the user is logged in for UX purposes
-      const { data, error } = await supabase.auth.getUser();
+      const { data, error } = await withTimeout(
+        supabase.auth.getUser(),
+        4000,
+        { data: { user: null }, error: null } as unknown as Awaited<ReturnType<typeof supabase.auth.getUser>>
+      );
 
       if (error || !data.user) {
         setDeleteError("You are not logged in.");
@@ -179,7 +188,7 @@ export default function ProfilePage() {
         throw new Error(text || "Failed to delete account.");
       }
 
-      await supabase.auth.signOut();
+      await withTimeout(supabase.auth.signOut({ scope: "local" }), 4000, undefined);
       setDeleteModalOpen(false);
       router.replace("/");
     } catch (err: unknown) {

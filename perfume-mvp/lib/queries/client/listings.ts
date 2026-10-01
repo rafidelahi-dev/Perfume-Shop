@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
-import { getSessionUserId } from "./auth";
+import { getSessionUserId } from "@/lib/queries/auth";
 
 export async function fetchMyListings() {
   const userId = await getSessionUserId();

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { signInSmart } from "@/lib/queries/client/auth";
+import { withTimeout } from "@/lib/queries/auth";
 
 type LoginClientProps = {
   nextPath: string;
@@ -20,7 +21,11 @@ export default function LoginClient({ nextPath }: LoginClientProps) {
   const [oauthLoading, setOauthLoading] = useState<"google" | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    withTimeout(
+      supabase.auth.getSession(),
+      4000,
+      { data: { session: null } } as Awaited<ReturnType<typeof supabase.auth.getSession>>
+    ).then(({ data: { session } }) => {
       if (session) router.replace(nextPath);
     });
   }, [nextPath, router]);

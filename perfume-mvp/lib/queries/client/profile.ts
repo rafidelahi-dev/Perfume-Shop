@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
-import { getSession } from "./auth";
+import { getSession } from "@/lib/queries/auth";
 
 export type Profile = {
   id: string;

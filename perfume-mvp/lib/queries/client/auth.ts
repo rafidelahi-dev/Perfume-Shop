@@ -18,32 +18,6 @@ export function isValidBdPhone(raw: string): boolean {
   return BD_PHONE_RE.test(normalizeBdPhone(raw));
 }
 
-export async function getSessionUserId(): Promise<string> {
-  const { data, error } = await supabase.auth.getUser();
-  if (error) throw error;
-  const id = data.user?.id;
-  if (!id) throw new Error("Not Authenticated");
-  return id;
-}
-
-export async function getSession() {
-  const { data, error } = await supabase.auth.getSession();
-  if (error) throw error;
-  return data.session ?? null;
-}
-
-export async function getUserProfile() {
-  const session = await getSession();
-  const user = session?.user;
-  if (!user) return { user: null, profile: null };
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("username, display_name, avatar_url")
-    .eq("id", user.id)
-    .single();
-  return { user, profile: profile ?? null };
-}
-
 export async function signIn(email: string, password: string) {
   return supabase.auth.signInWithPassword({ email, password });
 }
@@ -96,10 +70,6 @@ export async function signInSmart(identifier: string, password: string) {
     } as const;
   }
   return supabase.auth.signInWithPassword({ phone: normalized, password });
-}
-
-export async function signOut() {
-  return supabase.auth.signOut();
 }
 
 export async function resetPassword(email: string, redirectTo: string) {

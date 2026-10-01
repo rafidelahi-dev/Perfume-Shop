@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { withTimeout } from "@/lib/queries/auth";
 
 export default function ResetUpdateClient() {
   const router = useRouter();
@@ -16,7 +17,11 @@ export default function ResetUpdateClient() {
   useEffect(() => {
     let cancelled = false;
 
-    supabase.auth.getSession().then(({ data }) => {
+    withTimeout(
+      supabase.auth.getSession(),
+      4000,
+      { data: { session: null } } as Awaited<ReturnType<typeof supabase.auth.getSession>>
+    ).then(({ data }) => {
       if (cancelled) return;
 
       if (data.session) {

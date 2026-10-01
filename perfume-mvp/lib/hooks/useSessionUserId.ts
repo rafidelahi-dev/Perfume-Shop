@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { withTimeout } from "@/lib/queries/auth";
 
 /**
  * Lightweight hook to expose the current session user id.
@@ -15,7 +16,11 @@ export function useSessionUserId() {
     let cancelled = false;
 
     const load = async () => {
-      const { data } = await supabase.auth.getUser();
+      const { data } = await withTimeout(
+        supabase.auth.getUser(),
+        4000,
+        { data: { user: null } } as Awaited<ReturnType<typeof supabase.auth.getUser>>
+      );
       if (!cancelled) {
         setUserId(data.user?.id ?? null);
       }
