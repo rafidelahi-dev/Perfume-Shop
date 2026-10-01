@@ -8,8 +8,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-import Header from "@/components/Header";
-
 
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
@@ -28,18 +26,13 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   const email = user?.email ?? null; // Use optional chaining just in case
 
-  // Fetch profile for Header pre-population (avoids client-side flash)
-  let displayName: string | null = null;
-  let avatarUrl: string | null = null;
   let isPending = false;
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("display_name, username, avatar_url, status")
+      .select("status")
       .eq("id", user.id)
       .single();
-    displayName = profile?.display_name || profile?.username || "User";
-    avatarUrl = profile?.avatar_url ?? null;
     isPending = profile?.status === 'pending';
   }
 
@@ -49,19 +42,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
     <>
 
-      <Header
-        hideLogout
-        initialAuth={{
-          isAuthenticated: !!user,
-          displayName,
-          avatarUrl,
-        }}
-      />
-
       <div className="flex">
         {/* Pass the email/user data safely */}
-        <DashboardSidebar email={email} /> 
-        <main className="flex-1 lg:ml-64 min-h-[calc(100vh-64px)] p-4 lg:p-6 pt-16 lg:pt-6">
+        <DashboardSidebar email={email} />
+        <main className="flex-1 lg:ml-64 min-h-screen p-4 lg:p-6 pt-20 lg:pt-6">
 
           {isPending && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 text-sm text-amber-800 flex items-start gap-2">

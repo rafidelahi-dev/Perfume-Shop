@@ -7,6 +7,7 @@ import { useMemo, useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuthProfile } from "@/lib/hooks/useAuthProfile";
+import { withTimeout } from "@/lib/queries/auth";
 
 export default function Header({
   hideMobileBurger = false,
@@ -28,6 +29,7 @@ export default function Header({
   const { loading, isAuthenticated, displayName, avatarUrl } = useAuthProfile(initialAuth);
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   // Handle scroll effect
   useEffect(() => {
@@ -50,8 +52,13 @@ export default function Header({
       : "/noimageuser.jpg";
 
   async function logout() {
-    await supabase.auth.signOut();
+    if (loggingOut) return;
+    setLoggingOut(true);
+    // scope: "local" skips the server revocation round-trip so this can't
+    // hang on a flaky network — see withTimeout's comment in lib/queries/auth.ts
+    await withTimeout(supabase.auth.signOut({ scope: "local" }), 4000, undefined);
     router.refresh();
+    setLoggingOut(false);
   }
 
   const NavLink = ({
@@ -149,10 +156,15 @@ export default function Header({
                 {!hideLogout && (
                   <button
                     onClick={logout}
-                    className="ml-2 rounded-full p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                    disabled={loggingOut}
+                    className="ml-2 rounded-full p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
                     title="Logout"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                    {loggingOut ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                    )}
                   </button>
                 )}
               </div>
@@ -253,9 +265,10 @@ export default function Header({
                 {!hideLogout && (
                   <button
                     onClick={() => { logout(); setOpen(false); }}
-                    className="mt-2 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600"
+                    disabled={loggingOut}
+                    className="mt-2 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600 disabled:opacity-50"
                   >
-                    Sign Out
+                    {loggingOut ? "Signing out…" : "Sign Out"}
                   </button>
                 )}
               </>

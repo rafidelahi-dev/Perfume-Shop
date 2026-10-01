@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { withTimeout } from "@/lib/queries/auth";
 import { useTransition, useState, useEffect } from "react";
 
 export function DashboardSidebar({ email }: { email: string | null }) {
@@ -57,13 +58,28 @@ export function DashboardSidebar({ email }: { email: string | null }) {
   );
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    await withTimeout(supabase.auth.signOut({ scope: "local" }), 4000, undefined);
     startTransition(() => router.replace("/login"));
   };
 
   return (
     <>
-      {/* Mobile handled by Header drawer — sidebar is desktop-only */}
+      {/* Mobile top bar — own hamburger, no marketing navbar involved */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-30 h-14 bg-white border-b flex items-center px-4 gap-3">
+        <button
+          onClick={() => setIsMobileOpen((o) => !o)}
+          className="p-2 -ml-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+          aria-label="Toggle dashboard menu"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        </button>
+        <span className="font-semibold text-gray-900">Dashboard</span>
+      </div>
+
+      {/* Backdrop while mobile sidebar is open */}
+      {isMobileOpen && (
+        <div className="lg:hidden fixed inset-0 z-40 bg-black/30" onClick={() => setIsMobileOpen(false)} />
+      )}
 
       {/* Sidebar - Highest z-index when open */}
       <aside
@@ -73,7 +89,7 @@ export function DashboardSidebar({ email }: { email: string | null }) {
           top-0
           left-0
           h-full
-          pt-[70px]
+          pt-[70px] lg:pt-6
           w-64
           bg-white
           border-r
