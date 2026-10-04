@@ -33,7 +33,7 @@ export default function HeroCarousel() {
         setMaxMounted((m) => Math.max(m, Math.min(next + 1, backgroundImages.length - 1)));
         return next;
       });
-    }, 6000);
+    }, 3500);
     return () => clearInterval(interval);
   }, []);
 
