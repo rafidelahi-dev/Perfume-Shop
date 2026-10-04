@@ -13,6 +13,7 @@ const supabaseUrl = Deno.env.get("SUPABASE_URL");
 type SendEmailPayload = {
   user: { email?: string };
   email_data: {
+    token?: string;
     token_hash?: string;
     redirect_to?: string;
     email_action_type?: string;
@@ -36,8 +37,8 @@ const EMAIL_COPY: Record<string, { verifyType: string; subject: string; heading:
   recovery: {
     verifyType: "recovery",
     subject: "Reset your Cloud PerfumeBD password",
-    heading: "Reset your password",
-    body: "Tap the button below to choose a new password for your Cloud PerfumeBD account. If you didn't request this, you can ignore this email.",
+    heading: "Your password reset code",
+    body: "Use this verification code to choose a new password for your Cloud PerfumeBD account.",
     cta: "Reset my password",
   },
 };
@@ -82,38 +83,39 @@ Deno.serve(async (req: Request) => {
   }
 
   const tokenHash = data.email_data?.token_hash;
+  const otp = data.email_data?.token;
   const redirectTo = data.email_data?.redirect_to || "";
   const siteUrl = data.email_data?.site_url || supabaseUrl;
 
-  if (!email || !tokenHash) {
-    console.error("send-email-hook: missing email or token_hash in payload");
+  if (!email || !tokenHash || (actionType === "recovery" && !otp)) {
+    console.error("send-email-hook: missing email, token_hash or otp in payload");
     return new Response(JSON.stringify({ error: "malformed payload" }), { status: 400 });
   }
 
-  // Recovery links point at our own app instead of straight at Supabase's
-  // /auth/v1/verify: email link-scanners (Outlook Safe Links, antivirus
-  // gateways) GET every link in a message to prescan it, which silently
-  // consumes a single-use OTP token before the human clicks. Our app page
-  // only calls verifyOtp() from client JS, which scanners don't execute.
-  let confirmUrl: string;
+  // Recovery emails carry a 6-digit code typed into /reset, not a link: link
+  // scanners (Outlook Safe Links, antivirus gateways) GET every URL and burn
+  // single-use tokens before the human clicks.
+  let html: string;
   if (actionType === "recovery") {
-    let appOrigin = "https://www.cloudperfumebd.com";
-    try {
-      if (redirectTo) appOrigin = new URL(redirectTo).origin;
-    } catch {
-      // keep fallback
-    }
-    confirmUrl = `${appOrigin}/reset/confirm?token_hash=${tokenHash}&type=recovery`;
-  } else {
-    confirmUrl = `${supabaseUrl}/auth/v1/verify?token=${tokenHash}&type=${copy.verifyType}&redirect_to=${encodeURIComponent(redirectTo || siteUrl || "")}`;
-  }
-
-  const html = `
+    html = `
     <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
       <h1 style="font-size: 20px; color: #111;">${copy.heading}</h1>
-      <p style="color: #444; line-height: 1.5;">
-        ${copy.body}
+      <p style="color: #444; line-height: 1.5;">${copy.body}</p>
+      <p style="margin: 28px 0; font-size: 34px; letter-spacing: 8px; font-weight: bold; font-family: monospace; color: #111; text-align: center; background: #f4f4f4; padding: 16px; border-radius: 8px;">
+        ${otp}
       </p>
+      <p style="color: #888; font-size: 13px; line-height: 1.5;">
+        Enter this code on the password reset page. It expires soon and works once.
+        If you didn't request this, you can ignore this email.
+      </p>
+    </div>
+  `;
+  } else {
+    const confirmUrl = `${supabaseUrl}/auth/v1/verify?token=${tokenHash}&type=${copy.verifyType}&redirect_to=${encodeURIComponent(redirectTo || siteUrl || "")}`;
+    html = `
+    <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
+      <h1 style="font-size: 20px; color: #111;">${copy.heading}</h1>
+      <p style="color: #444; line-height: 1.5;">${copy.body}</p>
       <p style="margin: 28px 0;">
         <a href="${confirmUrl}"
            style="background: #111; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">
@@ -124,11 +126,10 @@ Deno.serve(async (req: Request) => {
         If the button doesn't work, paste this link into your browser:<br/>
         <a href="${confirmUrl}">${confirmUrl}</a>
       </p>
-      <p style="color: #888; font-size: 13px;">
-        If you didn't request this, you can ignore this email.
-      </p>
+      <p style="color: #888; font-size: 13px;">If you didn't request this, you can ignore this email.</p>
     </div>
   `;
+  }
 
   const resendResponse = await fetch("https://api.resend.com/emails", {
     method: "POST",

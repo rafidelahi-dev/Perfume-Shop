@@ -216,11 +216,41 @@ sequenceDiagram
 
 ---
 
+## 3. Password Reset (Email OTP)
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant W as /reset page
+    participant S as Supabase Auth
+    participant H as send-email-hook
+    participant R as Resend
+    U->>W: Enter email
+    W->>S: resetPasswordForEmail(email)
+    S->>H: Send Email hook (recovery, 6-digit token)
+    H->>R: Email containing OTP code
+    R-->>U: "Your password reset code"
+    U->>W: Enter code + new password
+    W->>S: verifyOtp(email, token, recovery)
+    alt code valid
+        W->>S: updateUser(password)
+        W->>S: signOut()
+        W-->>U: Redirect to /login
+    else wrong / expired
+        W-->>U: Error, offer resend (60s cooldown)
+    end
+```
+
+Code (not link) is used because email link-scanners consume single-use links before the user clicks.
+
+---
+
 ## Workflow Changelog
 
 | Date | What changed | Diagram(s) affected |
 |---|---|---|
 | 2026-09-29 | Initial two workflows written: Superadmin Daily Operations (flowchart), User → Seller Journey (sequence diagram) | Both |
+| 2026-10-04 | Password reset switched from emailed link to emailed 6-digit OTP entered on /reset | Section 3 (new) |
 
 **When adding a new workflow, role, or decision branch:** add a row here
 with the date and a one-line description, then either extend the

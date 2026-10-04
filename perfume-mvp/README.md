@@ -57,7 +57,7 @@ Public pages (`/perfumes`, `/blog`, `/fragrance/[slug]`, sitemap, `LatestArticle
 - `app/sitemap.ts` — static + seller profiles + listings + 252 fragrance pages + published blog posts. `app/robots.ts` — disallows `/dashboard/`, `/login`, `/signup`, `/reset`, `/api/`.
 
 ### Auth `(auth)` group
-`/login`, `/signup`, `/reset`, `/reset/update` — thin server pages wrapping `*Client.tsx` components. Supabase email/password + Google/Facebook OAuth. `lib/ensureProfile.ts` upserts a `profiles` row on sign-in (also triggered from `AuthWatcher` in `app/providers.tsx`).
+`/login`, `/signup`, `/reset` (email → 6-digit OTP + new password, single page) — thin server pages wrapping `*Client.tsx` components. Supabase email/password + Google/Facebook OAuth. `lib/ensureProfile.ts` upserts a `profiles` row on sign-in (also triggered from `AuthWatcher` in `app/providers.tsx`).
 
 ### Seller dashboard `/dashboard/*` — **protected by `middleware.ts`** (matcher: `/dashboard/:path*`, `/reset/:path*`)
 - `/dashboard` — stats overview; `layout.tsx` + `DashboardSidebar`.
