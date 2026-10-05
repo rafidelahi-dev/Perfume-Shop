@@ -26,7 +26,7 @@ export default function Header({
   const next = useMemo(() => encodeURIComponent(pathname || "/"), [pathname]);
   const router = useRouter();
 
-  const { loading, isAuthenticated, displayName, avatarUrl } = useAuthProfile(initialAuth);
+  const { loading, isAuthenticated, isAdmin, displayName, avatarUrl } = useAuthProfile(initialAuth);
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -151,8 +151,14 @@ export default function Header({
               </div>
             ) : isAuthenticated ? (
               <div className="flex items-center gap-2">
-                <NavLink href="/dashboard" label="Dashboard" />
-                <UserChip />
+                {isAdmin ? (
+                  <NavLink href="/superadmin" label="Panel" />
+                ) : (
+                  <>
+                    <NavLink href="/dashboard" label="Dashboard" />
+                    <UserChip />
+                  </>
+                )}
                 {!hideLogout && (
                   <button
                     onClick={logout}
@@ -217,6 +223,16 @@ export default function Header({
               </div>
             ) : isAuthenticated ? (
               <>
+                {isAdmin ? (
+                  <Link
+                    href="/superadmin"
+                    onClick={() => setOpen(false)}
+                    className="block rounded-xl bg-[#1a1a1a] px-4 py-3 text-center text-sm font-medium text-white"
+                  >
+                    Panel
+                  </Link>
+                ) : (
+                <>
                 <Link
                   href="/dashboard/profile"
                   className="flex items-center gap-3 rounded-xl border border-gray-100 p-3 shadow-sm"
@@ -261,6 +277,8 @@ export default function Header({
                     </Link>
                   ))}
                 </div>
+                </>
+                )}
 
                 {!hideLogout && (
                   <button

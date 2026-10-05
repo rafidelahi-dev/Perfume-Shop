@@ -21,6 +21,8 @@ export function useAuthProfile(initialAuth?: {
   const [displayName, setDisplayName] = useState<string | null>(initialAuth?.displayName ?? null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAuth?.avatarUrl ?? null);
 
+  const [isAdmin, setIsAdmin] = useState(false);
+
   const hadInitialAuth = useRef(!!initialAuth);
 
   const loadFromSession = useCallback(async () => {
@@ -33,6 +35,7 @@ export function useAuthProfile(initialAuth?: {
       setEmail(null);
       setDisplayName(null);
       setAvatarUrl(null); // ✅ reset on logout
+      setIsAdmin(false);
       setLoading(false);
       return;
     }
@@ -44,6 +47,7 @@ export function useAuthProfile(initialAuth?: {
     setEmail(user.email ?? null);
     setDisplayName(profile?.display_name || profile?.username || "User");
     setAvatarUrl(profile?.avatar_url || null); // ✅ added
+    setIsAdmin(profile?.role === "admin");
     setLoading(false);
   }, []);
 
@@ -64,6 +68,7 @@ export function useAuthProfile(initialAuth?: {
         setEmail(null);
         setDisplayName(null);
         setAvatarUrl(null);
+        setIsAdmin(false);
         setLoading(false);
         return;
       }
@@ -83,5 +88,5 @@ export function useAuthProfile(initialAuth?: {
   }, [loadFromSession]);
 
   // ✅ Now returning avatarUrl as well
-  return { loading, isAuthenticated, email, displayName, avatarUrl };
+  return { loading, isAuthenticated, isAdmin, email, displayName, avatarUrl };
 }

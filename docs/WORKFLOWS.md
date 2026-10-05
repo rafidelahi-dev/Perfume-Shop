@@ -251,6 +251,7 @@ Code (not link) is used because email link-scanners consume single-use links bef
 |---|---|---|
 | 2026-09-29 | Initial two workflows written: Superadmin Daily Operations (flowchart), User → Seller Journey (sequence diagram) | Both |
 | 2026-10-04 | Password reset switched from emailed link to emailed 6-digit OTP entered on /reset | Section 3 (new) |
+| 2026-10-05 | Navbar for admins: "Panel" link to /superadmin replaces Dashboard + profile chip | Section 1 (entry point) |
 
 **When adding a new workflow, role, or decision branch:** add a row here
 with the date and a one-line description, then either extend the
