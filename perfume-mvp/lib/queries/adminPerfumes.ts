@@ -20,6 +20,7 @@ export type AdminPerfume = {
   authenticity_batch_code: string | null
   authenticity_packaging_notes: string | null
   authenticity_other_notes: string | null
+  images: string[] | null
 }
 
 export type AdminPerfumeUpdate = Partial<
@@ -41,6 +42,7 @@ export type AdminPerfumeUpdate = Partial<
     | 'authenticity_batch_code'
     | 'authenticity_packaging_notes'
     | 'authenticity_other_notes'
+    | 'images'
   >
 >
 
@@ -60,8 +62,22 @@ export type AdminPerfumeCreate = Pick<AdminPerfume, 'name' | 'brand'> &
       | 'authenticity_batch_code'
       | 'authenticity_packaging_notes'
       | 'authenticity_other_notes'
+      | 'images'
     >
   >
+
+export async function uploadAdminPerfumeImages(files: File[]): Promise<string[]> {
+  const urls: string[] = []
+  for (const file of files) {
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await fetch('/api/admin/perfumes/images', { method: 'POST', body: fd })
+    const json = await res.json().catch(() => ({}))
+    if (!res.ok) throw new Error(json.error ?? `Upload failed for ${file.name}`)
+    urls.push(json.url as string)
+  }
+  return urls
+}
 
 async function fetchAdminPerfumes(): Promise<AdminPerfume[]> {
   const res = await fetch('/api/admin/perfumes')

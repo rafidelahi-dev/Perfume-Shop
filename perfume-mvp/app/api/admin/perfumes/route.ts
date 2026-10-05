@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabaseAdmin'
 import { requireAdmin } from '@/lib/adminAuth'
 
 const SELECT_FIELDS =
-  'id, slug, name, brand, meta_title, meta_description, search_terms, top_notes, heart_notes, base_notes, accords, gender_lean, house_description, is_verified, authenticity_batch_code, authenticity_packaging_notes, authenticity_other_notes'
+  'id, slug, name, brand, meta_title, meta_description, search_terms, top_notes, heart_notes, base_notes, accords, gender_lean, house_description, is_verified, authenticity_batch_code, authenticity_packaging_notes, authenticity_other_notes, images'
 
 function slugify(str: string): string {
   return str
@@ -76,6 +76,7 @@ export async function POST(req: NextRequest) {
     accords: Array.isArray(body.accords) ? body.accords : [],
     gender_lean: typeof body.gender_lean === 'string' ? body.gender_lean : null,
     house_description: typeof body.house_description === 'string' ? body.house_description : null,
+    images: Array.isArray(body.images) ? body.images.filter((u) => typeof u === 'string') : [],
     is_verified: false,
     authenticity_batch_code: typeof body.authenticity_batch_code === 'string' ? body.authenticity_batch_code : null,
     authenticity_packaging_notes:

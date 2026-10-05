@@ -27,6 +27,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     authenticity_batch_code,
     authenticity_packaging_notes,
     authenticity_other_notes,
+    images,
   } = body
 
   const supabase = createAdminClient()
@@ -47,6 +48,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (authenticity_batch_code !== undefined) updates.authenticity_batch_code = authenticity_batch_code
   if (authenticity_packaging_notes !== undefined) updates.authenticity_packaging_notes = authenticity_packaging_notes
   if (authenticity_other_notes !== undefined) updates.authenticity_other_notes = authenticity_other_notes
+  if (Array.isArray(images)) updates.images = images.filter((u: unknown) => typeof u === 'string')
 
   const { data, error } = await supabase
     .from('perfumes')

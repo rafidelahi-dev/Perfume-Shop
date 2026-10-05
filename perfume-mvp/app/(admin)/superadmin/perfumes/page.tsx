@@ -9,7 +9,9 @@ import {
   useAdminDeletePerfume,
   type AdminPerfume,
 } from '@/lib/queries/adminPerfumes'
+import { uploadAdminPerfumeImages } from '@/lib/queries/adminPerfumes'
 import { ActionModal } from '@/components/admin/ActionModal'
+import { toast } from 'sonner'
 
 function arrayToText(arr: string[]): string {
   return arr.join(', ')
@@ -45,6 +47,58 @@ function Field({
   )
 }
 
+function ImagePicker({ urls, onChange }: { urls: string[]; onChange: (urls: string[]) => void }) {
+  const [uploading, setUploading] = useState(false)
+
+  async function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? [])
+    e.target.value = ''
+    if (!files.length) return
+    setUploading(true)
+    try {
+      const added = await uploadAdminPerfumeImages(files)
+      onChange([...urls, ...added])
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Upload failed')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="mb-3">
+      <p className="text-xs text-gray-500 mb-1">Images (PNG/JPEG/WebP, max 4MB each; first is the main image)</p>
+      <div className="flex flex-wrap gap-2 items-center">
+        {urls.map((u, i) => (
+          <div key={u} className="relative w-20 h-20 rounded-lg border border-gray-200 overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={u} alt="" className="w-full h-full object-cover" />
+            <button
+              type="button"
+              onClick={() => onChange(urls.filter((_, j) => j !== i))}
+              className="absolute top-0.5 right-0.5 w-5 h-5 text-xs leading-none rounded-full bg-black/70 text-white"
+              aria-label="Remove image"
+            >
+              ×
+            </button>
+          </div>
+        ))}
+        <label className="w-20 h-20 flex items-center justify-center text-center text-xs text-gray-500 rounded-lg border border-dashed border-gray-300 cursor-pointer hover:bg-gray-50">
+          {uploading ? 'Uploading…' : '+ Add'}
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            multiple
+            disabled={uploading}
+            onChange={onFiles}
+            className="hidden"
+          />
+        </label>
+      </div>
+    </div>
+  )
+}
+
 const EMPTY_NEW = {
   brand: '',
   name: '',
@@ -65,6 +119,7 @@ function NewPerfumeForm() {
   const create = useAdminCreatePerfume()
   const [open, setOpen] = useState(false)
   const [f, setF] = useState(EMPTY_NEW)
+  const [images, setImages] = useState<string[]>([])
   const set = (k: keyof typeof EMPTY_NEW) => (v: string) => setF((p) => ({ ...p, [k]: v }))
 
   function submit() {
@@ -84,8 +139,9 @@ function NewPerfumeForm() {
         authenticity_batch_code: f.batchCode || null,
         authenticity_packaging_notes: f.packagingNotes || null,
         authenticity_other_notes: f.otherNotes || null,
+        images,
       },
-      { onSuccess: () => { setF(EMPTY_NEW); setOpen(false) } },
+      { onSuccess: () => { setF(EMPTY_NEW); setImages([]); setOpen(false) } },
     )
   }
 
@@ -109,6 +165,7 @@ function NewPerfumeForm() {
             <Field label="Name *" value={f.name} onChange={set('name')} placeholder="e.g. Lattafa Khamrah Qahwa" />
           </div>
           <p className="text-xs text-gray-400 mb-3">Slug is generated from the name.</p>
+          <ImagePicker urls={images} onChange={setImages} />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
             <Field label="Top notes (comma-separated)" value={f.topNotes} onChange={set('topNotes')} />
@@ -182,6 +239,7 @@ function PerfumeRow({ perfume }: { perfume: AdminPerfume }) {
   const [batchCode, setBatchCode] = useState(perfume.authenticity_batch_code ?? '')
   const [packagingNotes, setPackagingNotes] = useState(perfume.authenticity_packaging_notes ?? '')
   const [otherNotes, setOtherNotes] = useState(perfume.authenticity_other_notes ?? '')
+  const [images, setImages] = useState<string[]>(perfume.images ?? [])
 
   function save(extra: Partial<{ is_verified: boolean }> = {}) {
     update.mutate({
@@ -200,6 +258,7 @@ function PerfumeRow({ perfume }: { perfume: AdminPerfume }) {
       authenticity_batch_code: batchCode,
       authenticity_packaging_notes: packagingNotes,
       authenticity_other_notes: otherNotes,
+      images,
       ...extra,
     })
   }
@@ -248,6 +307,8 @@ function PerfumeRow({ perfume }: { perfume: AdminPerfume }) {
           />
         </label>
       </div>
+
+      <ImagePicker urls={images} onChange={setImages} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
         <label className="text-xs text-gray-500">
