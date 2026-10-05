@@ -37,10 +37,9 @@ export async function ensureProfile() {
     if(!profile.contact_number && user.phone){
       await supabase
       .from("profiles")
-      .update({ contact_number: user.phone, phone_verified: !!user.phone_confirmed_at })
+      .update({ contact_number: user.phone })
       .eq("id", user.id);
       profile.contact_number = user.phone;
-      profile.phone_verified = !!user.phone_confirmed_at;
     }
     return profile;
   }
@@ -69,7 +68,6 @@ export async function ensureProfile() {
       full_name: user.user_metadata?.name || null,
       avatar_url: avatar,
       contact_number: user.phone || null,
-      phone_verified: !!user.phone_confirmed_at,
     })
     .select()
     .single();
