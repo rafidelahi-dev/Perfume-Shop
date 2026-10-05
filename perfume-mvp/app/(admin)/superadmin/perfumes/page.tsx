@@ -19,34 +19,73 @@ function textToArray(text: string): string[] {
   return text.split(',').map((s) => s.trim()).filter(Boolean)
 }
 
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+  rows,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+  rows?: number
+}) {
+  const cls = 'mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm'
+  return (
+    <label className="text-xs text-gray-500 block">
+      {label}
+      {rows ? (
+        <textarea value={value} onChange={(e) => onChange(e.target.value)} rows={rows} placeholder={placeholder} className={cls} />
+      ) : (
+        <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className={cls} />
+      )}
+    </label>
+  )
+}
+
+const EMPTY_NEW = {
+  brand: '',
+  name: '',
+  topNotes: '',
+  heartNotes: '',
+  baseNotes: '',
+  accords: '',
+  description: '',
+  metaTitle: '',
+  metaDescription: '',
+  searchTerms: '',
+  batchCode: '',
+  packagingNotes: '',
+  otherNotes: '',
+}
+
 function NewPerfumeForm() {
   const create = useAdminCreatePerfume()
   const [open, setOpen] = useState(false)
-  const [brand, setBrand] = useState('')
-  const [name, setName] = useState('')
-  const [metaTitle, setMetaTitle] = useState('')
-  const [metaDescription, setMetaDescription] = useState('')
-  const [searchTerms, setSearchTerms] = useState('')
-
-  function reset() {
-    setBrand('')
-    setName('')
-    setMetaTitle('')
-    setMetaDescription('')
-    setSearchTerms('')
-  }
+  const [f, setF] = useState(EMPTY_NEW)
+  const set = (k: keyof typeof EMPTY_NEW) => (v: string) => setF((p) => ({ ...p, [k]: v }))
 
   function submit() {
-    if (!brand.trim() || !name.trim()) return
+    if (!f.brand.trim() || !f.name.trim()) return
     create.mutate(
       {
-        brand: brand.trim(),
-        name: name.trim(),
-        meta_title: metaTitle || null,
-        meta_description: metaDescription || null,
-        search_terms: textToArray(searchTerms),
+        brand: f.brand.trim(),
+        name: f.name.trim(),
+        top_notes: textToArray(f.topNotes),
+        heart_notes: textToArray(f.heartNotes),
+        base_notes: textToArray(f.baseNotes),
+        accords: textToArray(f.accords),
+        house_description: f.description || null,
+        meta_title: f.metaTitle || null,
+        meta_description: f.metaDescription || null,
+        search_terms: textToArray(f.searchTerms),
+        authenticity_batch_code: f.batchCode || null,
+        authenticity_packaging_notes: f.packagingNotes || null,
+        authenticity_other_notes: f.otherNotes || null,
       },
-      { onSuccess: () => { reset(); setOpen(false) } },
+      { onSuccess: () => { setF(EMPTY_NEW); setOpen(false) } },
     )
   }
 
@@ -66,56 +105,54 @@ function NewPerfumeForm() {
       {open && (
         <div className="px-6 pb-6 border-t border-gray-100 pt-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-            <label className="text-xs text-gray-500">
-              Brand *
-              <input
-                value={brand}
-                onChange={(e) => setBrand(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
-              />
-            </label>
-            <label className="text-xs text-gray-500">
-              Name *
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Lattafa Khamrah Qahwa"
-                className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
-              />
-            </label>
+            <Field label="Brand *" value={f.brand} onChange={set('brand')} />
+            <Field label="Name *" value={f.name} onChange={set('name')} placeholder="e.g. Lattafa Khamrah Qahwa" />
           </div>
-          <label className="text-xs text-gray-500 block mb-3">
-            Meta title (SEO)
-            <input
-              value={metaTitle}
-              onChange={(e) => setMetaTitle(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
-            />
-          </label>
-          <label className="text-xs text-gray-500 block mb-3">
-            Meta description (SEO)
-            <textarea
-              value={metaDescription}
-              onChange={(e) => setMetaDescription(e.target.value)}
-              rows={2}
-              className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
-            />
-          </label>
-          <label className="text-xs text-gray-500 block mb-4">
-            Search terms (comma-separated)
-            <input
-              value={searchTerms}
-              onChange={(e) => setSearchTerms(e.target.value)}
+          <p className="text-xs text-gray-400 mb-3">Slug is generated from the name.</p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <Field label="Top notes (comma-separated)" value={f.topNotes} onChange={set('topNotes')} />
+            <Field label="Heart notes" value={f.heartNotes} onChange={set('heartNotes')} />
+            <Field label="Base notes" value={f.baseNotes} onChange={set('baseNotes')} />
+            <Field label="Accords" value={f.accords} onChange={set('accords')} />
+          </div>
+          <div className="mb-3">
+            <Field label="House description" value={f.description} onChange={set('description')} rows={2} />
+          </div>
+
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">SEO</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <Field label="Meta title" value={f.metaTitle} onChange={set('metaTitle')} />
+            <Field
+              label="Search terms (comma-separated)"
+              value={f.searchTerms}
+              onChange={set('searchTerms')}
               placeholder="e.g. khamrah qahwa, lattafa coffee perfume"
-              className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
             />
-          </label>
-          <p className="text-xs text-gray-400 mb-3">
-            Notes, accords, and authenticity fields can be filled in after creation, below.
+          </div>
+          <div className="mb-3">
+            <Field label="Meta description" value={f.metaDescription} onChange={set('metaDescription')} rows={2} />
+          </div>
+
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">
+            Authenticity guide (fake-spotting)
           </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <Field label="Batch code" value={f.batchCode} onChange={set('batchCode')} placeholder="e.g. where to find it, format" />
+            <Field
+              label="Cap / box print notes"
+              value={f.packagingNotes}
+              onChange={set('packagingNotes')}
+              placeholder="e.g. cap texture, box print quality"
+            />
+          </div>
+          <div className="mb-4">
+            <Field label="Other authenticity notes" value={f.otherNotes} onChange={set('otherNotes')} rows={2} />
+          </div>
+
           <button
             onClick={submit}
-            disabled={!brand.trim() || !name.trim() || create.isPending}
+            disabled={!f.brand.trim() || !f.name.trim() || create.isPending}
             className="px-4 py-2 text-xs font-medium bg-[#d4af37] hover:bg-[#c4a030] text-[#1a1a1a] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {create.isPending ? 'Creating…' : 'Create perfume'}
