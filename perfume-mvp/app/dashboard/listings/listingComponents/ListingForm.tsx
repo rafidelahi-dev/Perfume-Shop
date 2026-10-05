@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { uploadToBucket } from "@/lib/queries/storage";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { insertListing } from "@/lib/queries/listings";
@@ -74,7 +75,10 @@ const ListingForm: React.FC = () => {
   const [brand, setBrand] = useState("");
 
   const [perfumeName, setPerfumeName] = useState("");
-  const [type, setType] = useState<ListingType>("intact");
+  const initialType = useSearchParams().get("type");
+  const [type, setType] = useState<ListingType>(
+    initialType === "partial" || initialType === "decant" ? initialType : "intact"
+  );
 
   const [bottleSize, setBottleSize] = useState<number | "">("");
   const [partialLeft, setPartialLeft] = useState<number | "">("");

@@ -67,7 +67,7 @@ export default function Header({
     className = "",
   }: {
     href: string;
-    label: string;
+    label: React.ReactNode;
     className?: string;
   }) => {
     const isActive = pathname === href;
@@ -141,6 +141,15 @@ export default function Header({
             <NavLink href="/perfumes" label="Perfumes" />
             <NavLink href="/fragrances" label="Fragrances" />
             <NavLink href="/blog" label="Blog" />
+            <NavLink
+              href="/partials"
+              label={
+                <>
+                  <span className="lg:hidden">Partials</span>
+                  <span className="hidden lg:inline">Drop your partials</span>
+                </>
+              }
+            />
 
             <div className="h-6 w-px bg-gray-300 mx-2" />
 
@@ -214,6 +223,7 @@ export default function Header({
             <NavLink href="/perfumes" label="Perfumes" />
             <NavLink href="/fragrances" label="Fragrances" />
             <NavLink href="/blog" label="Blog" />
+            <NavLink href="/partials" label="Drop your partials" />
             <hr className="border-gray-100" />
             
             {loading ? (

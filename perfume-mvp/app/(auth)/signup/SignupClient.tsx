@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { signUpWithPhone, verifyPhoneOtp } from "@/lib/queries/client/auth";
@@ -27,8 +27,15 @@ function fireCompleteRegistration(userData: { email?: string; phone?: string }) 
   }).catch(() => {});
 }
 
+// Only same-site paths: "?next=" is user-controlled, so reject anything that
+// could bounce a new account to another origin (e.g. "//evil.com").
+function safeNext(raw: string | null): string {
+  return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
+}
+
 export default function SignupClient() {
   const router = useRouter();
+  const nextPath = safeNext(useSearchParams().get("next"));
 
   // signup mode: phone shown first (matches Daraz/BD market norms)
   const [mode, setMode] = useState<"phone" | "email">("phone");
@@ -135,7 +142,11 @@ export default function SignupClient() {
     const { error: signErr } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: metadata },
+      options: {
+        data: metadata,
+        // Confirmation link returns them to where they were headed.
+        emailRedirectTo: `${location.origin}${nextPath}`,
+      },
     });
 
     if (signErr) {
@@ -165,7 +176,7 @@ export default function SignupClient() {
     }
 
     fireCompleteRegistration({ phone });
-    router.push("/");
+    router.push(nextPath);
     setOtpLoading(false);
   }
 
@@ -174,7 +185,7 @@ export default function SignupClient() {
       setOauthLoading(provider);
       setError(null);
       const redirectTo =
-        typeof window !== "undefined" ? `${location.origin}` : undefined;
+        typeof window !== "undefined" ? `${location.origin}${nextPath}` : undefined;
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider,

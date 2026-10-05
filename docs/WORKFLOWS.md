@@ -245,6 +245,20 @@ Code (not link) is used because email link-scanners consume single-use links bef
 
 ---
 
+## 4. Drop Your Partials (Public Entry Point)
+
+```mermaid
+flowchart TD
+    A[Navbar: Drop your partials] --> B[/partials: partial listings only]
+    B --> C{Visitor action}
+    C -->|Browse| D[Open listing, contact seller]
+    C -->|Drop yours here| E{Signed in?}
+    E -->|Yes| F[/dashboard/listings?type=partial form]
+    E -->|No| G[/signup?next=listings form] --> F
+```
+
+---
+
 ## Workflow Changelog
 
 | Date | What changed | Diagram(s) affected |
@@ -253,6 +267,7 @@ Code (not link) is used because email link-scanners consume single-use links bef
 | 2026-10-04 | Password reset switched from emailed link to emailed 6-digit OTP entered on /reset | Section 3 (new) |
 | 2026-10-05 | Navbar for admins: "Panel" link to /superadmin replaces Dashboard + profile chip | Section 1 (entry point) |
 | 2026-10-05 | Superadmin perfumes: upload multiple images on new + existing perfumes (admin-only API -> `perfume-images` bucket) | Admin catalog |
+| 2026-10-05 | New /partials page + navbar "Drop your partials" link; "Drop yours here" CTA funnels visitors into signup then the partial listing form; signup now honors ?next (phone OTP, email confirmation link, Google) | Section 4 (new) |
 
 **When adding a new workflow, role, or decision branch:** add a row here
 with the date and a one-line description, then either extend the
