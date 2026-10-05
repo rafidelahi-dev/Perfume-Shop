@@ -9,6 +9,34 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuthProfile } from "@/lib/hooks/useAuthProfile";
 import { withTimeout } from "@/lib/queries/auth";
 
+// Module scope on purpose: defined inside Header it gets a new identity every
+// render, so the hover pill's state updates remounted every link mid-click.
+function NavLink({
+  href,
+  label,
+  className = "",
+  slide = false,
+}: {
+  href: string;
+  label: React.ReactNode;
+  className?: string;
+  slide?: boolean;
+}) {
+  const isActive = usePathname() === href;
+  return (
+    <Link
+      href={href}
+      className={`relative z-10 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
+        isActive
+          ? "bg-[#1a1a1a] text-[#f8f7f3]"
+          : `text-[#1a1a1a]/70 hover:text-[#1a1a1a] ${slide ? "" : "hover:bg-black/5"}`
+      } ${className}`}
+    >
+      {label}
+    </Link>
+  );
+}
+
 export default function Header({
   hideMobileBurger = false,
   hideLogout = false,
@@ -36,12 +64,11 @@ export default function Header({
 
   function movePillTo(el: HTMLElement | null) {
     if (!el) return;
-    setPill((p) => ({
-      left: el.offsetLeft,
-      width: el.offsetWidth,
-      show: true,
-      instant: !p.show,
-    }));
+    setPill((p) =>
+      p.show && p.left === el.offsetLeft && p.width === el.offsetWidth
+        ? p
+        : { left: el.offsetLeft, width: el.offsetWidth, show: true, instant: !p.show }
+    );
   }
   function hidePill() {
     setPill((p) => ({ ...p, show: false }));
@@ -76,32 +103,6 @@ export default function Header({
     router.refresh();
     setLoggingOut(false);
   }
-
-  const NavLink = ({
-    href,
-    label,
-    className = "",
-    slide = false,
-  }: {
-    href: string;
-    label: React.ReactNode;
-    className?: string;
-    slide?: boolean;
-  }) => {
-    const isActive = pathname === href;
-    return (
-      <Link
-        href={href}
-        className={`relative z-10 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
-          isActive
-            ? "bg-[#1a1a1a] text-[#f8f7f3]"
-            : `text-[#1a1a1a]/70 hover:text-[#1a1a1a] ${slide ? "" : "hover:bg-black/5"}`
-        } ${className}`}
-      >
-        {label}
-      </Link>
-    );
-  };
 
   function UserChip() {
     return (
