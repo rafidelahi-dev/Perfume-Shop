@@ -30,6 +30,22 @@ export default function Header({
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  // Sliding hover pill behind the desktop nav links. `instant` = first hover
+  // after the pointer entered from outside: jump into place, don't slide.
+  const [pill, setPill] = useState({ left: 0, width: 0, show: false, instant: true });
+
+  function movePillTo(el: HTMLElement | null) {
+    if (!el) return;
+    setPill((p) => ({
+      left: el.offsetLeft,
+      width: el.offsetWidth,
+      show: true,
+      instant: !p.show,
+    }));
+  }
+  function hidePill() {
+    setPill((p) => ({ ...p, show: false }));
+  }
 
   // Handle scroll effect
   useEffect(() => {
@@ -65,19 +81,21 @@ export default function Header({
     href,
     label,
     className = "",
+    slide = false,
   }: {
     href: string;
     label: React.ReactNode;
     className?: string;
+    slide?: boolean;
   }) => {
     const isActive = pathname === href;
     return (
       <Link
         href={href}
-        className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+        className={`relative z-10 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
           isActive
             ? "bg-[#1a1a1a] text-[#f8f7f3]"
-            : "text-[#1a1a1a]/70 hover:text-[#1a1a1a] hover:bg-black/5"
+            : `text-[#1a1a1a]/70 hover:text-[#1a1a1a] ${slide ? "" : "hover:bg-black/5"}`
         } ${className}`}
       >
         {label}
@@ -137,19 +155,37 @@ export default function Header({
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
-            <NavLink href="/" label="Home" />
-            <NavLink href="/perfumes" label="Perfumes" />
-            <NavLink href="/fragrances" label="Fragrances" />
-            <NavLink href="/blog" label="Blog" />
-            <NavLink
-              href="/partials"
-              label={
-                <>
-                  <span className="lg:hidden">Partials</span>
-                  <span className="hidden lg:inline">Drop your partials</span>
-                </>
-              }
-            />
+            <div
+              className="relative flex items-center gap-1"
+              onMouseOver={(e) => movePillTo((e.target as HTMLElement).closest("a"))}
+              onFocus={(e) => movePillTo((e.target as HTMLElement).closest("a"))}
+              onMouseLeave={hidePill}
+              onBlur={hidePill}
+            >
+              <span
+                aria-hidden="true"
+                className={`pointer-events-none absolute left-0 top-0 h-full rounded-full bg-black/5 ${
+                  pill.instant
+                    ? "transition-opacity duration-150"
+                    : "transition-[transform,width,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                } motion-reduce:transition-none ${pill.show ? "opacity-100" : "opacity-0"}`}
+                style={{ width: pill.width, transform: `translateX(${pill.left}px)` }}
+              />
+              <NavLink slide href="/" label="Home" />
+              <NavLink slide href="/perfumes" label="Perfumes" />
+              <NavLink slide href="/fragrances" label="Fragrances" />
+              <NavLink slide href="/blog" label="Blog" />
+              <NavLink
+                slide
+                href="/partials"
+                label={
+                  <>
+                    <span className="lg:hidden">Partials</span>
+                    <span className="hidden lg:inline">Drop your partials</span>
+                  </>
+                }
+              />
+            </div>
 
             <div className="h-6 w-px bg-gray-300 mx-2" />
 
