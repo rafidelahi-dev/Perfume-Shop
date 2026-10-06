@@ -30,7 +30,10 @@ function fireCompleteRegistration(userData: { email?: string; phone?: string }) 
 // Only same-site paths: "?next=" is user-controlled, so reject anything that
 // could bounce a new account to another origin (e.g. "//evil.com").
 function safeNext(raw: string | null): string {
-  return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
+  // A bare "/" (navbar link clicked on the homepage) is not a destination.
+  return raw && raw.startsWith("/") && !raw.startsWith("//") && raw !== "/"
+    ? raw
+    : "/dashboard";
 }
 
 export default function SignupClient() {

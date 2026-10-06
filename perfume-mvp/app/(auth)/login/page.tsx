@@ -17,7 +17,12 @@ export default async function LoginPage({ searchParams }: PageProps) {
 
   const rawNext = params?.next;
   const nextPath =
-    typeof rawNext === "string" && rawNext.startsWith("/")
+    // "/" is just where the navbar link was clicked from, not a destination:
+    // signing in lands on the dashboard unless a deeper page asked for them.
+    typeof rawNext === "string" &&
+    rawNext.startsWith("/") &&
+    !rawNext.startsWith("//") &&
+    rawNext !== "/"
       ? rawNext
       : "/dashboard";
 

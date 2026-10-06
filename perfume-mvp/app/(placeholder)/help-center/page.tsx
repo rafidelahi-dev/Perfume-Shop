@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 export default function HelpCenterPage() {
   const [loading, setLoading] = useState(false);
@@ -30,17 +32,23 @@ export default function HelpCenterPage() {
 
   if (sent) {
     return (
-      <div className="max-w-lg mx-auto py-20 text-center">
+      <>
+      <Header />
+      <div className="max-w-lg mx-auto pt-32 pb-20 text-center">
         <h1 className="text-2xl font-semibold mb-4">Thank you!</h1>
         <p className="text-gray-600">
           Your message has been received. Our support team will get back to you soon.
         </p>
       </div>
+      <Footer />
+      </>
     );
   }
 
   return (
-    <div className="max-w-xl mx-auto py-20 px-4">
+    <>
+    <Header />
+    <div className="max-w-xl mx-auto pt-32 pb-20 px-4">
       <h1 className="text-3xl font-semibold mb-6">Help Center</h1>
       <p className="text-gray-600 mb-8">
         Have feedback? Found an issue? Want to suggest a feature?
@@ -95,5 +103,7 @@ export default function HelpCenterPage() {
         </button>
       </form>
     </div>
+    <Footer />
+    </>
   );
 }

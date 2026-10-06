@@ -5,9 +5,19 @@ import Link from "next/link";
 import Image from "next/image";
 import { useMemo, useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { LayoutDashboard, Droplets, Tag, Star, PenLine, Settings } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuthProfile } from "@/lib/hooks/useAuthProfile";
 import { withTimeout } from "@/lib/queries/auth";
+
+const DASHBOARD_TILES = [
+  { href: "/dashboard", label: "Overview", hint: "Your summary", Icon: LayoutDashboard },
+  { href: "/dashboard/perfumes", label: "My Perfumes", hint: "Your collection", Icon: Droplets },
+  { href: "/dashboard/listings", label: "My Listings", hint: "What you sell", Icon: Tag },
+  { href: "/dashboard/reviews", label: "My Reviews", hint: "Ratings you left", Icon: Star },
+  { href: "/dashboard/blog", label: "My Articles", hint: "Your writing", Icon: PenLine },
+  { href: "/dashboard/profile", label: "Settings", hint: "Profile & contact", Icon: Settings },
+];
 
 // Module scope on purpose: defined inside Header it gets a new identity every
 // render, so the hover pill's state updates remounted every link mid-click.
@@ -299,31 +309,42 @@ export default function Header({
                   </div>
                 </Link>
 
-                {/* Dashboard sub-navigation */}
-                <div className="space-y-1">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 pb-1">Dashboard</p>
-                  {[
-                    { href: "/dashboard", label: "Overview" },
-                    { href: "/dashboard/perfumes", label: "My Perfumes" },
-                    { href: "/dashboard/listings", label: "My Listings" },
-                    { href: "/dashboard/reviews", label: "My Reviews" },
-                    { href: "/dashboard/blog", label: "My Articles" },
-                    { href: "/dashboard/profile", label: "Profile Settings" },
-                  ].map(({ href, label }) => (
-                    <Link
-                      key={href}
-                      href={href}
-                      onClick={() => setOpen(false)}
-                      className={`block pl-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        pathname === href
-                          ? "bg-gray-900 text-white"
-                          : "text-gray-600 hover:bg-gray-50"
-                      }`}
-                    >
-                      {label}
-                    </Link>
-                  ))}
-                </div>
+                {/* Dashboard shortcuts: 2-column tiles, big thumb targets */}
+                <nav aria-label="Dashboard" className="space-y-3">
+                  <p className="px-1 text-sm font-semibold text-gray-900">Your dashboard</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {DASHBOARD_TILES.map(({ href, label, hint, Icon }) => {
+                      const active = pathname === href;
+                      return (
+                        <Link
+                          key={href}
+                          href={href}
+                          onClick={() => setOpen(false)}
+                          aria-current={active ? "page" : undefined}
+                          className={`flex min-h-[88px] flex-col justify-between rounded-2xl border p-3.5 transition active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d4af37] ${
+                            active
+                              ? "border-[#1a1a1a] bg-[#1a1a1a] text-white shadow-md"
+                              : "border-black/10 bg-[#fdfbf7] text-[#1a1a1a] hover:border-[#d4af37]/60"
+                          }`}
+                        >
+                          <span
+                            className={`grid h-9 w-9 place-items-center rounded-xl ${
+                              active ? "bg-white/15 text-[#d4af37]" : "bg-[#d4af37]/15 text-[#8a6d00]"
+                            }`}
+                          >
+                            <Icon className="h-5 w-5" aria-hidden="true" />
+                          </span>
+                          <span>
+                            <span className="block text-sm font-semibold leading-tight">{label}</span>
+                            <span className={`block text-xs ${active ? "text-white/70" : "text-[#666]"}`}>
+                              {hint}
+                            </span>
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </nav>
                 </>
                 )}
 

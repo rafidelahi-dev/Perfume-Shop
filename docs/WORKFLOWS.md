@@ -268,6 +268,7 @@ flowchart TD
 | 2026-10-05 | Navbar for admins: "Panel" link to /superadmin replaces Dashboard + profile chip | Section 1 (entry point) |
 | 2026-10-05 | Superadmin perfumes: upload multiple images on new + existing perfumes (admin-only API -> `perfume-images` bucket) | Admin catalog |
 | 2026-10-05 | New /partials page + navbar "Drop your partials" link; "Drop yours here" CTA funnels visitors into signup then the partial listing form; signup now honors ?next (phone OTP, email confirmation link, Google) | Section 4 (new) |
+| 2026-10-06 | Log in / sign up with no real destination (navbar clicked on "/") now lands on /dashboard; mobile drawer shows dashboard links as a 2-column tile grid | Section 1 (entry point) |
 
 **When adding a new workflow, role, or decision branch:** add a row here
 with the date and a one-line description, then either extend the
