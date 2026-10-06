@@ -107,7 +107,7 @@ export default function TrendingSection({ initialPerfumes }: TrendingSectionProp
     });
 
     return (
-        <section className="py-20 px-6 sm:px-12 bg-[#fcfbf9]">
+        <section className="pt-4 sm:pt-8 px-6 sm:px-12 bg-[#fcfbf9]">
             <div className="mx-auto">
                 
                 {/* Header & Tabs Container */}

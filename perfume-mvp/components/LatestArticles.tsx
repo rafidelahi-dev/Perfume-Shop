@@ -26,12 +26,11 @@ export default async function LatestArticles() {
   if (posts.length === 0) return null
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#fdfbf7]">
+    <section className="py-10 px-4 sm:px-6 lg:px-8 bg-[#fdfbf7]">
       <div className="mx-auto max-w-6xl">
         <div className="flex items-end justify-between mb-10">
           <div>
-            <p className="text-xs uppercase tracking-widest text-[#d4af37] font-semibold mb-2">Journal</p>
-            <h2 className="text-3xl font-serif font-bold text-[#1a1a1a]">Latest Articles</h2>
+            <h2 className="text-3xl font-serif font-bold text-[#1a1a1a]">Latest Blogs</h2>
           </div>
           <Link href="/blog" className="text-sm font-medium text-gray-500 hover:text-[#1a1a1a] underline underline-offset-2">
             View all

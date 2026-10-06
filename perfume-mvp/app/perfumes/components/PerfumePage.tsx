@@ -129,9 +129,6 @@ export default function PerfumesPage({ initialListings }: { initialListings?: Pe
       {/* Hero */}
       <section className="relative w-full bg-gradient-to-br from-[#f9f6ef] via-[#f5f1e8] to-[#efe9dc] py-16">
         <div className="mx-auto max-w-7xl px-4">
-          <div className="flex justify-center mb-4">
-            <Sparkles className="h-8 w-8 text-[#d4af37]" />
-          </div>
           <h1 className="text-center text-4xl md:text-5xl font-semibold tracking-tight text-[#111]">
             Discover your{" "}
             <span className="text-[#d4af37]">signature scent</span>

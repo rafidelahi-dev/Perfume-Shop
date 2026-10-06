@@ -88,17 +88,13 @@ export default async function Home() {
 
         <div className="relative z-10 mx-auto max-w-7xl text-center px-6 sm:px-12 flex flex-col items-center">
 
-          <div className="inline-block mb-4 px-4 py-1.5 rounded-full border border-[#d4af37]/30 bg-[#d4af37]/10 backdrop-blur-md">
-            <span className="text-xs font-semibold tracking-widest uppercase text-[#8a7224]">Learn · Discover · Trade</span>
-          </div>
-
           <h1 className="text-5xl font-light tracking-tight text-[#111] sm:text-7xl lg:text-8xl mb-8">
             Discover Your
             <span className="block mt-2 font-serif italic text-[#d4af37] drop-shadow-sm">Signature Scent</span>
           </h1>
 
           <p className="mt-2 text-lg sm:text-xl text-[#111] max-w-2xl mx-auto leading-relaxed font-light">
-            {"Bangladesh's honest home for fragrance — learn what's worth your money, compare real decant prices, and trade with a community of perfume lovers."}
+            {"Bangladesh's first community driven marketplace. Know what's worth your money, compare real decant prices, and trade with a community of perfume lovers."}
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -106,18 +102,18 @@ export default async function Home() {
               href="/perfumes"
               className="btn hover-lift bg-[#1a1a1a] text-white hover:bg-black border-none text-base px-10 py-4 rounded-full shadow-xl hover:shadow-2xl duration-300"
             >
-              Explore Collection
+              Explore Perfumes
             </Link>
             <Link
               href="/blog"
               className="btn hover-lift bg-white/50 backdrop-blur-md border border-[#1a1a1a]/10 text-[#1a1a1a] hover:bg-white text-base px-10 py-4 rounded-full shadow-sm hover:shadow-md duration-300"
             >
-              Learn Fragrance
+              Read Our Blogs
             </Link>
           </div>
 
           {/* Trust Indicators */}
-          <div className="mt-20 pt-8 border-t border-black/5 grid grid-cols-3 gap-8 sm:gap-16 text-xs sm:text-sm font-medium tracking-wide text-[#666] uppercase">
+          <div className="sm:mt-8 pt-8 border-t border-black/5 grid grid-cols-3 gap-8 sm:gap-16 text-xs sm:text-sm font-medium tracking-wide text-[#666] uppercase">
             <div className="flex flex-col items-center gap-2">
               <span className="text-[#d4af37] text-lg">✦</span>
               <span className="font-bold">Community Driven</span>
@@ -141,7 +137,7 @@ export default async function Home() {
       <LatestArticles />
 
       {/* CTA Section */}
-      <section className="relative py-24 px-6 sm:px-12 overflow-hidden">
+      <section className="relative py-12 sm:py-24 px-6 sm:px-12 overflow-hidden">
         <div className="absolute inset-0 bg-[#1a1a1a]">
           {/* Abstract shapes in background */}
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#d4af37]/10 rounded-full blur-[100px] translate-x-1/2 -translate-y-1/2"></div>
