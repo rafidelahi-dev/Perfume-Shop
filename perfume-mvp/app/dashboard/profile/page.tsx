@@ -17,6 +17,20 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
 import { withTimeout } from "@/lib/queries/auth";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import Link from "next/link";
+import {
+  BadgeCheck,
+  Camera,
+  Check,
+  ExternalLink,
+  Loader2,
+  Lock,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Trash2,
+  UserRound,
+} from "lucide-react";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -202,9 +216,9 @@ export default function ProfilePage() {
 
   if (isLoading)
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
-        <p className="text-gray-600 font-medium">Loading your profile...</p>
+      <div className="mx-auto flex min-h-[400px] flex-col items-center justify-center">
+        <Loader2 className="mb-3 h-8 w-8 animate-spin text-[#d4af37]" aria-hidden="true" />
+        <p className="font-medium text-[#555]">Loading your profile…</p>
       </div>
     );
 
@@ -322,385 +336,389 @@ export default function ProfilePage() {
 
   
 
+  const initials = (form.display_name || profile.username || "?").trim().charAt(0).toUpperCase();
+
+  const formKeys = [
+    "display_name",
+    "contact_number",
+    "messenger_link",
+    "facebook_link",
+    "whatsapp_number",
+    "website",
+    "location",
+    "bio",
+    "avatar_url",
+  ] as const;
+  const dirty = formKeys.some((k) => (form[k] ?? "") !== (profile[k] ?? ""));
+
+  const strength = [
+    { done: !!form.avatar_url, hint: "Add a profile photo" },
+    { done: !!form.display_name?.trim(), hint: "Add a display name" },
+    { done: !!form.location?.trim(), hint: "Say where you sell from" },
+    { done: !!form.bio?.trim(), hint: "Write a short bio" },
+    { done: !!profile.phone_verified, hint: "Verify your phone number" },
+    {
+      done: !!(form.whatsapp_number || form.facebook_link || form.messenger_link),
+      hint: "Add WhatsApp, Messenger or Facebook",
+    },
+  ];
+  const doneCount = strength.filter((x) => x.done).length;
+  const pct = Math.round((doneCount / strength.length) * 100);
+  const nextStep = strength.find((x) => !x.done);
+
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-16 px-4 lg:px-0">
-      {/* Header */}
-      <div className="text-center space-y-2 mt-4 md:mt-12">
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Profile Settings</h1>
-        <p className="text-gray-600 text-sm lg:text-base">
-          Manage your account information and preferences
-        </p>
-      </div>
-
-      {/* Profile Information */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-4 lg:px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100/30">
-          <h2 className="text-lg lg:text-xl font-semibold text-gray-900">
-            Profile Information
-          </h2>
-          <p className="text-sm text-gray-600 mt-1">
-            Update your personal details and how others see you
-          </p>
-        </div>
-
-        <form onSubmit={onSave} className="p-4 lg:p-6 space-y-6 lg:space-y-8">
-          <div className="flex flex-col sm:flex-row items-start gap-4 lg:gap-6 p-4 bg-gray-50 rounded-lg">
-            <div className="flex-shrink-0 mx-auto sm:mx-0">
-              <div className="relative h-20 w-20 lg:h-24 lg:w-24 overflow-hidden rounded-full border-4 border-white shadow-lg">
-                {form.avatar_url ? (
-                  <Image
-                    src={form.avatar_url}
-                    alt="Profile avatar"
-                    fill
-                    sizes="(max-width: 1024px) 80px, 96px"
-                    className="object-cover"
-                    priority
-                  />
-                ) : (
-                  <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 text-gray-500">
-                    <span className="text-xs font-medium">No avatar</span>
-                  </div>
-                )}
-                {imgUploading && (
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-4 lg:h-6 w-4 lg:w-6 border-b-2 border-white"></div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="flex-1 space-y-2 text-center sm:text-left">
-              <h3 className="font-medium text-gray-900">Profile Picture</h3>
-              <p className="text-sm text-gray-600">JPG, PNG or WebP. Max 5MB.</p>
-              <label className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-                Change avatar
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={onAvatarChange}
-                  disabled={imgUploading}
-                  className="hidden"
+    <div className="mx-auto max-w-3xl space-y-6 pb-16 sm:space-y-8">
+      {/* Identity hero */}
+      <section className="relative overflow-hidden rounded-3xl bg-[#1a1a1a] text-white shadow-[0_24px_48px_-24px_rgba(0,0,0,0.5)]">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(212,175,55,0.30),transparent_60%)]"
+        />
+        <div className="relative flex flex-col items-center gap-5 p-6 text-center sm:flex-row sm:items-center sm:p-8 sm:text-left">
+          <div className="relative shrink-0">
+            <div className="relative h-28 w-28 overflow-hidden rounded-full bg-[#2a2a2a] ring-4 ring-[#d4af37]/70 sm:h-32 sm:w-32">
+              {form.avatar_url ? (
+                <Image
+                  src={form.avatar_url}
+                  alt="Your profile photo"
+                  fill
+                  sizes="128px"
+                  className="object-cover"
+                  priority
                 />
-              </label>
+              ) : (
+                <div className="grid h-full w-full place-items-center font-serif text-5xl text-[#d4af37]">
+                  {initials}
+                </div>
+              )}
+              {imgUploading && (
+                <div className="absolute inset-0 grid place-items-center bg-black/60">
+                  <Loader2 className="h-6 w-6 animate-spin text-white" aria-hidden="true" />
+                </div>
+              )}
             </div>
+            <label
+              className="absolute -bottom-1 -right-1 grid h-11 w-11 cursor-pointer place-items-center rounded-full bg-[#d4af37] text-[#1a1a1a] shadow-lg transition hover:bg-[#e2c14f] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-white"
+              title="Change photo"
+            >
+              <Camera className="h-5 w-5" aria-hidden="true" />
+              <span className="sr-only">Change profile photo (JPG, PNG or WebP, max 5MB)</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={onAvatarChange}
+                disabled={imgUploading}
+                className="sr-only"
+              />
+            </label>
           </div>
 
-          {/* Form Grid */}
-          <div className="grid grid-cols-1 gap-4 lg:gap-6 lg:grid-cols-2">
-            {/* Read-only fields */}
-            <div className="space-y-2 lg:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <input
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all"
-                value={profile.email ?? ""}
-                disabled
-              />
+          <div className="min-w-0 flex-1 space-y-3">
+            <div>
+              <h1 className="truncate font-serif text-3xl font-semibold tracking-tight sm:text-4xl">
+                {form.display_name || profile.username || "Your profile"}
+              </h1>
+              {profile.username && <p className="text-white/60">@{profile.username}</p>}
             </div>
-
-            <div className="space-y-2 lg:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Username *people can search you by this name
-              </label>
-              <input
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all"
-                value={profile.username ?? ""}
-                disabled
-              />
+            <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
+              {form.location && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-sm text-white/85">
+                  <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+                  {form.location}
+                </span>
+              )}
+              {profile.phone_verified && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#d4af37]/20 px-3 py-1 text-sm text-[#f0d675]">
+                  <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                  Verified seller
+                </span>
+              )}
+              {profile.status === "pending" && (
+                <span className="inline-flex items-center rounded-full bg-amber-400/20 px-3 py-1 text-sm text-amber-200">
+                  Pending approval
+                </span>
+              )}
             </div>
+            {profile.username && (
+              <Link
+                href={`/perfumes/${profile.username}`}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#f0d675] underline-offset-4 hover:underline"
+              >
+                View my public page
+                <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+              </Link>
+            )}
+          </div>
+        </div>
 
-            {/* Editable fields */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Display Name *This will reflect on the dashboard
-              </label>
+        {/* Profile strength */}
+        <div className="relative border-t border-white/10 px-6 py-4 sm:px-8">
+          <div className="flex items-center justify-between gap-3 text-sm">
+            <span className="font-medium">Profile strength</span>
+            <span className="tabular-nums text-white/70">{pct}%</span>
+          </div>
+          <div
+            className="mt-2 h-2 overflow-hidden rounded-full bg-white/10"
+            role="progressbar"
+            aria-valuenow={pct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Profile strength"
+          >
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[#b8921f] to-[#f0d675] transition-[width] duration-500 motion-reduce:transition-none"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <p className="mt-2 text-sm text-white/60">
+            {nextStep ? `Next: ${nextStep.hint}. Complete profiles earn more buyer trust.` : "Your profile is complete. Buyers can trust what they see."}
+          </p>
+        </div>
+      </section>
+
+      <form onSubmit={onSave} className="space-y-6 sm:space-y-8">
+        {/* About you */}
+        <Card icon={<UserRound className="h-5 w-5" aria-hidden="true" />} title="About you" description="What buyers see on your public page.">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <Field label="Display name" htmlFor="display_name" hint="Shown on your dashboard and listings.">
               <input
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                id="display_name"
+                className={INPUT}
                 value={form.display_name ?? ""}
-                onChange={(e) =>
-                  setForm({ ...form, display_name: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, display_name: e.target.value })}
                 placeholder="Your display name"
               />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Website *your perfume website or your personal website
-              </label>
+            </Field>
+            <Field label="Website" htmlFor="website" hint="Your perfume shop or personal site.">
               <input
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                id="website"
+                className={INPUT}
+                inputMode="url"
                 value={form.website ?? ""}
-                onChange={(e) =>
-                  setForm({ ...form, website: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, website: e.target.value })}
                 placeholder="https://example.com"
               />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Facebook Link
-              </label>
+            </Field>
+            <Field label="Location" htmlFor="location" hint="Where you sell from." wide>
               <input
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                value={form.facebook_link ?? ""}
-                onChange={(e) =>
-                  setForm({ ...form, facebook_link: e.target.value })
-                }
-                placeholder="https://www.facebook.com/your.profile"
+                id="location"
+                className={INPUT}
+                value={form.location ?? ""}
+                onChange={(e) => setForm({ ...form, location: e.target.value })}
+                placeholder="City, Country"
               />
-              <p className="text-xs text-gray-500">
-                Your Facebook profile or page (optional).
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Messenger Link
-              </label>
-              <input
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                value={form.messenger_link ?? ""}
-                onChange={(e) =>
-                  setForm({ ...form, messenger_link: e.target.value })
-                }
-                placeholder="https://m.me/yourname"
+            </Field>
+            <Field label="Bio" htmlFor="bio" wide>
+              <textarea
+                id="bio"
+                className={`${INPUT} resize-none`}
+                rows={4}
+                value={form.bio ?? ""}
+                onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                placeholder="Your fragrance taste, what you collect, what you love about perfume…"
+                maxLength={500}
               />
-            </div>
+              <p className="mt-1.5 text-right text-xs tabular-nums text-[#777]">{form.bio?.length || 0}/500</p>
+            </Field>
+          </div>
+        </Card>
 
-
-
-            <div className="space-y-2"> 
-              <label 
-              className="block text-sm font-medium text-gray-700"> 
-              WhatsApp Number 
-              </label> 
-              <input 
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
-              value={form.whatsapp_number ?? ""} 
-              onChange={(e) => setForm({ ...form, whatsapp_number: e.target.value }) } 
-              placeholder="+8801XXXXXXXXX" />
-            </div>
-            
-            <div className="space-y-2 lg:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Contact Number
-              </label>
-
-              <div className="flex items-center gap-3">
+        {/* Contact */}
+        <Card
+          icon={<Phone className="h-5 w-5" aria-hidden="true" />}
+          title="Reach you"
+          description="Buyers contact you directly. Add at least one way to reach you."
+        >
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <Field label="Contact number" htmlFor="contact_number" wide>
+              <div className="flex gap-3">
                 <input
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none 
-                            focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  id="contact_number"
+                  className={`${INPUT} min-w-0 flex-1`}
+                  inputMode="tel"
                   value={form.contact_number ?? ""}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, contact_number: e.target.value }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, contact_number: e.target.value }))}
                   placeholder="+8801XXXXXXXXX"
                   onBlur={() => {
-                    const normalized = normalizeBDPhone(form.contact_number ?? "")
-                    if(normalized !== (form.contact_number ?? "")) {
-                      setForm((f) => ({...f, contact_number: normalized}))
+                    const normalized = normalizeBDPhone(form.contact_number ?? "");
+                    if (normalized !== (form.contact_number ?? "")) {
+                      setForm((f) => ({ ...f, contact_number: normalized }));
                     }
                   }}
                 />
-
                 {!profile.phone_verified ? (
                   <button
                     type="button"
                     onClick={handleVerifyContactNumber}
                     disabled={!contactOk}
-                    className={`px-4 py-2 rounded-lg text-white ${contactOk ? "bg-indigo-600 hover:bg-indigo-700" : "bg-gray-400 cursor-not-allowed"} 
-                              text-sm shadow-sm whitespace-nowrap`}
+                    className="shrink-0 rounded-xl bg-[#1a1a1a] px-5 text-sm font-medium text-white transition hover:bg-[#333] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Verify
                   </button>
                 ) : (
-                  <span className="px-4 py-2 rounded-lg text-sm bg-green-100 text-green-700">
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-emerald-50 px-4 text-sm font-medium text-emerald-700">
+                    <Check className="h-4 w-4" aria-hidden="true" />
                     Verified
                   </span>
                 )}
               </div>
               {contactNumber && !contactOk && !profile.phone_verified && (
-                <p className="text-xs text-red-600 mt-2">
-                  Please use a proper Bangladeshi format: <b>+8801*********</b>
+                <p className="mt-2 text-sm text-red-600">
+                  Use the Bangladeshi format <b>+8801XXXXXXXXX</b>.
                 </p>
               )}
-
               {showContactOtp && !profile.phone_verified && (
-                <div className="mt-2 flex flex-col sm:flex-row gap-3">
+                <div className="mt-3 flex flex-col gap-3 rounded-2xl bg-[#faf6e8] p-4 sm:flex-row">
                   <input
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none 
-                              focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    className={`${INPUT} flex-1`}
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
                     value={contactOtp}
                     onChange={(e) => setContactOtp(e.target.value)}
-                    placeholder="Enter the 6-digit code"
+                    placeholder="6-digit code from SMS"
+                    aria-label="Verification code"
                   />
                   <button
                     type="button"
                     onClick={handleConfirmContactOtp}
-                    className="px-4 py-2 rounded-lg text-white bg-green-600 hover:bg-green-700 
-                              text-sm shadow-sm whitespace-nowrap"
+                    className="rounded-xl bg-[#1a1a1a] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#333]"
                   >
-                    Confirm
+                    Confirm code
                   </button>
                 </div>
               )}
-
-              <p className="text-xs text-gray-500">
-                Your number will be used for buyer communication.
-              </p>
-            </div>
-
-            <div className="space-y-2 lg:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Location *Please mention where you are selling from
-              </label>
+            </Field>
+            <Field label="WhatsApp number" htmlFor="whatsapp_number">
               <input
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                value={form.location ?? ""}
-                onChange={(e) =>
-                  setForm({ ...form, location: e.target.value })
-                }
-                placeholder="City, Country"
+                id="whatsapp_number"
+                className={INPUT}
+                inputMode="tel"
+                value={form.whatsapp_number ?? ""}
+                onChange={(e) => setForm({ ...form, whatsapp_number: e.target.value })}
+                placeholder="+8801XXXXXXXXX"
               />
-            </div>
-
-            <div className="space-y-2 lg:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Bio *Tell us something about yourself that we can share with others
-              </label>
-              <textarea
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
-                rows={4}
-                value={form.bio ?? ""}
-                onChange={(e) =>
-                  setForm({ ...form, bio: e.target.value })
-                }
-                placeholder="Tell others about your fragrance preferences, collecting habits, or what you love about perfumes..."
-                maxLength={500}
-              />
-              <div className="flex justify-between text-xs text-gray-500">
-                <span>Brief introduction about yourself</span>
-                <span>{form.bio?.length || 0}/500</span>
+            </Field>
+            <Field label="Messenger link" htmlFor="messenger_link">
+              <div className="relative">
+                <MessageCircle className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-black/30" aria-hidden="true" />
+                <input
+                  id="messenger_link"
+                  className={`${INPUT} pl-11`}
+                  inputMode="url"
+                  value={form.messenger_link ?? ""}
+                  onChange={(e) => setForm({ ...form, messenger_link: e.target.value })}
+                  placeholder="https://m.me/yourname"
+                />
               </div>
-            </div>
-          </div>
-
-          {/* Save Button */}
-          <div className="flex justify-end pt-4 border-t border-gray-200">
-            <button
-              type="submit"
-              disabled={saving}
-              className="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
-            >
-              {saving ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Saving Changes...
-                </span>
-              ) : (
-                "Save Changes"
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {/* Change Password */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-4 lg:px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100/30">
-          <h2 className="text-lg lg:text-xl font-semibold text-gray-900">Security</h2>
-          <p className="text-sm text-gray-600 mt-1">
-            Update your password to keep your account secure
-          </p>
-        </div>
-
-        <form onSubmit={onChangePassword} className="p-4 lg:p-6 space-y-6">
-          <div className="grid grid-cols-1 gap-4 lg:gap-6 lg:grid-cols-2">
-            <div className="space-y-2 lg:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">
-                New Password
-              </label>
+            </Field>
+            <Field label="Facebook link" htmlFor="facebook_link" hint="Your profile or page (optional)." wide>
               <input
+                id="facebook_link"
+                className={INPUT}
+                inputMode="url"
+                value={form.facebook_link ?? ""}
+                onChange={(e) => setForm({ ...form, facebook_link: e.target.value })}
+                placeholder="https://www.facebook.com/your.profile"
+              />
+            </Field>
+          </div>
+        </Card>
+
+        {/* Account (read-only) */}
+        <Card icon={<Lock className="h-5 w-5" aria-hidden="true" />} title="Account" description="These can't be changed here.">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <Field label="Email" htmlFor="email">
+              <input id="email" className={`${INPUT} cursor-not-allowed bg-[#f6f4ee] text-[#666]`} value={profile.email ?? ""} disabled />
+            </Field>
+            <Field label="Username" htmlFor="username" hint="People can find you by this name.">
+              <input id="username" className={`${INPUT} cursor-not-allowed bg-[#f6f4ee] text-[#666]`} value={profile.username ?? ""} disabled />
+            </Field>
+          </div>
+        </Card>
+
+        {/* Sticky save bar */}
+        <div className="sticky bottom-3 z-20 flex items-center justify-between gap-3 rounded-2xl border border-black/10 bg-white/90 px-4 py-3 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.25)] backdrop-blur-md">
+          <p className="flex items-center gap-2 text-sm text-[#555]" aria-live="polite">
+            <span
+              aria-hidden="true"
+              className={`h-2 w-2 rounded-full ${dirty ? "bg-[#d4af37]" : "bg-emerald-500"}`}
+            />
+            {dirty ? "You have unsaved changes" : "All changes saved"}
+          </p>
+          <button
+            type="submit"
+            disabled={saving || !dirty}
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-[#1a1a1a] px-6 text-sm font-medium text-white transition hover:bg-[#d4af37] hover:text-[#1a1a1a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d4af37] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[#1a1a1a] disabled:hover:text-white"
+          >
+            {saving && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+            {saving ? "Saving…" : "Save changes"}
+          </button>
+        </div>
+      </form>
+
+      {/* Security */}
+      <form onSubmit={onChangePassword}>
+        <Card icon={<Lock className="h-5 w-5" aria-hidden="true" />} title="Password" description="Choose a new password to keep your account secure.">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <Field label="New password" htmlFor="new_password">
+              <input
+                id="new_password"
                 type="password"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                autoComplete="new-password"
+                className={INPUT}
                 value={pwd.newPwd}
-                onChange={(e) =>
-                  setPwd({ ...pwd, newPwd: e.target.value })
-                }
+                onChange={(e) => setPwd({ ...pwd, newPwd: e.target.value })}
                 required
                 minLength={6}
                 placeholder="At least 6 characters"
               />
-            </div>
-
-            <div className="space-y-2 lg:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Confirm Password
-              </label>
+            </Field>
+            <Field label="Confirm password" htmlFor="confirm_password">
               <input
+                id="confirm_password"
                 type="password"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                autoComplete="new-password"
+                className={INPUT}
                 value={pwd.confirmPwd}
-                onChange={(e) =>
-                  setPwd({ ...pwd, confirmPwd: e.target.value })
-                }
+                onChange={(e) => setPwd({ ...pwd, confirmPwd: e.target.value })}
                 required
-                placeholder="Confirm your new password"
+                placeholder="Repeat the new password"
               />
-            </div>
+            </Field>
           </div>
-
-          <div className="flex justify-end pt-4 border-t border-gray-200">
+          <div className="mt-6 flex justify-end">
             <button
               type="submit"
               disabled={pwdSaving || !pwd.newPwd || !pwd.confirmPwd}
-              className="w-full sm:w-auto px-6 py-2.5 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+              className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-[#1a1a1a] px-6 text-sm font-medium text-[#1a1a1a] transition hover:bg-[#1a1a1a] hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-[#1a1a1a] sm:w-auto"
             >
-              {pwdSaving ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Updating Password...
-                </span>
-              ) : (
-                "Update Password"
-              )}
+              {pwdSaving && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+              {pwdSaving ? "Updating…" : "Update password"}
             </button>
           </div>
-        </form>
-      </div>
+        </Card>
+      </form>
 
-      {/* Danger Zone */}
-      <div className="mt-8 border-t pt-4 text-center sm:text-left">
-        <p className="text-sm font-semibold text-red-700 mb-2">Danger Zone</p>
-        {deleteError && (
-          <p className="mb-2 text-sm text-red-600">
-            {deleteError}
-          </p>
-        )}
-        <button
-          type="button"
-          onClick={openDeleteModal}
-          className="w-full sm:w-auto rounded-md bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
-        >
-          Delete my account
-        </button>
-      </div>
+      {/* Danger zone: quiet until needed */}
+      <section className="rounded-3xl border border-red-200/70 bg-red-50/40 p-5 sm:p-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-serif text-xl font-semibold text-red-800">Delete account</h2>
+            <p className="mt-1 max-w-md text-sm text-red-900/70">
+              Permanently removes your account, perfumes and listings. This can't be undone.
+            </p>
+            {deleteError && <p className="mt-2 text-sm text-red-600">{deleteError}</p>}
+          </div>
+          <button
+            type="button"
+            onClick={openDeleteModal}
+            className="inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-full border border-red-300 bg-white px-5 text-sm font-medium text-red-700 transition hover:bg-red-600 hover:text-white"
+          >
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
+            Delete my account
+          </button>
+        </div>
+      </section>
 
       {/* Confirmation modal */}
       <ConfirmDialog
@@ -715,6 +733,61 @@ export default function ProfilePage() {
         confirmLabel="Yes, delete it"
         cancelLabel="Cancel"
       />
+    </div>
+  );
+}
+
+// 16px text on phones so iOS doesn't zoom on focus.
+const INPUT =
+  "w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-base text-[#1a1a1a] outline-none ring-2 ring-transparent transition placeholder:text-black/30 focus:border-[#d4af37] focus:ring-[#d4af37]/20 sm:text-sm";
+
+function Card({
+  icon,
+  title,
+  description,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-3xl border border-black/10 bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_16px_40px_-24px_rgba(0,0,0,0.18)] sm:p-8">
+      <header className="mb-6 flex items-start gap-3">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#d4af37]/15 text-[#8a6d00]">
+          {icon}
+        </span>
+        <div>
+          <h2 className="font-serif text-xl font-semibold text-[#1a1a1a]">{title}</h2>
+          <p className="text-sm text-[#666]">{description}</p>
+        </div>
+      </header>
+      {children}
+    </section>
+  );
+}
+
+function Field({
+  label,
+  htmlFor,
+  hint,
+  wide = false,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  hint?: string;
+  wide?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={wide ? "sm:col-span-2" : undefined}>
+      <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-[#1a1a1a]">
+        {label}
+      </label>
+      {children}
+      {hint && <p className="mt-1.5 text-xs text-[#777]">{hint}</p>}
     </div>
   );
 }
