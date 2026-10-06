@@ -20,14 +20,23 @@ export default function LoginClient({ nextPath }: LoginClientProps) {
   const [error, setError] = useState<string | null>(null);
   const [oauthLoading, setOauthLoading] = useState<"google" | null>(null);
 
+  // Default landing is the dashboard; admins go to the superadmin panel instead.
+  // An explicit deeper destination (?next=/x) is always respected.
+  async function landing(userId: string) {
+    if (nextPath !== "/dashboard") return nextPath;
+    const { data } = await supabase.from("profiles").select("role").eq("id", userId).single();
+    return data?.role === "admin" ? "/superadmin" : nextPath;
+  }
+
   useEffect(() => {
     withTimeout(
       supabase.auth.getSession(),
       4000,
       { data: { session: null } } as Awaited<ReturnType<typeof supabase.auth.getSession>>
     ).then(({ data: { session } }) => {
-      if (session) router.replace(nextPath);
+      if (session) landing(session.user.id).then((p) => router.replace(p));
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nextPath, router]);
 
   async function onSubmit(e: React.FormEvent) {
@@ -43,7 +52,8 @@ export default function LoginClient({ nextPath }: LoginClientProps) {
       return;
     }
 
-    router.replace(nextPath);
+    const { data: userData } = await supabase.auth.getUser();
+    router.replace(userData.user ? await landing(userData.user.id) : nextPath);
     setLoading(false);
   }
 
