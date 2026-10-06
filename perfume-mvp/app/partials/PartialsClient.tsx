@@ -34,33 +34,33 @@ export default function PartialsClient({ listings }: { listings: PerfumeListing[
     <div className="min-h-screen">
       <Header />
 
-      <section className="bg-gradient-to-br from-[#f9f6ef] via-[#f5f1e8] to-[#efe9dc] pt-28 pb-10 sm:pt-32">
+      <section className="bg-gradient-to-br from-[#f9f6ef] via-[#f5f1e8] to-[#efe9dc] pt-28 sm:pt-32">
         <div className="mx-auto max-w-3xl px-4">
           <h1 className="font-serif text-4xl font-semibold tracking-tight text-[#111] sm:text-5xl">
             Partial perfumes
           </h1>
           <p className="mt-3 max-w-xl text-[#444]">
-            Half-used bottles from real sellers across Bangladesh, newest first. Sellers
-            contact you directly.
+            Partially used bottles from fragheads across Bangladesh, newest first. Contact sellers
+             directly.
           </p>
 
-          {/* Styled like the comment box people already know from the groups. */}
+          {/* Phone: just the button. sm+: a call-out card with a short pitch. */}
           <Link
             href={dropHref}
             aria-label="Drop your partial here"
-            className="group mt-8 flex items-center gap-3 rounded-2xl border border-black/10 bg-white p-3 shadow-sm transition hover:border-[#d4af37] hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d4af37] sm:p-4"
+            className="group mt-8 flex items-center gap-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d4af37] sm:rounded-2xl sm:border-l-4 sm:border-[#d4af37] sm:bg-white sm:py-4 sm:pl-5 sm:pr-4 sm:shadow-sm sm:transition sm:hover:shadow-md"
           >
-            <span
-              aria-hidden="true"
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#f2eee4] font-serif text-lg text-[#8a6d00]"
-            >
-              ?
+            <span className="hidden min-w-0 flex-1 sm:block">
+              <span className="block font-serif text-lg font-semibold text-[#1a1a1a]">
+                Got a partial gathering dust?
+              </span>
+              <span className="block text-sm text-[#666]">
+                Post it here. Buyers across Bangladesh message you directly.
+              </span>
             </span>
-            <span className="min-w-0 flex-1 truncate rounded-full bg-[#f6f4ee] px-4 py-2.5 text-sm text-[#777]">
-              Got a partial you want to sell? Drop it here…
-            </span>
-            <span className="shrink-0 rounded-full bg-[#1a1a1a] px-5 py-2.5 text-sm font-medium text-white transition group-hover:bg-[#d4af37] group-hover:text-[#1a1a1a]">
-              Drop yours here
+            <span className="w-full shrink-0 rounded-full bg-[#1a1a1a] px-6 py-3 text-center text-sm font-medium text-white transition group-hover:bg-[#d4af37] group-hover:text-[#1a1a1a] sm:w-auto">
+              <span className="sm:hidden">Drop your partials here</span>
+              <span className="hidden sm:inline">Drop yours here</span>
             </span>
           </Link>
           <p className="mt-2 px-1 text-xs text-[#777]">Free to post. Takes about a minute.</p>
