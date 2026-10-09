@@ -2,6 +2,8 @@ export type SellerProfile = {
   display_name: string | null;
   avatar_url?: string | null;
   username: string | null;
+  phone_verified?: boolean | null;
+  created_at?: string | null;
 };
 
 export type PerfumeListing = {
@@ -19,5 +21,7 @@ export type PerfumeListing = {
   partial_left_ml?: number | null;
   decant_options?: unknown;    // jsonb if you use it
   images?: string[] | null;    // text[]
+  created_at?: string | null;
+  status?: string | null;      // available | sold
   profiles?: SellerProfile | null;
 };

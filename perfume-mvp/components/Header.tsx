@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useMemo, useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Droplets, Tag, Star, PenLine, Settings } from "lucide-react";
+import { LayoutDashboard, Droplets, Tag, Star, PenLine, Settings, BellRing } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuthProfile } from "@/lib/hooks/useAuthProfile";
 import { withTimeout } from "@/lib/queries/auth";
@@ -14,6 +14,7 @@ const DASHBOARD_TILES = [
   { href: "/dashboard", label: "Overview", hint: "Your summary", Icon: LayoutDashboard },
   { href: "/dashboard/perfumes", label: "My Perfumes", hint: "Your collection", Icon: Droplets },
   { href: "/dashboard/listings", label: "My Listings", hint: "What you sell", Icon: Tag },
+  { href: "/dashboard/alerts", label: "Alerts", hint: "New posts for you", Icon: BellRing },
   { href: "/dashboard/reviews", label: "My Reviews", hint: "Ratings you left", Icon: Star },
   { href: "/dashboard/blog", label: "My Articles", hint: "Your writing", Icon: PenLine },
   { href: "/dashboard/profile", label: "Settings", hint: "Profile & contact", Icon: Settings },
@@ -183,7 +184,7 @@ export default function Header({
                 style={{ width: pill.width, transform: `translateX(${pill.left}px)` }}
               />
               <NavLink slide href="/" label="Home" />
-              <NavLink slide href="/perfumes" label="Perfumes" />
+              <NavLink slide href="/perfumes" label="Sell Post" />
               <NavLink slide href="/fragrances" label="Fragrances" />
               <NavLink slide href="/blog" label="Blog" />
               <NavLink
@@ -196,6 +197,7 @@ export default function Header({
                   </>
                 }
               />
+              <NavLink slide href="/wanted" label="Wanted" />
             </div>
 
             <div className="h-6 w-px bg-gray-300 mx-2" />
@@ -267,10 +269,11 @@ export default function Header({
         <div className="fixed inset-0 z-40 overflow-y-auto bg-white pt-24 px-6 pb-10 md:hidden animate-in slide-in-from-top-10 fade-in duration-200">
            <div className="flex flex-col space-y-4">
             <NavLink href="/" label="Home" />
-            <NavLink href="/perfumes" label="Perfumes" />
+            <NavLink href="/perfumes" label="Sell Post" />
             <NavLink href="/fragrances" label="Fragrances" />
             <NavLink href="/blog" label="Blog" />
             <NavLink href="/partials" label="Drop your partials" />
+            <NavLink href="/wanted" label="Wanted" />
             <hr className="border-gray-100" />
             
             {loading ? (
@@ -321,7 +324,7 @@ export default function Header({
                           href={href}
                           onClick={() => setOpen(false)}
                           aria-current={active ? "page" : undefined}
-                          className={`flex min-h-[88px] flex-col justify-between rounded-2xl border p-3.5 transition active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d4af37] ${
+                          className={`flex min-h-[88px] flex-col justify-between rounded-2xl border p-3.5 [&:last-child:nth-child(odd)]:col-span-2 transition active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d4af37] ${
                             active
                               ? "border-[#1a1a1a] bg-[#1a1a1a] text-white shadow-md"
                               : "border-black/10 bg-[#fdfbf7] text-[#1a1a1a] hover:border-[#d4af37]/60"

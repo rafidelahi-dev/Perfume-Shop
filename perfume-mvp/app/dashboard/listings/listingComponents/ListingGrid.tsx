@@ -8,6 +8,9 @@ import { fetchMyListings, deleteMyListing } from "@/lib/queries/listings";
 import { toast } from "sonner";
 import Image from "next/image";
 import { useSessionUserId } from "@/lib/hooks/useSessionUserId";
+import { fetchMyProfile } from "@/lib/queries/profile";
+import { setListingSold } from "@/lib/queries/engagement";
+import { buildSellPostText, listingUrl, timeAgo } from "@/lib/listingUtils";
 
 // 🔹 Shape of a listing as used in this component
 export interface Listing {
@@ -22,6 +25,8 @@ export interface Listing {
   partial_left_ml?: number | null;
   decant_options?: { ml: number; price: number }[] | null;
   images?: string[] | null;
+  status?: string | null;
+  created_at?: string | null;
 }
 
 // 🔹 Props (currently not used, but kept if you want to reuse later)
@@ -46,6 +51,32 @@ export const ListingGrid: React.FC<ListingGridProps> = () => {
     queryFn: fetchMyListings,
     enabled: !!userId,
   });
+
+  const { data: me } = useQuery({
+    queryKey: qk.profile(userId),
+    queryFn: fetchMyProfile,
+    enabled: !!userId,
+  });
+
+  const toggleSold = useMutation({
+    mutationFn: ({ id, sold }: { id: string; sold: boolean }) => setListingSold(id, sold),
+    onSuccess: (_d, { sold }) => {
+      qc.invalidateQueries({ queryKey: qk.userListings(userId) });
+      qc.invalidateQueries({ queryKey: qk.dashboardListingStats(userId) });
+      toast.success(sold ? "Marked as sold." : "Back on the market.");
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not update the listing."),
+  });
+
+  async function copyPost(l: Listing) {
+    const text = buildSellPostText(l, listingUrl(me?.username, l.id));
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Sell post copied. Paste it in your Facebook group.");
+    } catch {
+      toast.error("Could not copy. Select and copy manually.");
+    }
+  }
 
   const filteredListings: Listing[] = useMemo(() => {
     if (!data) return [];
@@ -157,28 +188,52 @@ export const ListingGrid: React.FC<ListingGridProps> = () => {
                   />
                 )}
                 <div className="p-4">
+                  {l.status === "sold" && (
+                    <span className="mb-2 inline-block rounded-full bg-gray-900 px-2.5 py-0.5 text-[11px] font-semibold text-white">
+                      Sold
+                    </span>
+                  )}
                   <div className="text-xs uppercase tracking-wide text-gray-500">
                     {l.brand}
                     {l.sub_brand ? ` • ${l.sub_brand}` : ""}
                   </div>
                   <h4 className="mt-1 font-semibold">{l.perfume_name}</h4>
 
-                  <div className="mt-2">
+                  {timeAgo(l.created_at) && (
+                    <div className="mt-0.5 text-xs text-gray-400">Posted {timeAgo(l.created_at)}</div>
+                  )}
+
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
                     <span className="inline-block rounded-full bg-[#f8f7f3] px-2 py-1 text-xs capitalize">
                       {l.type}
                     </span>
                     <button
+                      type="button"
+                      onClick={() => toggleSold.mutate({ id: l.id, sold: l.status !== "sold" })}
+                      disabled={toggleSold.isPending}
+                      className="rounded-full border border-[#d4af37]/60 bg-[#fffaf0] px-3 py-1.5 text-xs font-medium text-[#6b5600] hover:bg-[#fff2cf] disabled:opacity-50"
+                    >
+                      {l.status === "sold" ? "Relist" : "Mark sold"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => copyPost(l)}
+                      className="rounded-full border px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50"
+                    >
+                      Copy FB post
+                    </button>
+                    <button
                       onClick={() =>
                         router.push(`/dashboard/listings/${l.id}`)
                       }
-                      className="ml-2 rounded-full border px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50"
+                      className="rounded-full border px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50"
                     >
                       Edit
                     </button>
                     <button
                       type="button"
                       onClick={() => confirmAndDelete(l.id)}
-                      className="ml-1 rounded-full border px-3 py-1.5 text-xs text-red-600 hover:bg-red-50"
+                      className="rounded-full border px-3 py-1.5 text-xs text-red-600 hover:bg-red-50"
                     >
                       Delete
                     </button>

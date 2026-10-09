@@ -7,6 +7,7 @@ import Link from "next/link";
 import TrendingSection from "@/components/TrendingSection";
 import HeroCarousel from "@/components/HeroCarousel";
 import LatestArticles from "@/components/LatestArticles";
+import JustDropped from "@/components/JustDropped";
 import { SITE_URL, SUPPORT_EMAIL, SOCIAL_LINKS } from "@/lib/site";
 
 export const revalidate = 60;
@@ -94,7 +95,7 @@ export default async function Home() {
           </h1>
 
           <p className="mt-2 text-lg sm:text-xl text-[#111] max-w-2xl mx-auto leading-relaxed font-light">
-            {"Bangladesh's first community driven marketplace. Know what's worth your money, compare real decant prices, and trade with a community of perfume lovers."}
+            {"Bangladesh's first community driven marketplace. Every sell post in one place: decants, partials and full bottles. Know what's worth your money and compare real prices."}
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -102,13 +103,13 @@ export default async function Home() {
               href="/perfumes"
               className="btn hover-lift bg-[#1a1a1a] text-white hover:bg-black border-none text-base px-10 py-4 rounded-full shadow-xl hover:shadow-2xl duration-300"
             >
-              Explore Perfumes
+              Browse Sell Posts
             </Link>
             <Link
-              href="/blog"
-              className="btn hover-lift bg-white/50 backdrop-blur-md border border-[#1a1a1a]/10 text-[#1a1a1a] hover:bg-white text-base px-10 py-4 rounded-full shadow-sm hover:shadow-md duration-300"
+              href="/partials"
+              className="btn hover-lift bg-white/60 backdrop-blur-md border border-[#d4af37] text-[#1a1a1a] hover:bg-[#d4af37] text-base px-10 py-4 rounded-full shadow-sm hover:shadow-md duration-300"
             >
-              Read Our Blogs
+              Drop Your Partial
             </Link>
           </div>
 
@@ -129,6 +130,9 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* Freshest sell posts, so phone visitors see real stock under the banner */}
+      <JustDropped />
 
       {/* Trending Now */}
       <TrendingSection initialPerfumes={initialTrending} />

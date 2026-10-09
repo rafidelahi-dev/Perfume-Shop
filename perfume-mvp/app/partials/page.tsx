@@ -38,11 +38,14 @@ async function fetchPartials(): Promise<PerfumeListing[]> {
       partial_left_ml,
       decant_options,
       images,
+      created_at,
+      status,
       profiles:profiles!inner (
         id,
         username,
         display_name,
-        avatar_url
+        avatar_url,
+        phone_verified
       )
     `)
     .eq("is_hidden", false)

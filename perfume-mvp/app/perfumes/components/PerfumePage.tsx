@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import Header from "@/components/Header";
@@ -10,6 +10,8 @@ import { useUiStore } from "@/stores/useUiStore";
 import { Sparkles, Filter, X, Search } from "lucide-react";
 import type { PerfumeListing, SellerProfile } from "@/types/perfume";
 import { useSearchParams } from "next/navigation";
+import NotifyMeCard from "@/components/engagement/NotifyMeCard";
+import { effectivePrice, isPostedWithin, pricePerMl } from "@/lib/listingUtils";
 
 
 type RawListing = Omit<PerfumeListing, "profiles"> & {
@@ -32,11 +34,14 @@ async function fetchPerfumes(): Promise<PerfumeListing[]> {
       partial_left_ml,
       decant_options,
       images,
+      created_at,
+      status,
       profiles:profiles!inner (
         id,
         username,
         display_name,
         avatar_url,
+        phone_verified,
         contact_number,
         messenger_link,
         whatsapp_number
@@ -55,13 +60,6 @@ async function fetchPerfumes(): Promise<PerfumeListing[]> {
   }));
 }
 
-  function effectivePrice(p: PerfumeListing) {
-  if ((p.type ?? "").toLowerCase() === "decant" && p.min_price != null) {
-    return Number(p.min_price);
-  }
-  return Number(p.price ?? NaN);
-}
-
 export default function PerfumesPage({ initialListings }: { initialListings?: PerfumeListing[] }) {
   const { data: listings = [], isLoading, error } = useQuery({
     queryKey: ["perfumes"],
@@ -75,12 +73,16 @@ export default function PerfumesPage({ initialListings }: { initialListings?: Pe
   const setFilters = useUiStore((s) => s.setFilters);
   const reset = useUiStore((s) => s.resetFilters);
   const params = useSearchParams();
+  const [newOnly, setNewOnly] = useState(false);
+  const [sort, setSort] = useState<"newest" | "price_asc" | "ppm_asc">("newest");
+
   const filteredPerfumes = useMemo(() => {
   const min = filters.priceMin ?? -Infinity;
   const max = filters.priceMax ?? +Infinity;
   const typeSet = new Set((filters.types ?? []).map(t => t.toLowerCase()));
 
-  return listings.filter((item) => {
+  const matched = listings.filter((item) => {
+    if (newOnly && !isPostedWithin(item.created_at, 24)) return false;
     const brandMatch = filters.brand
       ? item.brand?.trim().toLowerCase().includes(filters.brand.trim().toLowerCase())
       : true;
@@ -98,7 +100,51 @@ export default function PerfumesPage({ initialListings }: { initialListings?: Pe
 
     return brandMatch && searchMatch && typeMatch && priceMatch;
   });
-}, [listings, filters.brand, filters.q, filters.priceMin, filters.priceMax, filters.types]);
+
+  const time = (l: PerfumeListing) => new Date(l.created_at ?? 0).getTime();
+  const key = (l: PerfumeListing) =>
+    sort === "price_asc" ? effectivePrice(l) : sort === "ppm_asc" ? pricePerMl(l) ?? Infinity : -time(l);
+
+  // Sold posts stay visible (the feed looks alive) but always sink below available ones.
+  return [...matched].sort((a, b) => {
+    const sa = a.status === "sold" ? 1 : 0;
+    const sb = b.status === "sold" ? 1 : 0;
+    if (sa !== sb) return sa - sb;
+    const ka = key(a);
+    const kb = key(b);
+    return (Number.isNaN(ka) ? Infinity : ka) - (Number.isNaN(kb) ? Infinity : kb);
+  });
+}, [listings, newOnly, sort, filters.brand, filters.q, filters.priceMin, filters.priceMax, filters.types]);
+
+  const availableCount = filteredPerfumes.filter((l) => l.status !== "sold").length;
+  const types = filters.types ?? [];
+  const chipsAreDefault =
+    !newOnly && types.length === 0 && filters.priceMin === null && filters.priceMax === null;
+
+  const chips: { label: string; active: boolean; onClick: () => void }[] = [
+    {
+      label: "All",
+      active: chipsAreDefault,
+      onClick: () => {
+        setNewOnly(false);
+        setFilters({ types: [], priceMin: null, priceMax: null });
+      },
+    },
+    { label: "New today", active: newOnly, onClick: () => setNewOnly((v) => !v) },
+    ...(["decant", "partial", "intact"] as const).map((t) => ({
+      label: t === "decant" ? "Decants" : t === "partial" ? "Partials" : "Full bottle",
+      active: types.length === 1 && types[0] === t,
+      onClick: () => setFilters({ types: types.length === 1 && types[0] === t ? [] : [t] }),
+    })),
+    ...[1000, 3000].map((max) => ({
+      label: `Under ৳${max.toLocaleString("en-US")}`,
+      active: filters.priceMin === null && filters.priceMax === max,
+      onClick: () =>
+        setFilters(
+          filters.priceMax === max ? { priceMin: null, priceMax: null } : { priceMin: null, priceMax: max }
+        ),
+    })),
+  ];
 
   useEffect(() => {
     const qParam = params.get("q") ?? "";
@@ -151,6 +197,31 @@ export default function PerfumesPage({ initialListings }: { initialListings?: Pe
         </div>
       </div>
 
+      {/* Quick filter chips: one tap, no dropdowns */}
+      <div className="mx-auto mt-5 max-w-3xl px-4">
+        <div
+          role="group"
+          aria-label="Quick filters"
+          className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:justify-center sm:px-0"
+        >
+          {chips.map((c) => (
+            <button
+              key={c.label}
+              type="button"
+              onClick={c.onClick}
+              aria-pressed={c.active}
+              className={`min-h-[40px] shrink-0 rounded-full border px-4 text-sm font-medium transition ${
+                c.active
+                  ? "border-[#1a1a1a] bg-[#1a1a1a] text-white"
+                  : "border-black/10 bg-white text-[#1a1a1a] hover:border-[#d4af37] hover:bg-[#fffaf0]"
+              }`}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Filters */}
       <div className="mx-auto max-w-[110rem] px-4 py-10">
         <div className="mb-8 flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
@@ -163,6 +234,18 @@ export default function PerfumesPage({ initialListings }: { initialListings?: Pe
             </p>
           </div>
 
+          <div className="flex w-full flex-wrap items-center gap-3 lg:w-auto">
+          <label className="sr-only" htmlFor="feed-sort">Sort posts</label>
+          <select
+            id="feed-sort"
+            value={sort}
+            onChange={(e) => setSort(e.target.value as typeof sort)}
+            className="min-h-[44px] rounded-full border border-black/10 bg-white px-4 text-sm text-[#1a1a1a] outline-none focus:border-[#d4af37]"
+          >
+            <option value="newest">Newest first</option>
+            <option value="price_asc">Price: low to high</option>
+            <option value="ppm_asc">Cheapest per ml</option>
+          </select>
           <button
             onClick={toggle}
             className={`flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-all ${
@@ -174,6 +257,7 @@ export default function PerfumesPage({ initialListings }: { initialListings?: Pe
             <Filter className="h-5 w-5" />
             {isOpen ? "Hide Filters" : "Show Filters"}
           </button>
+          </div>
         </div>
 
         {isOpen && (
@@ -346,6 +430,9 @@ export default function PerfumesPage({ initialListings }: { initialListings?: Pe
           isLoading={isLoading}
           error={error}
         />
+        {!isLoading && !error && availableCount === 0 && filters.q.trim() && (
+          <NotifyMeCard query={filters.q} />
+        )}
       </div>
       <Footer />
     </div>

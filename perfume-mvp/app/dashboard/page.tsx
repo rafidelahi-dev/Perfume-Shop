@@ -33,6 +33,7 @@ type ListingRow = {
   images: string[] | null;
   is_hidden: boolean;
   is_flagged: boolean;
+  status?: string | null;
   created_at: string | null;
 };
 
@@ -152,8 +153,9 @@ export default function DashboardOverview() {
   const reviews = reviewsQuery.data ?? [];
   const collection = perfumesQuery.data ?? [];
 
-  const live = listings.filter((l) => !l.is_hidden && !l.is_flagged);
+  const live = listings.filter((l) => !l.is_hidden && !l.is_flagged && l.status !== "sold");
   const hidden = listings.filter((l) => l.is_hidden || l.is_flagged);
+  const soldCount = listings.filter((l) => l.status === "sold").length;
   const askingValue = live.reduce(
     (sum, l) => (l.type === "decant" ? sum : sum + Number(l.price ?? 0)),
     0
@@ -292,6 +294,11 @@ export default function DashboardOverview() {
                   ))}
                 </ul>
               </>
+            )}
+            {soldCount > 0 && (
+              <p className="mt-4 rounded-xl bg-[#f6f4ee] px-3 py-2 text-xs text-[#555]">
+                {soldCount} {soldCount === 1 ? "post" : "posts"} marked sold. Sold posts stay visible on the feed but don&apos;t count as live.
+              </p>
             )}
             {hidden.length > 0 && (
               <p className="mt-4 flex items-center gap-2 rounded-xl bg-[#f6f4ee] px-3 py-2 text-xs text-[#555]">

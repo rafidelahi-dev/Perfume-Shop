@@ -259,6 +259,30 @@ flowchart TD
 
 ---
 
+## 5. Sell Post Feed, Alerts and Wanted Requests
+
+```mermaid
+flowchart TD
+    A[Navbar / banner: Sell Post] --> B[/perfumes feed: chips, sort, New today]
+    B -->|No results for search| C{Signed in?}
+    C -->|Yes| D[Notify me saves perfume_alerts row]
+    C -->|No| E[/signup?next=/perfumes]
+    D --> F[/dashboard/alerts: new matching posts]
+    B --> G[Listing page]
+    G --> H[Share WhatsApp / Facebook / copy link]
+    G --> I[Follow seller saves seller_follows row] --> F
+    G --> J[Report post saves listing_reports row for admin review]
+    K[Seller: /dashboard/listings] --> L[Mark sold / Relist sets listings.status]
+    K --> M[Copy FB post: paste into Facebook group]
+    L --> B
+    N[/wanted: buyer posts a request] --> O[Sellers message buyer via WhatsApp / Messenger / call]
+    P[pg_cron, Fridays 10:00 Dhaka] --> Q[/api/digest with CRON_SECRET]
+    Q -->|new matches since last seen or last digest| R[Resend email with unsubscribe link]
+    R --> F
+```
+
+---
+
 ## Workflow Changelog
 
 | Date | What changed | Diagram(s) affected |
@@ -275,3 +299,4 @@ flowchart TD
 with the date and a one-line description, then either extend the
 relevant diagram above (new branch/step) or add a new numbered section
 with its own diagram + AI-tool quote, following the same format.
+| 2026-10-09 | Navbar and banner say "Sell Post"; feed gets time stamps, sold status, chips, sort; landing "Just dropped" strip; share, report, follow; alerts; /wanted requests | Section 5 (incl. weekly email digest) |

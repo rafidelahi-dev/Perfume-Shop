@@ -1,14 +1,17 @@
 // server component
+import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import type { Metadata } from "next";
-import { Phone, MessageCircle, Facebook, Zap } from "lucide-react";
+import { Phone, MessageCircle, Facebook, Zap, BadgeCheck, CalendarDays, Package } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import DecantOptions from "../../components/DecantOptions";
 import ImageGallery from "./ImageGallery";
+import ListingActions from "./ListingActions";
+import { listingUrl, pricePerMl, timeAgo, typeLabel } from "@/lib/listingUtils";
 
-export const revalidate = 300;
+export const revalidate = 60;
 
 function createPublicSupabase() {
   return createClient(
@@ -95,7 +98,7 @@ export default async function ListingDetailPage({ params }: Props) {
   // 2. Find seller by username
   const { data: profile, error: pErr } = await supabase
     .from("profiles")
-    .select("id, username, display_name, avatar_url, contact_number, whatsapp_number, messenger_link, facebook_link, bio")
+    .select("id, username, display_name, avatar_url, contact_number, whatsapp_number, messenger_link, facebook_link, bio, phone_verified, created_at")
     .eq("username", username)
     .single();
   if (pErr || !profile) redirect("/perfumes");
@@ -106,13 +109,20 @@ export default async function ListingDetailPage({ params }: Props) {
     .select(`
       id, brand, perfume_name, sub_brand,
       type, price, min_price, decant_options,
-      images, created_at
+      bottle_size_ml, partial_left_ml,
+      images, created_at, status
     `)
     .eq("id", id)
     .eq("user_id", profile.id)
     .eq("is_hidden", false)
     .single();
   if (lErr || !listing) notFound();
+
+  const { count: sellerPostCount } = await supabase
+    .from("listings")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", profile.id)
+    .eq("is_hidden", false);
 
   // Fetch community reviews for this perfume (public, no auth needed)
   const { data: perfumeReviews } = await supabase
@@ -148,6 +158,15 @@ export default async function ListingDetailPage({ params }: Props) {
     !!profile.facebook_link ||
     !!profile.contact_number;
 
+  const isSold = listing.status === "sold";
+  const ppm = pricePerMl(listing);
+  const posted = timeAgo(listing.created_at);
+  const memberSince = profile.created_at
+    ? new Date(profile.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+    : null;
+  const pageUrl = listingUrl(username, id);
+  const shareText = `${listing.brand ?? ""} ${listing.perfume_name ?? ""} (${typeLabel(listing.type)}) on Cloud PerfumeBD`.trim();
+
   const isDecant = (listing.type ?? "").toLowerCase() === "decant";
   const priceToShow =
     isDecant && listing.min_price != null ? Number(listing.min_price) : Number(listing.price ?? NaN);
@@ -167,7 +186,7 @@ export default async function ListingDetailPage({ params }: Props) {
       "@type": "Offer",
       priceCurrency: "BDT",
       price: Number.isFinite(priceToShow) ? priceToShow.toFixed(2) : undefined,
-      availability: "https://schema.org/InStock",
+      availability: isSold ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
       url: `https://www.cloudperfumebd.com/perfumes/${username}/${id}`,
       seller: {
         "@type": "Person",
@@ -237,6 +256,22 @@ export default async function ListingDetailPage({ params }: Props) {
           {/* 2. Content & Seller Section (Right Column) */}
           <div className="space-y-6">
             
+            {isSold && (
+              <div role="status" className="rounded-xl border border-gray-300 bg-gray-900 px-5 py-4 text-white">
+                <p className="font-semibold">This one is sold.</p>
+                <p className="mt-0.5 text-sm text-white/70">
+                  <Link href={`/perfumes/${profile.username}`} className="underline hover:text-[#d4af37]">
+                    See what else this seller has
+                  </Link>{" "}
+                  or{" "}
+                  <Link href="/perfumes" className="underline hover:text-[#d4af37]">
+                    browse all sell posts
+                  </Link>
+                  .
+                </p>
+              </div>
+            )}
+
             {/* Listing Details */}
             <div className="p-6 bg-white rounded-xl shadow-md border border-gray-100 space-y-4">
               <div className="flex items-center justify-between">
@@ -255,7 +290,13 @@ export default async function ListingDetailPage({ params }: Props) {
                 </span>
               </div>
               
-              <p className="text-xl text-gray-700 font-light border-b pb-4">{listing.perfume_name}</p>
+              <p className="text-xl text-gray-700 font-light">{listing.perfume_name}</p>
+              <p className="border-b pb-4 text-sm text-gray-500">
+                {typeLabel(listing.type)}
+                {listing.type === "partial" && listing.partial_left_ml ? ` · ${listing.partial_left_ml} ml left` : ""}
+                {listing.type === "intact" && listing.bottle_size_ml ? ` · ${listing.bottle_size_ml} ml` : ""}
+                {posted ? ` · Posted ${posted}` : ""}
+              </p>
 
               <div className="pt-2">
                 <span className="text-4xl font-black text-[#d4af37]">
@@ -265,6 +306,11 @@ export default async function ListingDetailPage({ params }: Props) {
                   <span className="ml-3 text-sm text-gray-500">
                     {listing.min_price === listing.price ? "Fixed Decant Price" : "Starting Price"}
                   </span>
+                )}
+                {ppm != null && (
+                  <p className="mt-1 text-sm text-[#8a6d00]">
+                    {isDecant ? "As low as" : "About"} ৳{ppm.toFixed(0)} per ml
+                  </p>
                 )}
               </div>
               
@@ -292,7 +338,25 @@ export default async function ListingDetailPage({ params }: Props) {
                   </div>
                 )}
                 <div>
-                  <div className="text-lg font-bold text-gray-900">{profile.display_name ?? profile.username}</div>
+                  <div className="flex items-center gap-1.5 text-lg font-bold text-gray-900">
+                    {profile.display_name ?? profile.username}
+                    {profile.phone_verified && (
+                      <BadgeCheck className="h-5 w-5 text-[#8a6d00]" aria-label="Phone verified" />
+                    )}
+                  </div>
+                  <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+                    {profile.phone_verified && <span className="font-medium text-[#8a6d00]">Phone verified</span>}
+                    {typeof sellerPostCount === "number" && (
+                      <span className="inline-flex items-center gap-1">
+                        <Package className="h-3.5 w-3.5" aria-hidden="true" /> {sellerPostCount} sell post{sellerPostCount === 1 ? "" : "s"}
+                      </span>
+                    )}
+                    {memberSince && (
+                      <span className="inline-flex items-center gap-1">
+                        <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" /> Member since {memberSince}
+                      </span>
+                    )}
+                  </div>
                   {profile.bio && <div className="text-sm text-gray-500 italic max-w-sm">{profile.bio}</div>}
                   <a href={`/perfumes/${profile.username}`} className="text-sm text-blue-600 hover:text-blue-800 transition duration-150">
                     View Other Listings &rarr;
@@ -343,6 +407,16 @@ export default async function ListingDetailPage({ params }: Props) {
                   <p className="text-sm">This seller hasn’t added any verifiable contact details yet. Please be cautious and avoid making commitments without proper verification. We recommend using a platform that provides seller verification.</p>
                 </div>
               )}
+            </div>
+
+            <div className="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+              <ListingActions
+                listingId={listing.id}
+                sellerId={profile.id}
+                url={pageUrl}
+                shareText={shareText}
+                returnTo={`/perfumes/${username}/${id}`}
+              />
             </div>
 
           </div>

@@ -63,8 +63,9 @@ const Footer = () => {
             <div>
               <h3 className="text-sm font-bold uppercase tracking-widest text-white mb-4">Discover</h3>
               <ul className="space-y-3">
-                <li><Link href="/perfumes" className="text-gray-400 hover:text-[#d4af37] transition-colors text-sm">Explore Listings</Link></li>
+                <li><Link href="/perfumes" className="text-gray-400 hover:text-[#d4af37] transition-colors text-sm">Sell Posts</Link></li>
                 <li><Link href="/fragrances" className="text-gray-400 hover:text-[#d4af37] transition-colors text-sm">Fragrance Directory</Link></li>
+                <li><Link href="/wanted" className="text-gray-400 hover:text-[#d4af37] transition-colors text-sm">Wanted Perfumes</Link></li>
                 <li><Link href="/blog" className="text-gray-400 hover:text-[#d4af37] transition-colors text-sm">Blog & Guides</Link></li>
                 <li><Link href="/dashboard/listings" className="text-gray-400 hover:text-[#d4af37] transition-colors text-sm">Sell Perfume</Link></li>
               </ul>
