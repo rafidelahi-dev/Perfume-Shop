@@ -95,3 +95,18 @@ create index if not exists wanted_requests_open_created_idx on public.wanted_req
 create index if not exists listing_reports_listing_idx on public.listing_reports (listing_id);
 create index if not exists perfume_alerts_user_idx on public.perfume_alerts (user_id);
 create index if not exists seller_follows_seller_idx on public.seller_follows (seller_id);
+
+-- Fix: record_price_history FK violation blocked every listing insert / price update.
+-- listings.perfume_id is overwritten with a perfume_score id (sync_perfume_score_from_listing),
+-- but price_history.perfume_id references perfumes(id). Only record when the id exists in perfumes.
+CREATE OR REPLACE FUNCTION public.record_price_history()
+ RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'
+AS $function$
+BEGIN
+  IF NEW.perfume_id IS NOT NULL AND NEW.min_price IS NOT NULL
+     AND EXISTS (SELECT 1 FROM public.perfumes p WHERE p.id = NEW.perfume_id) THEN
+    INSERT INTO public.price_history (perfume_id, price) VALUES (NEW.perfume_id, NEW.min_price);
+  END IF;
+  RETURN NEW;
+END;
+$function$;
