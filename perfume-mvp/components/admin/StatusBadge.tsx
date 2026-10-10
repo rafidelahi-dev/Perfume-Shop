@@ -1,5 +1,4 @@
 const STYLES: Record<string, string> = {
-  pending: 'bg-amber-100 text-amber-800',
   active:  'bg-green-100 text-green-800',
   flagged: 'bg-orange-100 text-orange-800',
   banned:  'bg-red-100 text-red-800',

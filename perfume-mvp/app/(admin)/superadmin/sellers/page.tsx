@@ -6,16 +6,15 @@ import { useAdminSellers, useAdminListings } from '@/lib/queries/admin'
 import { StatusBadge } from '@/components/admin/StatusBadge'
 import { SellerDetailPanel } from '@/components/admin/SellerDetailPanel'
 
-type Filter = 'all' | 'pending' | 'active' | 'flagged' | 'banned'
-const FILTERS: Filter[] = ['all', 'pending', 'active', 'flagged', 'banned']
+type Filter = 'all' | 'active' | 'flagged' | 'banned'
+const FILTERS: Filter[] = ['all', 'active', 'flagged', 'banned']
 
 export default function SellersPage() {
   const { data: sellers = [], isLoading, isError } = useAdminSellers()
   const { data: listings = [] } = useAdminListings()
-  const [filter, setFilter] = useState<Filter>('pending')
+  const [filter, setFilter] = useState<Filter>('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
-  const pendingCount = sellers.filter((s) => s.status === 'pending').length
   const filtered = filter === 'all' ? sellers : sellers.filter((s) => s.status === filter)
 
   return (
@@ -35,11 +34,6 @@ export default function SellersPage() {
             }`}
           >
             {f}
-            {f === 'pending' && pendingCount > 0 && (
-              <span className="ml-1.5 bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
-                {pendingCount}
-              </span>
-            )}
           </button>
         ))}
       </div>

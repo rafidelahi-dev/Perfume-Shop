@@ -12,7 +12,7 @@ export type AdminSeller = {
   bio: string | null
   location: string | null
   avatar_url: string | null
-  status: 'pending' | 'active' | 'flagged' | 'banned'
+  status: 'active' | 'flagged' | 'banned'
   flag_reason: string | null
   ban_reason: string | null
   status_updated_at: string | null
@@ -47,7 +47,7 @@ export function useAdminSellers() {
   return useQuery({ queryKey: qk.adminSellers(), queryFn: fetchAdminSellers })
 }
 
-type SellerAction = 'approve' | 'flag' | 'ban' | 'unflag' | 'unban'
+type SellerAction = 'flag' | 'ban' | 'unflag' | 'unban'
 
 export function useSellerAction() {
   const qc = useQueryClient()

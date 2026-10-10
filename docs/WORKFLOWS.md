@@ -36,14 +36,11 @@ Covers: Sellers, Listings, Reviews, Blog, and Perfumes (full CRUD as of
 
 ```mermaid
 flowchart TD
-    Start([Superadmin logs in]) --> Sellers{New seller\nsignups pending?}
+    Start([Superadmin logs in]) --> Sellers{Any seller reported\nor looks suspicious?}
 
-    Sellers -- Yes --> SellerReview[Review profile:\nphone + WhatsApp/FB contact filled?]
-    SellerReview --> SellerDecision{Legit seller?}
-    SellerDecision -- Approve --> SellerActive[status: pending → active\nCan now create listings]
-    SellerDecision -- Suspicious --> SellerFlag[status → flagged]
-    SellerDecision -- Reject --> SellerBan[status → banned]
-    SellerActive --> Listings
+    Sellers -- Yes --> SellerDecision{Suspicious or\nclearly abusive?}
+    SellerDecision -- Suspicious --> SellerFlag[status → flagged\ncannot create listings]
+    SellerDecision -- Abusive --> SellerBan[status → banned\nlistings hidden]
     SellerFlag --> Listings
     SellerBan --> Listings
     Sellers -- No --> Listings{Any listings\nto moderate?}
@@ -70,7 +67,7 @@ flowchart TD
     Perfumes -- Add fake-spotting guide --> PerfumeVerify[Fill batch code /\npackaging notes →\nSave & Verify]
     Perfumes -- Duplicate/bad entry --> PerfumeDelete{Any listings\nreference it?}
     PerfumeDelete -- Yes --> PerfumeBlocked[Delete blocked —\nreassign/remove listings first]
-    PerfumeDelete -- No --> PerfumeGone[Deleted —\nprice history + demand\nrequests cascade-delete;\nreviews keep, perfume_id set null]
+    PerfumeDelete -- No --> PerfumeGone[Deleted —\ndemand\nrequests cascade-delete;\nreviews keep, perfume_id set null]
 
     PerfumeCreate --> Blog
     PerfumeEdit --> Blog
@@ -97,11 +94,10 @@ flowchart TD
 > today." It's a single-actor decision loop through six sections in
 > order: Sellers, Listings, Reviews, Demand Requests, Perfumes, Blog,
 > then a final "post on social media as the brand, never as a fake
-> user" step before Done. For Sellers: decision "new signups pending?"
-> → if yes, review profile completeness → decision "legit seller?" with
-> three branches: Approve (status becomes active, can now create
-> listings), Flag (suspicious), Reject (banned) — all three rejoin the
-> flow. For Listings: decision "any to moderate?" → if yes, decision
+> user" step before Done. For Sellers: decision "any seller reported or
+> suspicious?" → if yes, decision "suspicious or clearly abusive?" with
+> two branches: Flag (cannot create listings) or Ban (listings hidden)
+> — both rejoin the flow. New accounts need no approval. For Listings: decision "any to moderate?" → if yes, decision
 > "fake or abusive?" → yes leads to hide/flag/delete, no continues. For
 > Reviews: decision "new reviews?" → if yes, decision "fake, off-topic,
 > or abusive?" with three outcomes: flag with a reason (visible to the
@@ -114,7 +110,7 @@ flowchart TD
 > filling in a fake-spotting authenticity guide, or delete a duplicate
 > — the delete branch has its own sub-decision "any listings still
 > reference it?" where yes blocks deletion and no proceeds (and
-> deleting cascades to price history and demand requests, while
+> deleting cascades to demand requests, while
 > reviews are kept with their perfume link cleared). For Blog: decision
 > "posts awaiting review?" → publish or reject with a reason. Use
 > diamond shapes for every decision point and rectangles for actions.
@@ -128,9 +124,9 @@ time-ordered — a Visitor, the System, the Superadmin, and a Buyer each
 take turns — so a sequence diagram is the right shape, not a flowchart.
 
 Key fact this diagram encodes: **"seller" is not a separate account
-role.** Every account starts as `role: user`. Becoming a seller is a
-`profiles.status` transition (`pending → active`) approved by a
-superadmin — there is no third role in the system.
+role.** Every account starts as `role: user, status: active` and can
+list right away — no approval step. A superadmin can later move
+`profiles.status` to `flagged` or `banned`; there is no third role.
 
 ```mermaid
 sequenceDiagram
@@ -140,16 +136,8 @@ sequenceDiagram
     actor B as Buyer
 
     V->>S: Sign up (email/password)
-    S->>S: Create profiles row\n(role: user, status: pending)
-    S-->>V: Dashboard shows amber banner:\n"pending approval — fill in phone\n+ WhatsApp/FB contact"
-
-    Note over V,S: Listing creation is blocked\nwhile status = pending
-
-    A->>S: Open /superadmin/sellers
-    S-->>A: List of pending profiles
-    A->>S: Approve seller
-    S->>S: status: pending → active
-    S-->>V: Banner gone — can now\ncreate listings
+    S->>S: Create profiles row\n(role: user, status: active)
+    S-->>V: Dashboard opens, can\ncreate listings immediately
 
     V->>S: Create listing\n(brand, sub_brand, name, price,\ntype: intact/partial/decant, photos)
     S->>S: Autocomplete pulled from\nperfume_score table\n(separate from perfumes catalog)
@@ -171,6 +159,10 @@ sequenceDiagram
     B->>S: Submit review\n(rating, owns_bottle, climate,\nlongevity, occasion)
     S->>S: Insert into reviews\n(is_flagged: false, is_hidden: false)
     S-->>B: Review visible on\npublic fragrance page
+    opt Superadmin flags or bans a seller
+        A->>S: Open /superadmin/sellers
+        A->>S: Flag (blocks new listings) or Ban (hides listings)
+    end
 
     opt Superadmin moderates
         A->>S: Open /superadmin/reviews
@@ -189,12 +181,8 @@ sequenceDiagram
 > Draw a sequence diagram titled "User → Seller Journey (Signup to
 > Sale)" with four lanes: Visitor, System (Next.js + Supabase), Superadmin,
 > Buyer. Sequence: Visitor signs up → System creates a profile row with
-> role "user" and status "pending" → System shows Visitor a banner
-> saying they're pending approval and listing creation is blocked. Then
-> Superadmin opens the sellers admin page, sees the pending profile, and
-> approves it → System changes status from pending to active → the
-> banner disappears for the Visitor, who can now create listings. The
-> Visitor then creates a listing (brand, sub-brand, name, price, listing
+> role "user" and status "active" → the Visitor can create listings
+> immediately, no approval. The Visitor then creates a listing (brand, sub-brand, name, price, listing
 > type of intact/partial/decant, photos) — note that the brand/name
 > autocomplete pulls from a separate table called perfume_score, not
 > the main perfume catalog table — and the listing goes live on their
@@ -300,3 +288,4 @@ with the date and a one-line description, then either extend the
 relevant diagram above (new branch/step) or add a new numbered section
 with its own diagram + AI-tool quote, following the same format.
 | 2026-10-09 | Navbar and banner say "Sell Post"; feed gets time stamps, sold status, chips, sort; landing "Just dropped" strip; share, report, follow; alerts; /wanted requests | Section 5 (incl. weekly email digest) |
+| 2026-10-09 | Seller approval step removed (new accounts active at signup; flag/ban remain); price history feature removed | Sections 1 and 2 |

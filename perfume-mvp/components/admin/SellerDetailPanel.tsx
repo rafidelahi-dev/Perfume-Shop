@@ -91,16 +91,7 @@ export function SellerDetailPanel({ seller, listings }: Props) {
           </p>
         )}
         <div className="flex flex-wrap gap-2 pt-1">
-          {seller.status === 'pending' && (
-            <button
-              onClick={() => action.mutate({ id: seller.id, action: 'approve' })}
-              disabled={action.isPending}
-              className="px-3 py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Approve
-            </button>
-          )}
-          {(seller.status === 'active' || seller.status === 'pending') && (
+          {seller.status === 'active' && (
             <button
               onClick={() => setModal('flag')}
               className="px-3 py-1.5 text-xs font-medium bg-orange-100 hover:bg-orange-200 text-orange-800 rounded-lg transition-colors"

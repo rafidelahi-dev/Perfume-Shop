@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import {
-  AlertTriangle,
   ArrowUpRight,
   Boxes,
   Check,
@@ -170,7 +169,6 @@ export default function DashboardOverview() {
     : null;
 
   const name = profile?.display_name?.trim() || "there";
-  const isPending = profile?.status === "pending";
   const hasContact = !!(profile?.contact_number || profile?.whatsapp_number || profile?.messenger_link || profile?.facebook_link);
   const withPhotos = live.filter((l) => (l.images?.length ?? 0) > 0).length;
 
@@ -223,13 +221,6 @@ export default function DashboardOverview() {
           </div>
         </div>
       </section>
-
-      {isPending && (
-        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-          <p>Your account is waiting for approval. You can set up your shop now. Listings go public once approved.</p>
-        </div>
-      )}
 
       {/* KPIs */}
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-4" aria-label="Shop numbers">

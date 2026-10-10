@@ -23,7 +23,6 @@ export default function AdminSidebar() {
   const { data: perfumes = [] } = useAdminPerfumes()
   const { data: reviews = [] } = useAdminReviews()
 
-  const pendingCount = sellers.filter((s) => s.status === 'pending').length
   const blogPendingCount = blogPosts.filter((p) => p.status === 'pending_review').length
   const unverifiedPerfumeCount = perfumes.filter((p) => !p.is_verified).length
   const flaggedReviewCount = reviews.filter((r) => r.is_flagged).length
@@ -50,11 +49,6 @@ export default function AdminSidebar() {
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
               <span className="flex-1">{label}</span>
-              {href === '/superadmin/sellers' && pendingCount > 0 && (
-                <span className="bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full leading-none">
-                  {pendingCount}
-                </span>
-              )}
               {href === '/superadmin/blog' && blogPendingCount > 0 && (
                 <span className="bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full leading-none">
                   {blogPendingCount}

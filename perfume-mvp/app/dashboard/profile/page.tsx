@@ -433,11 +433,6 @@ export default function ProfilePage() {
                   Verified seller
                 </span>
               )}
-              {profile.status === "pending" && (
-                <span className="inline-flex items-center rounded-full bg-amber-400/20 px-3 py-1 text-sm text-amber-200">
-                  Pending approval
-                </span>
-              )}
             </div>
             {profile.username && (
               <Link

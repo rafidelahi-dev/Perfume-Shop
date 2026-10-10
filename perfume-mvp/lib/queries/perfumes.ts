@@ -118,21 +118,6 @@ export async function fetchPerfumeReviewAggregate(perfumeId: string): Promise<Re
   return data as ReviewAggregate;
 }
 
-export type PricePoint = { month: string; avg_price: number };
-
-export async function fetchPerfumePriceHistory(perfumeId: string): Promise<PricePoint[]> {
-  const supabase = createPublicSupabase();
-  const { data, error } = await supabase.rpc("get_perfume_price_history", {
-    p_perfume_id: perfumeId,
-  });
-
-  if (error) {
-    console.error("[perfumes] fetchPerfumePriceHistory failed:", error.message);
-    return [];
-  }
-  return (data ?? []) as PricePoint[];
-}
-
 export type PublicReview = {
   id: string;
   rating: 1 | 2 | 3 | 4 | 5 | null;

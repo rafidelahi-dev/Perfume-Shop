@@ -69,14 +69,14 @@ Public pages (`/perfumes`, `/blog`, `/fragrance/[slug]`, sitemap, `LatestArticle
 
 ### Admin `/superadmin/*` (`(admin)` group) — ⚠️ **NO AUTH GUARD AT ALL** (see §7)
 - `/superadmin` → redirects to `/superadmin/sellers`.
-- `sellers` — approve/flag/ban sellers (ban cascades `is_hidden` onto their listings).
+- `sellers` — flag/ban sellers (new accounts are active immediately) (ban cascades `is_hidden` onto their listings).
 - `listings` — hide/unhide/delete any listing.
 - `blog`, `blog/new`, `blog/[id]/edit`, `blog/categories`, `blog/tags` — full blog CMS; admin-created posts publish immediately.
 
 ### API routes (`app/api/`)
 | Route | Auth status | Purpose |
 |---|---|---|
-| `admin/sellers` GET, `admin/sellers/[id]` PATCH | ❌ **none** | list all seller PII; ban/flag/approve anyone |
+| `admin/sellers` GET, `admin/sellers/[id]` PATCH | ❌ **none** | list all seller PII; ban/flag anyone |
 | `admin/listings*` | ❌ **none** | list/hide/delete any listing |
 | `admin/blog/posts*`, `admin/blog/{categories,tags}*` | ❌ GET none; POST checks only "any active user" | full blog CRUD, direct publish |
 | `dashboard/blog`, `dashboard/blog/[id]` | ✅ user + ownership + status checks | seller draft workflow (uses admin client but filters by `author_id`) |

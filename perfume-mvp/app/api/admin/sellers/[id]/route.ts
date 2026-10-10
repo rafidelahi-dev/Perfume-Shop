@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import { requireAdmin } from '@/lib/adminAuth'
 
-type Action = 'approve' | 'flag' | 'ban' | 'unflag' | 'unban'
+type Action = 'flag' | 'ban' | 'unflag' | 'unban'
 
 const STATUS_MAP: Record<Action, string> = {
-  approve: 'active',
   flag: 'flagged',
   ban: 'banned',
   unflag: 'active',
@@ -28,7 +27,7 @@ export async function PATCH(
   }
   const { action, reason } = body
 
-  const validActions: Action[] = ['approve', 'flag', 'ban', 'unflag', 'unban']
+  const validActions: Action[] = ['flag','ban', 'unflag', 'unban']
   if (!validActions.includes(action)) {
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
   }
