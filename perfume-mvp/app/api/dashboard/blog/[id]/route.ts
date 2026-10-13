@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { sanitizeFaq, sanitizeSlugs, getInternalNotes, saveInternalNotes } from '@/lib/blogPostExtras'
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import { createServerSupabase } from '@/lib/supabaseServer'
 
@@ -19,7 +20,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const { data, error } = await supabase
     .from('blog_posts')
     .select(`
-      id, slug, title, excerpt, content, cover_image_url, status,
+      id, slug, title, excerpt, meta_title, meta_description, faq, fragrance_slugs, content, cover_image_url, status,
       rejection_note, published_at, created_at, updated_at,
       blog_post_categories(blog_categories(id, name, slug)),
       blog_post_tags(blog_tags(id, name, slug))
@@ -29,7 +30,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 404 })
-  return NextResponse.json(data)
+  return NextResponse.json({ ...data, internal_notes: await getInternalNotes(supabase, id) })
 }
 
 export async function PATCH(req: NextRequest, { params }: Params) {
@@ -38,7 +39,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
-  const { title, slug, excerpt, content, cover_image_url, action, category_ids, tag_ids } = body
+  const { title, slug, excerpt, meta_title, meta_description, faq, fragrance_slugs, internal_notes, content, cover_image_url, action, category_ids, tag_ids } = body
 
   const supabase = createAdminClient()
 
@@ -59,6 +60,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (title !== undefined) updates.title = title
   if (slug !== undefined) updates.slug = slug
   if (excerpt !== undefined) updates.excerpt = excerpt
+  if (meta_title !== undefined) updates.meta_title = meta_title?.trim() || null
+  if (meta_description !== undefined) updates.meta_description = meta_description?.trim() || null
+  if (faq !== undefined) updates.faq = sanitizeFaq(faq)
+  if (fragrance_slugs !== undefined) updates.fragrance_slugs = sanitizeSlugs(fragrance_slugs)
   if (content !== undefined) updates.content = content
   if (cover_image_url !== undefined) updates.cover_image_url = cover_image_url
   if (action === 'submit') updates.status = 'pending_review'
@@ -71,6 +76,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  if (typeof internal_notes === 'string') {
+    await saveInternalNotes(supabase, id, internal_notes)
+  }
 
   if (category_ids !== undefined) {
     await supabase.from('blog_post_categories').delete().eq('post_id', id)

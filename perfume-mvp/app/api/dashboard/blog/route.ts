@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { sanitizeFaq, sanitizeSlugs, getInternalNotes, saveInternalNotes } from '@/lib/blogPostExtras'
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import { createServerSupabase } from '@/lib/supabaseServer'
 
@@ -11,7 +12,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from('blog_posts')
     .select(`
-      id, slug, title, excerpt, cover_image_url, status,
+      id, slug, title, excerpt, meta_title, meta_description, cover_image_url, status,
       rejection_note, published_at, created_at, updated_at,
       blog_post_categories(blog_categories(id, name, slug)),
       blog_post_tags(blog_tags(id, name, slug))
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
-  const { title, slug, excerpt, content, cover_image_url, category_ids, tag_ids } = body
+  const { title, slug, excerpt, meta_title, meta_description, faq, fragrance_slugs, internal_notes, content, cover_image_url, category_ids, tag_ids } = body
 
   const supabase = createAdminClient()
 
@@ -39,6 +40,10 @@ export async function POST(req: NextRequest) {
       title,
       slug,
       excerpt,
+      meta_title: meta_title?.trim() || null,
+      meta_description: meta_description?.trim() || null,
+      faq: sanitizeFaq(faq),
+      fragrance_slugs: sanitizeSlugs(fragrance_slugs),
       content,
       cover_image_url: cover_image_url ?? null,
       status: 'draft',
@@ -48,6 +53,10 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  if (typeof internal_notes === 'string' && internal_notes.trim()) {
+    await saveInternalNotes(supabase, post.id, internal_notes)
+  }
 
   if (category_ids?.length) {
     await supabase.from('blog_post_categories').insert(

@@ -5,11 +5,12 @@ import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Underline from '@tiptap/extension-underline'
+import { Table, TableRow, TableHeader, TableCell } from '@tiptap/extension-table'
 import { useRef } from 'react'
 import { toast } from 'sonner'
 import {
-  Bold, Italic, Underline as UnderlineIcon, Heading1, Heading2, Heading3,
-  Quote, List, ListOrdered, Link2, ImageIcon,
+  Bold, Italic, Underline as UnderlineIcon, Heading2, Heading3,
+  Quote, List, ListOrdered, Link2, ImageIcon, Table2, Plus, Trash2,
 } from 'lucide-react'
 
 type Props = {
@@ -28,6 +29,10 @@ export default function BlogEditor({ content, onChange, postId }: Props) {
       Underline,
       Image.configure({ inline: false, allowBase64: false }),
       Link.configure({ openOnClick: false }),
+      Table.configure({ resizable: false }),
+      TableRow,
+      TableHeader,
+      TableCell,
     ],
     content: content && Object.keys(content).length > 0 ? content : undefined,
     onUpdate: ({ editor }) => {
@@ -35,7 +40,7 @@ export default function BlogEditor({ content, onChange, postId }: Props) {
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none min-h-[300px] focus:outline-none px-4 py-3',
+        class: 'prose prose-sm max-w-none min-h-[300px] focus:outline-none px-4 py-3 prose-table:w-full prose-th:border prose-th:border-gray-300 prose-th:bg-gray-50 prose-th:px-2 prose-th:py-1 prose-td:border prose-td:border-gray-300 prose-td:px-2 prose-td:py-1',
       },
     },
   })
@@ -54,7 +59,8 @@ export default function BlogEditor({ content, onChange, postId }: Props) {
       return
     }
     const { url } = await res.json()
-    editor?.chain().focus().setImage({ src: url }).run()
+    const alt = window.prompt('Image alt text (describe the image, helps SEO and accessibility)') ?? ''
+    editor?.chain().focus().setImage({ src: url, alt }).run()
   }
 
   function setLink() {
@@ -82,9 +88,6 @@ export default function BlogEditor({ content, onChange, postId }: Props) {
 
         <div className="w-px h-5 bg-gray-300 mx-1" />
 
-        <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={btn(editor.isActive('heading', { level: 1 }))} title="H1">
-          <Heading1 className="w-4 h-4" />
-        </button>
         <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={btn(editor.isActive('heading', { level: 2 }))} title="H2">
           <Heading2 className="w-4 h-4" />
         </button>
@@ -112,6 +115,31 @@ export default function BlogEditor({ content, onChange, postId }: Props) {
         <button type="button" onClick={() => fileRef.current?.click()} className={btn(false)} title="Insert image">
           <ImageIcon className="w-4 h-4" />
         </button>
+
+        <div className="w-px h-5 bg-gray-300 mx-1" />
+
+        <button type="button" onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} className={btn(editor.isActive('table'))} title="Insert table">
+          <Table2 className="w-4 h-4" />
+        </button>
+        {editor.isActive('table') && (
+          <>
+            <button type="button" onClick={() => editor.chain().focus().addRowAfter().run()} className={btn(false)} title="Add row below">
+              <Plus className="w-4 h-4" /><span className="sr-only">Add row</span>
+            </button>
+            <button type="button" onClick={() => editor.chain().focus().addColumnAfter().run()} className="px-1.5 py-1 rounded text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-900" title="Add column right">
+              +Col
+            </button>
+            <button type="button" onClick={() => editor.chain().focus().deleteRow().run()} className="px-1.5 py-1 rounded text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-900" title="Delete row">
+              -Row
+            </button>
+            <button type="button" onClick={() => editor.chain().focus().deleteColumn().run()} className="px-1.5 py-1 rounded text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-900" title="Delete column">
+              -Col
+            </button>
+            <button type="button" onClick={() => editor.chain().focus().deleteTable().run()} className={btn(false)} title="Delete table">
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </>
+        )}
       </div>
 
       <input

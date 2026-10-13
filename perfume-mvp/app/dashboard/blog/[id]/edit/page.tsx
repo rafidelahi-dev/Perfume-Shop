@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { useAdminBlogCategories, useAdminBlogTags, useDashboardUpdateBlogPost, type BlogPost } from '@/lib/queries/blog'
 import CoverImageUpload from '@/components/blog/CoverImageUpload'
+import SeoFields from '@/components/blog/SeoFields'
+import PostExtras from '@/components/blog/PostExtras'
+import type { FaqItem } from '@/lib/blogPostExtras'
 import BlogStatusBadge from '@/components/blog/BlogStatusBadge'
 
 const BlogEditor = dynamic(() => import('@/components/blog/BlogEditor'), { ssr: false })
@@ -24,6 +27,11 @@ export default function DashboardEditBlogPage({ params }: Params) {
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
   const [excerpt, setExcerpt] = useState('')
+  const [metaTitle, setMetaTitle] = useState('')
+  const [metaDescription, setMetaDescription] = useState('')
+  const [faq, setFaq] = useState<FaqItem[]>([])
+  const [fragranceSlugs, setFragranceSlugs] = useState<string[]>([])
+  const [internalNotes, setInternalNotes] = useState('')
   const [content, setContent] = useState<Record<string, unknown>>({})
   const [coverUrl, setCoverUrl] = useState<string | null>(null)
   const [selectedCats, setSelectedCats] = useState<string[]>([])
@@ -39,6 +47,11 @@ export default function DashboardEditBlogPage({ params }: Params) {
           setTitle(data.title)
           setSlug(data.slug)
           setExcerpt(data.excerpt)
+          setMetaTitle(data.meta_title ?? '')
+          setMetaDescription(data.meta_description ?? '')
+          setFaq(data.faq ?? [])
+          setFragranceSlugs(data.fragrance_slugs ?? [])
+          setInternalNotes(data.internal_notes ?? '')
           setContent(data.content)
           setCoverUrl(data.cover_image_url)
           setSelectedCats(
@@ -62,6 +75,11 @@ export default function DashboardEditBlogPage({ params }: Params) {
   async function save(action?: string) {
     await updateMutation.mutateAsync({
       id, title, slug, excerpt, content,
+      meta_title: metaTitle,
+      meta_description: metaDescription,
+      faq,
+      fragrance_slugs: fragranceSlugs,
+      internal_notes: internalNotes,
       cover_image_url: coverUrl,
       category_ids: selectedCats,
       tag_ids: selectedTags,
@@ -131,12 +149,17 @@ export default function DashboardEditBlogPage({ params }: Params) {
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 resize-none disabled:bg-gray-50" />
         </div>
 
+        <SeoFields title={title} slug={slug} excerpt={excerpt} metaTitle={metaTitle} metaDescription={metaDescription} onMetaTitleChange={setMetaTitle} onMetaDescriptionChange={setMetaDescription} />
+
+
         <CoverImageUpload value={coverUrl} onChange={setCoverUrl} postId={id} />
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
           <BlogEditor content={content} onChange={setContent} postId={id} />
         </div>
+
+        <PostExtras faq={faq} onFaqChange={setFaq} fragranceSlugs={fragranceSlugs} onFragranceSlugsChange={setFragranceSlugs} internalNotes={internalNotes} onInternalNotesChange={setInternalNotes} />
 
         {categories.length > 0 && (
           <div>

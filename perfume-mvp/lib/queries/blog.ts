@@ -22,6 +22,11 @@ export type BlogPost = {
   title: string
   content: Record<string, unknown>
   excerpt: string
+  meta_title: string | null
+  meta_description: string | null
+  faq?: { q: string; a: string }[]
+  fragrance_slugs?: string[]
+  internal_notes?: string
   cover_image_url: string | null
   status: BlogPostStatus
   author_id: string
@@ -38,6 +43,11 @@ export type BlogPostInput = {
   title: string
   slug: string
   excerpt: string
+  meta_title?: string | null
+  meta_description?: string | null
+  faq?: { q: string; a: string }[]
+  fragrance_slugs?: string[]
+  internal_notes?: string
   content: Record<string, unknown>
   cover_image_url?: string | null
   category_ids?: string[]

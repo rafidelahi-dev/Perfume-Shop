@@ -10,11 +10,6 @@ type Props = {
   category?: string | null
 }
 
-function readTime(excerpt: string) {
-  const words = excerpt.split(/\s+/).length
-  return Math.max(1, Math.round(words / 200))
-}
-
 export default function BlogPostCard({ slug, title, excerpt, cover_image_url, published_at, category }: Props) {
   return (
     <Link
@@ -46,7 +41,7 @@ export default function BlogPostCard({ slug, title, excerpt, cover_image_url, pu
         </h3>
         <p className="text-sm text-gray-500 line-clamp-2 flex-1">{excerpt}</p>
         <div className="mt-3 flex items-center justify-between text-xs text-gray-400">
-          <span>{readTime(excerpt)} min read</span>
+          <span />
           {published_at && (
             <span>
               {new Date(published_at).toLocaleDateString('en-BD', { day: 'numeric', month: 'short', year: 'numeric' })}
