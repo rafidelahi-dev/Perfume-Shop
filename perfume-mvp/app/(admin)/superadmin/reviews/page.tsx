@@ -5,6 +5,7 @@ import { Search } from 'lucide-react'
 import { useAdminReviews, useReviewAction, useDeleteReview, AdminReview } from '@/lib/queries/admin'
 import { StatusBadge } from '@/components/admin/StatusBadge'
 import { ActionModal } from '@/components/admin/ActionModal'
+import SellerReviewsAdmin from '@/components/admin/SellerReviewsAdmin'
 
 type StatusFilter = 'all' | 'active' | 'flagged' | 'hidden'
 
@@ -174,6 +175,8 @@ export default function ReviewsPage() {
           onClose={() => setRemoveModal(null)}
         />
       )}
+
+      <SellerReviewsAdmin />
     </div>
   )
 }

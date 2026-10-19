@@ -1,4 +1,5 @@
 // server component
+import SellerRatingBadge from "@/components/reviews/SellerRatingBadge";
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
@@ -132,6 +133,17 @@ export default async function ListingDetailPage({ params }: Props) {
     .ilike("name", listing.perfume_name ?? "")
     .limit(1)
     .maybeSingle();
+
+  const { data: sellerRatingRow } = await supabase
+    .rpc("get_seller_rating", { p_seller_id: profile.id })
+    .single();
+  const sellerRatingCount = Number(
+    (sellerRatingRow as { rating_count?: number | string } | null)?.rating_count ?? 0
+  );
+  const sellerRatingAvg =
+    (sellerRatingRow as { rating_avg?: number | string | null } | null)?.rating_avg != null
+      ? Number((sellerRatingRow as { rating_avg: number | string }).rating_avg)
+      : null;
 
   let avgRating: number | null = null;
   let reviewCount = 0;
@@ -342,7 +354,8 @@ export default async function ListingDetailPage({ params }: Props) {
                       <BadgeCheck className="h-5 w-5 text-[#8a6d00]" aria-label="Phone verified" />
                     )}
                   </div>
-                  <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+                  <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
+                    <SellerRatingBadge avg={sellerRatingAvg} count={sellerRatingCount} />
                     {profile.phone_verified && <span className="font-medium text-[#8a6d00]">Phone verified</span>}
                     {typeof sellerPostCount === "number" && (
                       <span className="inline-flex items-center gap-1">

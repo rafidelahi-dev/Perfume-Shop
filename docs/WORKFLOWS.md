@@ -302,6 +302,29 @@ after 3 voters. Hidden reviews never appear publicly. Limits: 10 reviews/hour,
 60 vote writes/hour. "Knows the seller" is a disclosed badge; sellers never post
 as fake customers.
 
+## 7. Seller Ratings
+
+Per seller, not per listing. One rating per (seller, reviewer); stars alone are
+valid, a short line (max 500 chars) is optional. Sellers cannot rate themselves.
+
+```mermaid
+flowchart TD
+    A[Visitor opens /perfumes/username] --> B[Sees average, count, ratings]
+    B --> C{Logged in?}
+    C -- No --> D[Clicks star or Rate this seller]
+    D --> E["/login?next=/perfumes/username?rate=N or ?review=1"]
+    E --> F[Back on seller page, rating applied]
+    C -- Yes --> G{Own profile?}
+    G -- Yes --> H[No rating controls]
+    G -- No --> I[Tap a star: saved instantly]
+    I --> J[Optional one-line comment]
+    B --> K[Report a rating]
+    K --> L[Superadmin /superadmin/reviews: unflag, hide or remove]
+```
+
+The average shows next to the seller name on the seller page and on each
+listing's "Meet the Seller" card. Limit: 10 new seller ratings/hour per user.
+
 ## Workflow Changelog
 
 | Date | What changed | Diagram(s) affected |
@@ -321,3 +344,4 @@ with its own diagram + AI-tool quote, following the same format.
 | 2026-10-09 | Navbar and banner say "Sell Post"; feed gets time stamps, sold status, chips, sort; landing "Just dropped" strip; share, report, follow; alerts; /wanted requests | Section 5 (incl. weekly email digest) |
 | 2026-10-09 | Seller approval step removed (new accounts active at signup; flag/ban remain); price history feature removed | Sections 1 and 2 |
 | 2026-10-19 | In-page star reviews and polls on /fragrance/[slug] for any logged-in user (login-resume via ?next=); /dashboard/reviews is now list + delete; superadmin gains hide/unhide on reviews | Section 6 (new) |
+| 2026-10-19 | Seller ratings on /perfumes/[username] (login-gated, resume via ?next=), average shown on listing seller card, superadmin moderation of seller ratings | Section 7 (new) |

@@ -14,6 +14,9 @@ function createPublicSupabase() {
 }
 import { UsernameListingGrid } from "./components/UsernameListingGrid";
 import { Facebook, MessageSquare, Phone, User } from "lucide-react";
+import SellerRatingSection from "@/components/reviews/SellerRatingSection";
+import SellerRatingBadge from "@/components/reviews/SellerRatingBadge";
+import type { PublicSellerReview } from "@/lib/queries/sellerReviews";
 
 type Params = { username: string };
 
@@ -105,6 +108,16 @@ export default async function SellerListingsPage({
     console.error("LISTINGS ERROR:", lErr);
   }
 
+  const [{ data: ratingRow }, { data: sellerReviews }] = await Promise.all([
+    supabase.rpc("get_seller_rating", { p_seller_id: profile.id }).single(),
+    supabase.rpc("get_seller_reviews", { p_seller_id: profile.id }),
+  ]);
+  const ratingCount = Number((ratingRow as { rating_count?: number | string } | null)?.rating_count ?? 0);
+  const ratingAvg =
+    (ratingRow as { rating_avg?: number | string | null } | null)?.rating_avg != null
+      ? Number((ratingRow as { rating_avg: number | string }).rating_avg)
+      : null;
+
   const listingsWithProfile = (listings ?? []).map((l) => ({
     ...l,
     profiles: {
@@ -143,6 +156,9 @@ export default async function SellerListingsPage({
               <h1 className="text-3xl font-serif font-medium text-[#1a1a1a]">
                 {profile.display_name ?? profile.username}
               </h1>
+              <div className="mt-1">
+                <SellerRatingBadge avg={ratingAvg} count={ratingCount} />
+              </div>
               {profile.bio && (
                 <p className="text-sm text-gray-600 mt-1">{profile.bio}</p>
               )}
@@ -208,6 +224,14 @@ export default async function SellerListingsPage({
           </div>
         </div>
         
+        <SellerRatingSection
+          sellerId={profile.id}
+          username={profile.username}
+          sellerName={profile.display_name ?? profile.username}
+          initialRating={{ rating_count: ratingCount, rating_avg: ratingAvg }}
+          initialReviews={(sellerReviews ?? []) as PublicSellerReview[]}
+        />
+
         <h2 className="text-2xl font-light text-[#1a1a1a] mb-6">
             Active Listings by {profile.display_name ?? profile.username}
         </h2>
