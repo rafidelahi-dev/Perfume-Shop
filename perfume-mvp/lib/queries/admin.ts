@@ -134,7 +134,7 @@ export function useAdminReviews() {
 export function useReviewAction() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, action, reason }: { id: string; action: 'flag' | 'unflag'; reason?: string }) =>
+    mutationFn: ({ id, action, reason }: { id: string; action: 'flag' | 'unflag' | 'hide' | 'unhide'; reason?: string }) =>
       fetch(`/api/admin/reviews/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },

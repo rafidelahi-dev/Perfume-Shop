@@ -87,13 +87,18 @@ export async function fetchSimilarPerfumes(
 
 export type ReviewAggregate = {
   review_count: number;
-  longevity_counts: Record<string, number>;
-  gender_counts: Record<string, number>;
-  occasion_counts: Record<string, number>;
   rating_avg: number | null;
-  rating_count: number;
-  climate_counts: Record<string, number>;
-  environment_counts: Record<string, number>;
+  rating_histogram: Record<string, number>;
+  polls: Record<string, Record<string, { yes: number; no: number }>>;
+  voter_counts: Record<string, number>;
+};
+
+export const EMPTY_AGGREGATE: ReviewAggregate = {
+  review_count: 0,
+  rating_avg: null,
+  rating_histogram: {},
+  polls: {},
+  voter_counts: {},
 };
 
 export async function fetchPerfumeReviewAggregate(perfumeId: string): Promise<ReviewAggregate> {
@@ -104,31 +109,24 @@ export async function fetchPerfumeReviewAggregate(perfumeId: string): Promise<Re
 
   if (error || !data) {
     console.error("[perfumes] fetchPerfumeReviewAggregate failed:", error?.message);
-    return {
-      review_count: 0,
-      longevity_counts: {},
-      gender_counts: {},
-      occasion_counts: {},
-      rating_avg: null,
-      rating_count: 0,
-      climate_counts: {},
-      environment_counts: {},
-    };
+    return EMPTY_AGGREGATE;
   }
-  return data as ReviewAggregate;
+  const row = data as ReviewAggregate;
+  return {
+    ...row,
+    review_count: Number(row.review_count),
+    rating_avg: row.rating_avg == null ? null : Number(row.rating_avg),
+  };
 }
 
 export type PublicReview = {
   id: string;
-  rating: 1 | 2 | 3 | 4 | 5 | null;
+  rating: 1 | 2 | 3 | 4 | 5;
   review_text: string | null;
   images: string[];
-  longevity: "0-2h" | "2-5h" | "5-7h" | "7-10h" | "10h+" | null;
-  gender: "very_masculine" | "masculine" | "unisex" | "feminine" | "very_feminine" | null;
-  when_to_wear: string[];
-  climate_season: ("summer" | "monsoon" | "winter")[];
-  environment: "ac_office" | "outdoors" | "mixed" | null;
   owns_bottle: boolean;
+  knows_seller: boolean;
+  display_name: string;
   created_at: string;
 };
 

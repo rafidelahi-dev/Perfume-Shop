@@ -124,31 +124,29 @@ export default async function ListingDetailPage({ params }: Props) {
     .eq("user_id", profile.id)
     .eq("is_hidden", false);
 
-  // Fetch community reviews for this perfume (public, no auth needed)
-  const { data: perfumeReviews } = await supabase
-    .from("reviews")
-    .select("rating, review_text, created_at")
-    .eq("brand", listing.brand ?? "")
-    .eq("perfume_name", listing.perfume_name ?? "")
-    .not("rating", "is", null)
-    .limit(20);
+  // Community reviews come from the perfume catalog entry matching this listing.
+  const { data: catalogPerfume } = await supabase
+    .from("perfumes")
+    .select("id")
+    .ilike("brand", listing.brand ?? "")
+    .ilike("name", listing.perfume_name ?? "")
+    .limit(1)
+    .maybeSingle();
 
-  const ratingMap: Record<string, number> = {
-    love: 5,
-    like: 4,
-    okay: 3,
-    dislike: 2,
-    hate: 1,
-  };
-
-  const numericRatings = (perfumeReviews ?? [])
-    .map((r) => ratingMap[r.rating ?? ""])
-    .filter((n): n is number => n !== undefined);
-
-  const avgRating =
-    numericRatings.length > 0
-      ? numericRatings.reduce((a, b) => a + b, 0) / numericRatings.length
-      : null;
+  let avgRating: number | null = null;
+  let reviewCount = 0;
+  let perfumeReviews: { rating: number; review_text: string | null; created_at: string }[] = [];
+  if (catalogPerfume?.id) {
+    const [{ data: agg }, { data: list }] = await Promise.all([
+      supabase.rpc("get_perfume_review_aggregate", { p_perfume_id: catalogPerfume.id }).single(),
+      supabase.rpc("get_perfume_reviews", { p_perfume_id: catalogPerfume.id, p_limit: 20 }),
+    ]);
+    const row = agg as { review_count: number | string; rating_avg: number | string | null } | null;
+    reviewCount = Number(row?.review_count ?? 0);
+    // Same threshold as the fragrance page: too few ratings is noise.
+    if (reviewCount >= 3 && row?.rating_avg != null) avgRating = Number(row.rating_avg);
+    perfumeReviews = (list ?? []) as typeof perfumeReviews;
+  }
 
   // --- Calculated Properties ---
 
@@ -199,18 +197,18 @@ export default async function ListingDetailPage({ params }: Props) {
           aggregateRating: {
             "@type": "AggregateRating",
             ratingValue: avgRating.toFixed(1),
-            reviewCount: numericRatings.length,
+            reviewCount,
             bestRating: 5,
             worstRating: 1,
           },
-          review: (perfumeReviews ?? [])
+          review: perfumeReviews
             .filter((r) => r.review_text)
             .slice(0, 3)
             .map((r) => ({
               "@type": "Review",
               reviewRating: {
                 "@type": "Rating",
-                ratingValue: ratingMap[r.rating ?? ""] ?? 3,
+                ratingValue: r.rating,
                 bestRating: 5,
                 worstRating: 1,
               },

@@ -271,6 +271,37 @@ flowchart TD
 
 ---
 
+## 6. Reviews and Polls on a Fragrance Page
+
+Anyone can read. Only logged-in users interact. Logged-out visitors see the
+five stars, an "Add a review" button and poll results, but no vote controls.
+
+```mermaid
+flowchart TD
+    A[Visitor opens /fragrance/slug] --> B{Logged in?}
+    B -- No --> C[Sees stars, results, reviews]
+    C --> D[Clicks a star or Add a review]
+    D --> E["/login?next=/fragrance/slug?rate=N or ?review=1"]
+    E --> F[Logs in or signs up]
+    F --> G[Back on fragrance page]
+    B -- Yes --> G
+    G --> H{Resume params?}
+    H -- rate=N --> I[Rating saved, comment box opens]
+    H -- review=1 --> J[Comment box opens]
+    H -- none --> K[Normal page]
+    K --> L[Tap a star: saved instantly]
+    L --> M[Optional: text, up to 4 photos, own it, knows seller, anonymous]
+    K --> N[Tap polls: gender, longevity, projection, value, climate, place]
+    K --> O[Report a review]
+    O --> P[Flagged: superadmin reviews, can hide, unflag or delete]
+```
+
+Rules: one review per user per perfume (edited in place). Single-choice polls
+replace the previous pick; yes/no polls take yes, no or cleared. Poll bars show
+after 3 voters. Hidden reviews never appear publicly. Limits: 10 reviews/hour,
+60 vote writes/hour. "Knows the seller" is a disclosed badge; sellers never post
+as fake customers.
+
 ## Workflow Changelog
 
 | Date | What changed | Diagram(s) affected |
@@ -289,3 +320,4 @@ relevant diagram above (new branch/step) or add a new numbered section
 with its own diagram + AI-tool quote, following the same format.
 | 2026-10-09 | Navbar and banner say "Sell Post"; feed gets time stamps, sold status, chips, sort; landing "Just dropped" strip; share, report, follow; alerts; /wanted requests | Section 5 (incl. weekly email digest) |
 | 2026-10-09 | Seller approval step removed (new accounts active at signup; flag/ban remain); price history feature removed | Sections 1 and 2 |
+| 2026-10-19 | In-page star reviews and polls on /fragrance/[slug] for any logged-in user (login-resume via ?next=); /dashboard/reviews is now list + delete; superadmin gains hide/unhide on reviews | Section 6 (new) |

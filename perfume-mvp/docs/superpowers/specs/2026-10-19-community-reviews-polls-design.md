@@ -99,7 +99,7 @@ Dashboard card "Ask friends for reviews": copyable WhatsApp/Messenger text with 
 ## 6. Moderation & anti-abuse
 - One review per user per perfume and per seller (DB-enforced).
 - Report action sets `is_flagged`; `/superadmin/reviews` (exists) gains hide/unflag for both review tables.
-- Rate limit: max 30 votes and 10 reviews per user per hour (enforced inside RPC / insert trigger).
+- Rate limit: max 60 vote writes and 10 reviews per user per hour (enforced inside RPC / insert trigger).
 - Text length caps in DB `CHECK`s. Image upload reuses the existing bucket and size limits.
 - Honesty rule from `docs/GOAL.md`: seller never posts as a customer; friend reviews allowed and disclosed via the knows-seller badge.
 

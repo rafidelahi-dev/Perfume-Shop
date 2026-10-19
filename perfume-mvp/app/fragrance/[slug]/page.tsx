@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import BlogPostCard from '@/components/blog/BlogPostCard';
 import SimilarPerfumeCard from '@/components/perfume/SimilarPerfumeCard';
 import DemandRequestButtons from '@/components/perfume/DemandRequestButtons';
+import FeedbackSection from '@/components/reviews/FeedbackSection';
 import {
   createPublicSupabase,
   fetchAllPerfumeSlugs,
@@ -19,7 +20,7 @@ import {
 export const revalidate = 3600;
 
 const SITE_URL = 'https://www.cloudperfumebd.com';
-const MIN_REVIEWS_FOR_CHART = 3;
+const MIN_REVIEWS_FOR_SCHEMA = 3;
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -64,26 +65,6 @@ function effectivePrice(listing: FragranceListing): number {
   }
   return Number(listing.price ?? NaN);
 }
-
-const RATING_DISPLAY: Record<number, { emoji: string; label: string }> = {
-  5: { emoji: '❤️', label: 'Love' },
-  4: { emoji: '👍', label: 'Like' },
-  3: { emoji: '😐', label: 'Okay' },
-  2: { emoji: '👎', label: 'Dislike' },
-  1: { emoji: '💀', label: 'Hate' },
-};
-
-const CLIMATE_LABEL: Record<string, string> = {
-  summer: 'Summer',
-  monsoon: 'Monsoon',
-  winter: 'Winter',
-};
-
-const ENVIRONMENT_LABEL: Record<string, string> = {
-  ac_office: 'AC / Office',
-  outdoors: 'Outdoors',
-  mixed: 'Mixed',
-};
 
 type RelatedPost = {
   id: string
@@ -141,67 +122,6 @@ async function fetchListings(perfume: PerfumeProfile): Promise<FragranceListing[
   );
 }
 
-const LONGEVITY_ORDER = ['0-2h', '2-5h', '5-7h', '7-10h', '10h+'] as const;
-const GENDER_ORDER = ['very_masculine', 'masculine', 'unisex', 'feminine', 'very_feminine'] as const;
-const GENDER_LABELS: Record<string, string> = {
-  very_masculine: 'Very Masc.',
-  masculine: 'Masculine',
-  unisex: 'Unisex',
-  feminine: 'Feminine',
-  very_feminine: 'Very Fem.',
-};
-const OCCASION_ORDER = ['office', 'university', 'wedding', 'jummah', 'date night', 'casual'] as const;
-const OCCASION_LABELS: Record<string, string> = {
-  office: 'Office',
-  university: 'University',
-  wedding: 'Wedding',
-  jummah: 'Jummah',
-  'date night': 'Date Night',
-  casual: 'Casual',
-};
-const CLIMATE_ORDER = ['summer', 'monsoon', 'winter'] as const;
-const CLIMATE_LABELS: Record<string, string> = {
-  summer: 'Summer',
-  monsoon: 'Monsoon',
-  winter: 'Winter',
-};
-const ENVIRONMENT_ORDER = ['ac_office', 'outdoors', 'mixed'] as const;
-const ENVIRONMENT_LABELS: Record<string, string> = {
-  ac_office: 'AC / Office',
-  outdoors: 'Outdoors',
-  mixed: 'Mixed',
-};
-
-function DistributionBar({
-  counts,
-  order,
-  labels,
-  total,
-}: {
-  counts: Record<string, number>;
-  order: readonly string[];
-  labels?: Record<string, string>;
-  total: number;
-}) {
-  return (
-    <div className="space-y-2">
-      {order.map((key) => {
-        const count = counts[key] ?? 0;
-        const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-        return (
-          <div key={key} className="flex items-center gap-3 text-xs">
-            <span className="w-16 shrink-0 text-gray-500">{labels?.[key] ?? key}</span>
-            <div className="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
-              <div className="h-full bg-[#d4af37]" style={{ width: `${pct}%` }} />
-            </div>
-            <span className="w-8 shrink-0 text-right text-gray-400">{count}</span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 function NoteTier({ label, notes }: { label: string; notes: string[] }) {
   return (
     <div>
@@ -227,8 +147,6 @@ export default async function FragrancePage({ params }: Props) {
     fetchPerfumeReviewAggregate(perfume.id),
     fetchPerfumeReviews(perfume.id),
   ]);
-
-  const hasEnoughReviews = aggregate.review_count >= MIN_REVIEWS_FOR_CHART;
 
   const prices = listings.map(effectivePrice).filter(Number.isFinite);
   const lowPrice = prices.length > 0 ? Math.min(...prices) : null;
@@ -257,11 +175,11 @@ export default async function FragrancePage({ params }: Props) {
         availability: 'https://schema.org/OutOfStock',
       },
     }),
-    ...(aggregate.rating_count > 0 && {
+    ...(aggregate.review_count >= MIN_REVIEWS_FOR_SCHEMA && aggregate.rating_avg != null && {
       aggregateRating: {
         '@type': 'AggregateRating',
-        ratingValue: aggregate.rating_avg?.toFixed(1),
-        ratingCount: aggregate.rating_count,
+        ratingValue: aggregate.rating_avg.toFixed(1),
+        ratingCount: aggregate.review_count,
         bestRating: 5,
         worstRating: 1,
       },
@@ -359,65 +277,15 @@ export default async function FragrancePage({ params }: Props) {
           </div>
         </section>
 
-        <section className="mb-12 rounded-2xl border border-black/5 bg-white p-6">
-          <h2 className="text-lg font-serif font-semibold text-[#1a1a1a] mb-4">Community Read</h2>
-          {aggregate.rating_count > 0 && (
-            <p className="text-sm text-gray-600 mb-4">
-              <span className="text-[#d4af37] font-semibold">★ {aggregate.rating_avg?.toFixed(1)}</span>
-              {' '}average from {aggregate.rating_count} rating{aggregate.rating_count > 1 ? 's' : ''}
-            </p>
-          )}
-          {hasEnoughReviews ? (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div>
-                <p className="text-xs uppercase tracking-widest text-gray-400 mb-2">Longevity</p>
-                <DistributionBar
-                  counts={aggregate.longevity_counts}
-                  order={LONGEVITY_ORDER}
-                  total={aggregate.review_count}
-                />
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-widest text-gray-400 mb-2">Gender Lean</p>
-                <DistributionBar
-                  counts={aggregate.gender_counts}
-                  order={GENDER_ORDER}
-                  labels={GENDER_LABELS}
-                  total={aggregate.review_count}
-                />
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-widest text-gray-400 mb-2">Best Worn</p>
-                <DistributionBar
-                  counts={aggregate.occasion_counts}
-                  order={OCCASION_ORDER}
-                  labels={OCCASION_LABELS}
-                  total={aggregate.review_count}
-                />
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-widest text-gray-400 mb-2">BD Climate Performance</p>
-                <DistributionBar
-                  counts={aggregate.climate_counts}
-                  order={CLIMATE_ORDER}
-                  labels={CLIMATE_LABELS}
-                  total={aggregate.review_count}
-                />
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-widest text-gray-400 mb-2">Worn In</p>
-                <DistributionBar
-                  counts={aggregate.environment_counts}
-                  order={ENVIRONMENT_ORDER}
-                  labels={ENVIRONMENT_LABELS}
-                  total={aggregate.review_count}
-                />
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-gray-400 italic">Not enough reviews yet.</p>
-          )}
-        </section>
+        <div className="mb-12 rounded-2xl border border-black/5 bg-white p-6">
+          <FeedbackSection
+            perfumeId={perfume.id}
+            slug={perfume.slug}
+            perfumeName={perfume.name}
+            initialAggregate={aggregate}
+            initialReviews={reviews}
+          />
+        </div>
 
         {(perfume.authenticity_batch_code || perfume.authenticity_packaging_notes || perfume.authenticity_other_notes) && (
           <section className="mb-8 rounded-2xl border border-black/5 bg-white p-6">
@@ -444,61 +312,6 @@ export default async function FragrancePage({ params }: Props) {
                 </div>
               )}
             </div>
-          </section>
-        )}
-
-        {reviews.length > 0 && (
-          <section className="mb-8 rounded-2xl border border-black/5 bg-white p-6">
-            <h2 className="text-lg font-serif font-semibold text-[#1a1a1a] mb-4">Reviews</h2>
-            <ul className="space-y-4">
-              {reviews.map((r) => (
-                <li key={r.id} className="border-b border-black/5 pb-4 last:border-0 last:pb-0">
-                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                    {r.rating && (
-                      <span className="text-xs font-medium text-gray-700">
-                        {RATING_DISPLAY[r.rating]?.emoji} {RATING_DISPLAY[r.rating]?.label}
-                      </span>
-                    )}
-                    {r.owns_bottle && (
-                      <span className="text-xs bg-green-50 text-green-700 rounded-md px-2 py-0.5">
-                        Owns bottle
-                      </span>
-                    )}
-                    {r.longevity && (
-                      <span className="text-xs bg-blue-50 text-blue-700 rounded-md px-2 py-0.5">
-                        {r.longevity}
-                      </span>
-                    )}
-                    {r.environment && (
-                      <span className="text-xs bg-cyan-50 text-cyan-700 rounded-md px-2 py-0.5">
-                        {ENVIRONMENT_LABEL[r.environment]}
-                      </span>
-                    )}
-                    {r.climate_season.map((s) => (
-                      <span key={s} className="text-xs bg-teal-50 text-teal-700 rounded-md px-2 py-0.5">
-                        {CLIMATE_LABEL[s]}
-                      </span>
-                    ))}
-                  </div>
-                  {r.review_text && (
-                    <p className="text-sm text-gray-600">{r.review_text}</p>
-                  )}
-                  {r.images.length > 0 && (
-                    <div className="mt-2 flex gap-2">
-                      {r.images.slice(0, 4).map((src) => (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          key={src}
-                          src={src}
-                          alt=""
-                          className="w-16 h-16 rounded-lg object-cover border border-gray-100"
-                        />
-                      ))}
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
           </section>
         )}
 

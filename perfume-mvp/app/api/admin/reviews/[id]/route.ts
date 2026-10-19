@@ -10,7 +10,7 @@ export async function PATCH(
   if (response) return response
 
   const { id } = await params
-  let body: { action: 'flag' | 'unflag'; reason?: string }
+  let body: { action: 'flag' | 'unflag' | 'hide' | 'unhide'; reason?: string }
   try {
     body = await req.json()
   } catch {
@@ -19,7 +19,7 @@ export async function PATCH(
   const { action, reason } = body
   const supabase = createAdminClient()
 
-  const validActions = ['flag', 'unflag'] as const
+  const validActions = ['flag', 'unflag', 'hide', 'unhide'] as const
   if (!validActions.includes(action)) {
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
   }
@@ -27,7 +27,9 @@ export async function PATCH(
   const update =
     action === 'flag'
       ? { is_flagged: true, flag_reason: reason ?? null, flagged_at: new Date().toISOString() }
-      : { is_flagged: false, flag_reason: null, flagged_at: null }
+      : action === 'unflag'
+        ? { is_flagged: false, flag_reason: null, flagged_at: null }
+        : { is_hidden: action === 'hide' }
 
   const { error } = await supabase.from('reviews').update(update).eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

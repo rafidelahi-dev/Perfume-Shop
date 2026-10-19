@@ -84,7 +84,7 @@ export default function ReviewsPage() {
 
       {!isLoading && !isError && filtered.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="grid grid-cols-[1.5fr_100px_2fr_100px_90px_140px] gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <div className="grid grid-cols-[1.5fr_100px_2fr_100px_90px_200px] gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
             <span>Perfume</span>
             <span>Rating</span>
             <span>Review</span>
@@ -96,7 +96,7 @@ export default function ReviewsPage() {
           {filtered.map((review) => (
             <div
               key={review.id}
-              className="grid grid-cols-[1.5fr_100px_2fr_100px_90px_140px] gap-4 px-6 py-4 items-center border-b border-gray-100 hover:bg-gray-50 transition-colors"
+              className="grid grid-cols-[1.5fr_100px_2fr_100px_90px_200px] gap-4 px-6 py-4 items-center border-b border-gray-100 hover:bg-gray-50 transition-colors"
             >
               <div>
                 <p className="text-sm font-medium text-gray-900">{review.perfume_name}</p>
@@ -134,6 +134,12 @@ export default function ReviewsPage() {
                     </button>
                   )
                 )}
+                <button
+                  onClick={() => flagAction.mutate({ id: review.id, action: review.is_hidden ? 'unhide' : 'hide' })}
+                  className="px-2.5 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                >
+                  {review.is_hidden ? 'Unhide' : 'Hide'}
+                </button>
                 <button
                   onClick={() => setRemoveModal(review.id)}
                   className="px-2.5 py-1 text-xs font-medium bg-red-100 hover:bg-red-200 text-red-800 rounded-lg transition-colors"

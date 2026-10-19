@@ -1,38 +1,11 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
-import type { Review } from "@/lib/queries/reviews";
-
-const RATING_DISPLAY: Record<number, { emoji: string; label: string; color: string }> = {
-  5: { emoji: "❤️",  label: "Love",    color: "text-red-600" },
-  4: { emoji: "👍",  label: "Like",    color: "text-green-600" },
-  3: { emoji: "😐",  label: "Okay",    color: "text-yellow-600" },
-  2: { emoji: "👎",  label: "Dislike", color: "text-orange-600" },
-  1: { emoji: "💀",  label: "Hate",    color: "text-gray-600" },
-};
-
-const CLIMATE_LABEL: Record<string, string> = {
-  summer: "Summer",
-  monsoon: "Monsoon",
-  winter: "Winter",
-};
-
-const ENVIRONMENT_LABEL: Record<string, string> = {
-  ac_office: "AC / Office",
-  outdoors: "Outdoors",
-  mixed: "Mixed",
-};
-
-const GENDER_LABEL: Record<string, string> = {
-  very_masculine: "Very Masculine",
-  masculine:      "Masculine",
-  unisex:         "Unisex",
-  feminine:       "Feminine",
-  very_feminine:  "Very Feminine",
-};
+import Link from "next/link";
+import { Star, Trash2 } from "lucide-react";
+import type { MyReview } from "@/lib/queries/reviews";
 
 type Props = {
-  items: Review[];
+  items: MyReview[];
   isLoading: boolean;
   error: Error | null;
   onDelete: (id: string) => void;
@@ -59,7 +32,9 @@ export default function ReviewList({ items, isLoading, error, onDelete }: Props)
   if (!items.length) {
     return (
       <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-10 text-center">
-        <p className="text-gray-500 text-sm">No reviews yet. Add your first one above.</p>
+        <p className="text-gray-500 text-sm">
+          No reviews yet. Open any fragrance page and tap the stars to leave your first one.
+        </p>
       </div>
     );
   }
@@ -71,13 +46,12 @@ export default function ReviewList({ items, isLoading, error, onDelete }: Props)
           key={r.id}
           className="bg-white border border-gray-200 rounded-xl p-4 flex gap-4 shadow-sm hover:shadow-md transition-shadow"
         >
-          {/* Image */}
           {r.images[0] && (
             <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border border-gray-100">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={r.images[0]}
-                alt={r.perfume_name}
+                alt={r.perfumes?.name ?? "Review photo"}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -89,12 +63,25 @@ export default function ReviewList({ items, isLoading, error, onDelete }: Props)
                 Flagged by moderators{r.flag_reason ? `: ${r.flag_reason}` : "."}
               </div>
             )}
+            {r.is_hidden && (
+              <div className="mb-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                Hidden by moderators. Only you can see this.
+              </div>
+            )}
 
-            {/* Name + Brand */}
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="font-semibold text-gray-900 text-sm truncate">{r.perfume_name}</p>
-                <p className="text-xs text-gray-500">{r.brand}</p>
+                {r.perfumes ? (
+                  <Link
+                    href={`/fragrance/${r.perfumes.slug}`}
+                    className="font-semibold text-gray-900 text-sm truncate block hover:underline"
+                  >
+                    {r.perfumes.name}
+                  </Link>
+                ) : (
+                  <p className="font-semibold text-gray-900 text-sm">Fragrance</p>
+                )}
+                <p className="text-xs text-gray-500">{r.perfumes?.brand}</p>
               </div>
               <button
                 onClick={() => onDelete(r.id)}
@@ -105,62 +92,17 @@ export default function ReviewList({ items, isLoading, error, onDelete }: Props)
               </button>
             </div>
 
-            {/* Category */}
-            <div className="mt-1.5 flex flex-wrap gap-1">
-              <span className="inline-block text-xs bg-gray-100 text-gray-600 rounded-md px-2 py-0.5">
-                {r.category}
-              </span>
-              {r.sub_category && (
-                <span className="inline-block text-xs bg-gray-100 text-gray-500 rounded-md px-2 py-0.5">
-                  {r.sub_category}
-                </span>
-              )}
-            </div>
-
-            {/* Meta chips */}
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {r.rating && (
-                <span className={`text-xs font-medium ${RATING_DISPLAY[r.rating]?.color}`}>
-                  {RATING_DISPLAY[r.rating]?.emoji} {RATING_DISPLAY[r.rating]?.label}
-                </span>
-              )}
-              {r.longevity && (
-                <span className="text-xs bg-blue-50 text-blue-700 rounded-md px-2 py-0.5">
-                  {r.longevity}
-                </span>
-              )}
-              {r.gender && (
-                <span className="text-xs bg-purple-50 text-purple-700 rounded-md px-2 py-0.5">
-                  {GENDER_LABEL[r.gender]}
-                </span>
-              )}
-              {r.environment && (
-                <span className="text-xs bg-cyan-50 text-cyan-700 rounded-md px-2 py-0.5">
-                  {ENVIRONMENT_LABEL[r.environment]}
-                </span>
-              )}
-              {r.climate_season.map((s) => (
-                <span key={s} className="text-xs bg-teal-50 text-teal-700 rounded-md px-2 py-0.5">
-                  {CLIMATE_LABEL[s]}
-                </span>
+            <div className="mt-2 flex items-center gap-0.5" aria-label={`${r.rating} out of 5 stars`}>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <Star
+                  key={n}
+                  size={14}
+                  className={n <= r.rating ? "fill-[#d4af37] text-[#d4af37]" : "text-gray-300"}
+                />
               ))}
+              {r.is_anonymous && <span className="ml-2 text-xs text-gray-400">Posted anonymously</span>}
             </div>
 
-            {/* When to wear */}
-            {r.when_to_wear.length > 0 && (
-              <div className="mt-1.5 flex flex-wrap gap-1">
-                {r.when_to_wear.map((w) => (
-                  <span
-                    key={w}
-                    className="text-xs bg-amber-50 text-amber-700 rounded-md px-2 py-0.5 capitalize"
-                  >
-                    {w}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Review text */}
             {r.review_text && (
               <p className="mt-2 text-xs text-gray-600 line-clamp-2">{r.review_text}</p>
             )}
