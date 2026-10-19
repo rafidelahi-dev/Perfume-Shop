@@ -312,7 +312,7 @@ flowchart TD
     A[Visitor opens /perfumes/username] --> B[Sees average, count, ratings]
     B --> C{Logged in?}
     C -- No --> D[Clicks star or Rate this seller]
-    D --> E["/login?next=/perfumes/username?rate=N or ?review=1"]
+    D --> E["/join?next=/perfumes/username?rate=N or ?review=1 (section 8)"]
     E --> F[Back on seller page, rating applied]
     C -- Yes --> G{Own profile?}
     G -- Yes --> H[No rating controls]
@@ -324,6 +324,35 @@ flowchart TD
 
 The average shows next to the seller name on the seller page and on each
 listing's "Meet the Seller" card. Limit: 10 new seller ratings/hour per user.
+
+## 8. Quick Join, Share Link and Retention Loop
+
+`/join` is the low-friction signup for people who only want to rate or vote:
+Google, or phone number plus a 6-digit code. No username, name or password; the
+`handle_new_user` trigger generates a username (collision-safe). Sellers still
+use the full `/signup`. Logged-out stars on fragrance and seller pages send
+people to `/join`; `/login` stays one click away ("Have a password?").
+
+```mermaid
+flowchart TD
+    A[Logged-out visitor taps star or Add a review] --> B["/join?next=page?rate=N or ?review=1"]
+    B --> C{Method}
+    C -- Google --> D[OAuth, returns to next]
+    C -- Phone --> E[Enter number, receive code]
+    E --> F[Verify code, account auto-created]
+    D --> G[Back on page, rating or composer applied]
+    F --> G
+    H[Seller dashboard: Ask friends for reviews] --> I[Copy WhatsApp or Messenger text]
+    I --> J["Friend opens /perfumes/username?review=1 or /fragrance/slug?review=1"]
+    J --> K[Page scrolls to the review section]
+    K --> A
+    G --> L[Dashboard: N people voted on perfumes you reviewed, rate more list]
+    L --> M[Reviewer returns to rate more fragrances]
+```
+
+Friends may review; the "knows seller" badge discloses it. A seller never posts
+as a fake customer. The dashboard activity card counts other people only and
+never shows who they are.
 
 ## Workflow Changelog
 
@@ -345,3 +374,4 @@ with its own diagram + AI-tool quote, following the same format.
 | 2026-10-09 | Seller approval step removed (new accounts active at signup; flag/ban remain); price history feature removed | Sections 1 and 2 |
 | 2026-10-19 | In-page star reviews and polls on /fragrance/[slug] for any logged-in user (login-resume via ?next=); /dashboard/reviews is now list + delete; superadmin gains hide/unhide on reviews | Section 6 (new) |
 | 2026-10-19 | Seller ratings on /perfumes/[username] (login-gated, resume via ?next=), average shown on listing seller card, superadmin moderation of seller ratings | Section 7 (new) |
+| 2026-10-19 | /join quick signup (Google or phone code, auto username) for raters; share-link card, review activity and rate-more cards on /dashboard; ?review=1 scrolls to the review section | Section 8 (new) |

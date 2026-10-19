@@ -71,7 +71,7 @@ export default function SellerRatingSection({
   }, [loggedIn, isSelf, userId, refreshMine]);
 
   const loginUrl = (query: string) =>
-    `/login?next=${encodeURIComponent(`/perfumes/${username}${query}`)}`;
+    `/join?next=${encodeURIComponent(`/perfumes/${username}${query}`)}`;
 
   const rate = useCallback(
     async (n: number) => {
@@ -93,6 +93,12 @@ export default function SellerRatingSection({
     }
     void rate(n);
   }
+
+  // Shared link (?review=1): guide visitors, logged in or not, to the section.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("review") !== "1") return;
+    document.getElementById("seller-rating-heading")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   function startComment() {
     setComment(mine?.comment ?? "");

@@ -52,6 +52,18 @@ export async function signUpWithPhone(
   return supabase.auth.signUp({ phone: normalized, password, options });
 }
 
+/** Passwordless: sends a code, and creates the account on first verify. */
+export async function sendPhoneOtp(phone: string) {
+  const normalized = normalizeBdPhone(phone);
+  if (!BD_PHONE_RE.test(normalized)) {
+    return {
+      data: { user: null, session: null },
+      error: { name: "InvalidPhone", message: "Invalid phone format. Use 01XXXXXXXXX." },
+    } as const;
+  }
+  return supabase.auth.signInWithOtp({ phone: normalized });
+}
+
 export async function verifyPhoneOtp(phone: string, token: string) {
   const normalized = normalizeBdPhone(phone);
   return supabase.auth.verifyOtp({ phone: normalized, token, type: "sms" });

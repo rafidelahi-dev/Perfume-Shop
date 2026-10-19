@@ -71,7 +71,7 @@ export default function FeedbackSection({
   }, [loggedIn, userId, refreshMine]);
 
   const loginUrl = (query: string) =>
-    `/login?next=${encodeURIComponent(`/fragrance/${slug}${query}`)}`;
+    `/join?next=${encodeURIComponent(`/fragrance/${slug}${query}`)}`;
 
   const rate = useCallback(
     async (n: number) => {
@@ -114,6 +114,12 @@ export default function FeedbackSection({
     if (r >= 1 && r <= 5) void rate(r).then(() => setComposing(true));
     else setComposing(true);
   }, [loggedIn, slug, rate]);
+
+  // Shared link (?review=1): guide visitors, logged in or not, to the section.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("review") !== "1") return;
+    document.getElementById("reviews-heading")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   useEffect(() => {
     if (composing) composerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });

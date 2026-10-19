@@ -141,3 +141,44 @@ export async function reportReview(reviewId: string, reason: string): Promise<vo
   });
   if (error) throw error;
 }
+
+export type ReviewActivity = {
+  perfume_id: string;
+  name: string;
+  brand: string;
+  slug: string;
+  my_rating: number;
+  other_reviews: number;
+  other_voters: number;
+  new_reviews_7d: number;
+  new_votes_7d: number;
+};
+
+export type PerfumeToRate = {
+  id: string;
+  name: string;
+  brand: string;
+  slug: string;
+  review_count: number;
+};
+
+export async function fetchMyReviewActivity(): Promise<ReviewActivity[]> {
+  const { data, error } = await supabase.rpc("get_my_review_activity");
+  if (error) throw error;
+  return (data ?? []).map((r: Record<string, unknown>) => ({
+    ...(r as ReviewActivity),
+    other_reviews: Number(r.other_reviews),
+    other_voters: Number(r.other_voters),
+    new_reviews_7d: Number(r.new_reviews_7d),
+    new_votes_7d: Number(r.new_votes_7d),
+  }));
+}
+
+export async function fetchPerfumesToRate(limit = 6): Promise<PerfumeToRate[]> {
+  const { data, error } = await supabase.rpc("get_perfumes_to_rate", { p_limit: limit });
+  if (error) throw error;
+  return (data ?? []).map((r: Record<string, unknown>) => ({
+    ...(r as PerfumeToRate),
+    review_count: Number(r.review_count),
+  }));
+}

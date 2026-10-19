@@ -18,6 +18,7 @@ import { fetchMyListings } from "@/lib/queries/listings";
 import { fetchMyReviews } from "@/lib/queries/reviews";
 import { fetchMyProfile } from "@/lib/queries/profile";
 import { qk } from "@/lib/queries/key";
+import CommunityCards from "@/components/dashboard/CommunityCards";
 import { useSessionUserId } from "@/lib/hooks/useSessionUserId";
 
 type ListingRow = {
@@ -244,6 +245,10 @@ export default function DashboardOverview() {
           Icon={Library}
         />
       </section>
+
+      <div className="grid gap-5 md:grid-cols-2">
+        <CommunityCards userId={userId} username={profile?.username} />
+      </div>
 
       <div className="grid gap-5 lg:grid-cols-3">
         {/* Inventory + recent */}
