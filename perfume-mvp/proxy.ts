@@ -41,6 +41,15 @@ export async function proxy(req: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (error || !user) {
+    // Returning from Google: the session does not exist until the ?code is
+    // exchanged, so hand it to the callback instead of bouncing to /login.
+    const code = req.nextUrl.searchParams.get("code");
+    if (code) {
+      const cb = new URL("/auth/callback", req.url);
+      cb.searchParams.set("code", code);
+      cb.searchParams.set("next", req.nextUrl.pathname);
+      return NextResponse.redirect(cb);
+    }
     const redirectUrl = new URL("/login", req.url);
     redirectUrl.searchParams.set("next", req.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);

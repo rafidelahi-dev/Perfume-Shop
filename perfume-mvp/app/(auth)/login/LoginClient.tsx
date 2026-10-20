@@ -163,6 +163,16 @@ export default function LoginClient({ nextPath }: LoginClientProps) {
             </Link>
           </p>
 
+          <p className="text-center text-xs text-gray-500">
+            No password?{" "}
+            <Link
+              href={`/join?next=${encodeURIComponent(nextPath)}`}
+              className="underline hover:text-gray-900"
+            >
+              Get a code by SMS
+            </Link>
+          </p>
+
           <p className="text-center text-sm text-gray-600">
             Don&apos;t have an account?{" "}
             <Link

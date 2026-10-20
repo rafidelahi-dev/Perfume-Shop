@@ -6,15 +6,20 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { sendPhoneOtp, verifyPhoneOtp } from "@/lib/queries/client/auth";
 import { withTimeout } from "@/lib/queries/auth";
+import { fireCompleteRegistration } from "@/lib/trackRegistration";
 
-type Props = { nextPath: string };
+type Props = { nextPath: string; title?: string; subtitle?: string };
 
 /**
  * Two-tap join for people who just want to rate or vote: Google, or a phone
  * number and a code. No username, name or password; the account is created
  * (and a username generated) on first sign-in.
  */
-export default function JoinClient({ nextPath }: Props) {
+export default function JoinClient({
+  nextPath,
+  title = "Join in seconds",
+  subtitle = "Rate fragrances and vote. No password needed.",
+}: Props) {
   const router = useRouter();
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
@@ -69,6 +74,7 @@ export default function JoinClient({ nextPath }: Props) {
       setBusy(false);
       return;
     }
+    fireCompleteRegistration({ phone });
     router.replace(nextPath);
   }
 
@@ -76,8 +82,8 @@ export default function JoinClient({ nextPath }: Props) {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="bg-[#1a1a1a] p-6 text-center">
-          <h1 className="text-2xl font-bold text-white mb-1">Join in seconds</h1>
-          <p className="text-gray-400 text-sm">Rate fragrances and vote. No password needed.</p>
+          <h1 className="text-2xl font-bold text-white mb-1">{title}</h1>
+          <p className="text-gray-400 text-sm">{subtitle}</p>
         </div>
 
         <div className="p-6 space-y-5">
@@ -165,10 +171,15 @@ export default function JoinClient({ nextPath }: Props) {
             </Link>
           </p>
           <p className="text-center text-xs text-gray-400">
-            Want to sell?{" "}
-            <Link href={`/signup?next=${encodeURIComponent(nextPath)}`} className="underline">
-              Create a seller account
+            By continuing you agree to the{" "}
+            <Link href="/terms" className="underline">
+              Terms
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy-policy" className="underline">
+              Privacy Policy
             </Link>
+            .
           </p>
         </div>
       </div>
