@@ -1,7 +1,7 @@
 // app/(auth)/signup/page.tsx
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import JoinClient from "../join/JoinClient";
+import SignupClient from "./SignupClient";
 
 export const metadata: Metadata = {
   title: "Sign Up",
@@ -25,11 +25,7 @@ export default async function SignupPage({ searchParams }: PageProps) {
 
   return (
     <Suspense fallback={<div className="flex justify-center py-10">Loading…</div>}>
-      <JoinClient
-        nextPath={nextPath}
-        title="Create your account"
-        subtitle="Google or a phone code. No password needed."
-      />
+      <SignupClient nextPath={nextPath} />
     </Suspense>
   );
 }

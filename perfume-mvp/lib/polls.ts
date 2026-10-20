@@ -7,12 +7,15 @@ export type PollDimension = {
   key: string;
   title: string;
   kind: PollKind;
-  options: { value: string; label: string; emoji?: string }[];
+  /** Hex used for this poll's bars and highlights. */
+  accent: string;
+  options: { value: string; label: string; icon?: string }[];
 };
 
 export const POLLS: PollDimension[] = [
   {
     key: "gender",
+    accent: "#8b5cf6",
     title: "Gender lean",
     kind: "single",
     options: [
@@ -25,6 +28,7 @@ export const POLLS: PollDimension[] = [
   },
   {
     key: "longevity",
+    accent: "#f59e0b",
     title: "Longevity",
     kind: "single",
     options: [
@@ -37,6 +41,7 @@ export const POLLS: PollDimension[] = [
   },
   {
     key: "projection",
+    accent: "#ec4899",
     title: "Projection",
     kind: "single",
     options: [
@@ -48,6 +53,7 @@ export const POLLS: PollDimension[] = [
   },
   {
     key: "value",
+    accent: "#10b981",
     title: "Value for price",
     kind: "single",
     options: [
@@ -59,26 +65,28 @@ export const POLLS: PollDimension[] = [
   },
   {
     key: "climate",
+    accent: "#0ea5e9",
     title: "Works in Bangladesh weather?",
     kind: "yes_no",
     options: [
-      { value: "hot_summer", label: "Hot summer", emoji: "☀️" },
-      { value: "humid_rainy", label: "Humid / rainy", emoji: "🌧️" },
-      { value: "winter", label: "Winter", emoji: "❄️" },
-      { value: "mild", label: "Mild (spring / autumn)", emoji: "🍃" },
+      { value: "hot_summer", label: "Hot summer", icon: "sun" },
+      { value: "humid_rainy", label: "Humid / rainy", icon: "rain" },
+      { value: "winter", label: "Winter", icon: "snow" },
+      { value: "mild", label: "Mild (spring / autumn)", icon: "leaf" },
     ],
   },
   {
     key: "place",
+    accent: "#f97316",
     title: "Where can you wear it?",
     kind: "yes_no",
     options: [
-      { value: "bus_metro", label: "Bus / metro", emoji: "🚌" },
-      { value: "ac_room", label: "AC room / office", emoji: "🏢" },
-      { value: "restaurant", label: "Restaurant", emoji: "🍽️" },
-      { value: "outdoors", label: "Outdoors / street", emoji: "🛵" },
-      { value: "wedding_event", label: "Wedding / event", emoji: "💍" },
-      { value: "jummah_eid", label: "Jummah / Eid", emoji: "🕌" },
+      { value: "bus_metro", label: "Bus / metro", icon: "bus" },
+      { value: "ac_room", label: "AC room / office", icon: "building" },
+      { value: "restaurant", label: "Restaurant", icon: "dining" },
+      { value: "outdoors", label: "Outdoors / street", icon: "bike" },
+      { value: "wedding_event", label: "Wedding / event", icon: "gem" },
+      { value: "jummah_eid", label: "Jummah / Eid", icon: "mosque" },
     ],
   },
 ];

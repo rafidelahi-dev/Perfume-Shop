@@ -174,26 +174,27 @@ export default function FeedbackSection({
   return (
     <div className="space-y-12">
       <section aria-labelledby="polls-heading">
-        <h2 id="polls-heading" className="text-xl font-semibold mb-1">
+        <h2 id="polls-heading" className="font-serif text-2xl font-semibold text-[#1a1a1a] mb-1">
           Community Read
         </h2>
         <p className="text-sm text-gray-500 mb-6">
           {loggedIn
             ? "Tap to vote. Takes a second."
-            : "What Cloud members say. Log in to add your vote."}
+            : "What Cloud members say about this fragrance."}
         </p>
         <PollsPanel
           polls={aggregate.polls}
           voterCounts={aggregate.voter_counts}
           myVotes={loggedIn ? (mine?.votes ?? []) : null}
           onVote={onVote}
+          onJoin={() => router.push(loginUrl("?review=1"))}
         />
       </section>
 
       <section aria-labelledby="reviews-heading">
         <div className="flex flex-wrap items-end justify-between gap-4 mb-4">
           <div>
-            <h2 id="reviews-heading" className="text-xl font-semibold">
+            <h2 id="reviews-heading" className="font-serif text-2xl font-semibold text-[#1a1a1a]">
               Reviews
             </h2>
             {aggregate.review_count > 0 && aggregate.rating_avg != null && (
@@ -217,8 +218,8 @@ export default function FeedbackSection({
           )}
         </div>
 
-        <div className="rounded-xl bg-gray-50 p-4">
-          <p className="mb-2 text-sm text-gray-600">
+        <div className="rounded-3xl bg-gradient-to-br from-[#fbf6e3] via-white to-[#f6efd2] p-5 ring-1 ring-[#d4af37]/30 sm:p-6">
+          <p className="mb-2 font-serif text-lg font-semibold text-[#1a1a1a]">
             {myReview ? "Your rating" : `How do you rate ${perfumeName}?`}
           </p>
           <StarRater value={myReview?.rating ?? null} onRate={onStar} />
@@ -256,7 +257,11 @@ export default function FeedbackSection({
         </div>
 
         <div className="mt-6">
-          <ReviewList reviews={reviews} onReport={loggedIn ? onReport : undefined} />
+          <ReviewList
+            reviews={reviews}
+            onReport={loggedIn ? onReport : undefined}
+            onFirst={onAddReview}
+          />
         </div>
       </section>
     </div>

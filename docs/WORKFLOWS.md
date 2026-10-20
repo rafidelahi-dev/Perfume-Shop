@@ -330,11 +330,15 @@ listing's "Meet the Seller" card. Limit: 10 new seller ratings/hour per user.
 `/join` is the low-friction signup for people who only want to rate or vote:
 Google, or phone number plus a 6-digit code. No username, name or password; the
 `handle_new_user` trigger generates a username (collision-safe). Sellers still
-use the same form at `/signup` (it renders the join form, default destination
-`/dashboard`); profile details are edited later in the profile page. Email +
-password signup was removed (confirmation mail was not delivered); `/login`
-still accepts email or phone + password. Logged-out stars on fragrance and
-seller pages send people to `/join`; `/login` stays one click away.
+use `/signup`: Google, or phone/email plus a password. Phone and email are
+verified with a 6-digit code (SMS or email) before the account exists, and the
+password is then used for `/login`. `/login` takes one field: whatever contains
+an "@" is treated as email, otherwise as a BD phone number. Profile details are
+edited later in the profile page. Logged-out stars on fragrance and seller pages
+send people to `/join`; `/login` stays one click away.
+
+Email codes need the Supabase "Confirm signup" template to include
+`{{ .Token }}` and a working SMTP sender.
 
 Google returns with a `?code`. `proxy.ts` forwards a code-bearing request on a
 protected route to `/auth/callback`, which exchanges it for a session cookie and
@@ -382,4 +386,5 @@ with its own diagram + AI-tool quote, following the same format.
 | 2026-10-19 | In-page star reviews and polls on /fragrance/[slug] for any logged-in user (login-resume via ?next=); /dashboard/reviews is now list + delete; superadmin gains hide/unhide on reviews | Section 6 (new) |
 | 2026-10-19 | Seller ratings on /perfumes/[username] (login-gated, resume via ?next=), average shown on listing seller card, superadmin moderation of seller ratings | Section 7 (new) |
 | 2026-10-19 | /join quick signup (Google or phone code, auto username) for raters; share-link card, review activity and rate-more cards on /dashboard; ?review=1 scrolls to the review section | Section 8 (new) |
-| 2026-10-20 | /signup now same simple form as /join (Google or phone code, no username/name); email+password signup removed; Google login fixed via /auth/callback code exchange | Section 8 |
+| 2026-10-20 | Google login fixed via /auth/callback code exchange | Section 8 |
+| 2026-10-20 | /signup is Google or phone/email + password verified by OTP; single-field login detects email vs phone; fragrance polls/ratings restyled (animated bars, completion meter, join CTA) | Section 8 |
