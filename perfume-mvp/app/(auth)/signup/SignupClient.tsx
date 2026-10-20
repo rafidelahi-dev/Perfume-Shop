@@ -8,6 +8,8 @@ import { supabase } from "@/lib/supabaseClient";
 import { normalizeBdPhone, isValidBdPhone } from "@/lib/queries/client/auth";
 import { withTimeout } from "@/lib/queries/auth";
 import { fireCompleteRegistration } from "@/lib/trackRegistration";
+import { friendlyAuthError, isStrongPassword } from "@/lib/passwordRules";
+import PasswordChecklist from "@/components/auth/PasswordChecklist";
 
 type Props = { nextPath: string };
 type Mode = "phone" | "email";
@@ -67,6 +69,10 @@ export default function SignupClient({ nextPath }: Props) {
       setError("Enter a valid phone number (01XXXXXXXXX).");
       return;
     }
+    if (!isStrongPassword(password)) {
+      setError("Your password needs a lowercase letter, an uppercase letter, a number and a symbol.");
+      return;
+    }
     setBusy(true);
     const { error } =
       mode === "phone"
@@ -74,7 +80,7 @@ export default function SignupClient({ nextPath }: Props) {
         : await supabase.auth.signUp({ email: target, password });
     setBusy(false);
     if (error) {
-      setError(error.message);
+      setError(friendlyAuthError(error.message));
       return;
     }
     setStep("code");
@@ -183,11 +189,10 @@ export default function SignupClient({ nextPath }: Props) {
                 <div className="relative">
                   <input
                     className={`${input} pr-11`}
-                    placeholder="Password (min 6 characters)"
+                    placeholder="Create a password"
                     type={showPw ? "text" : "password"}
                     autoComplete="new-password"
                     aria-label="Password"
-                    minLength={6}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -201,8 +206,9 @@ export default function SignupClient({ nextPath }: Props) {
                     {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
+                <PasswordChecklist password={password} />
                 <button
-                  disabled={busy}
+                  disabled={busy || !isStrongPassword(password)}
                   className="w-full bg-[#1a1a1a] text-white rounded-lg py-3 text-sm font-medium hover:bg-[#333] disabled:opacity-60"
                   type="submit"
                 >

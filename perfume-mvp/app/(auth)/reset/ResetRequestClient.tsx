@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
+import { friendlyAuthError, isStrongPassword } from "@/lib/passwordRules";
+import PasswordChecklist from "@/components/auth/PasswordChecklist";
 
 // Two-step OTP reset, all on one page. Emailing a code (instead of a link)
 // sidesteps email link-scanners that consume single-use links, and avoids
@@ -80,6 +82,10 @@ export default function ResetRequestClient() {
       setErr(`Enter the ${OTP_LENGTH}-digit code from your email.`);
       return;
     }
+    if (!isStrongPassword(password)) {
+      setErr("Your password needs a lowercase letter, an uppercase letter, a number and a symbol.");
+      return;
+    }
     if (password !== confirm) {
       setErr("Passwords don't match.");
       return;
@@ -103,7 +109,7 @@ export default function ResetRequestClient() {
 
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) {
-        setErr(updateError.message);
+        setErr(friendlyAuthError(updateError.message));
         return;
       }
 
@@ -163,17 +169,16 @@ export default function ResetRequestClient() {
           <input
             type="password"
             autoComplete="new-password"
-            minLength={6}
             required
             className="w-full border rounded p-2"
-            placeholder="New password (min 6 characters)"
+            placeholder="New password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          <PasswordChecklist password={password} />
           <input
             type="password"
             autoComplete="new-password"
-            minLength={6}
             required
             className="w-full border rounded p-2"
             placeholder="Confirm new password"
