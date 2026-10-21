@@ -9,10 +9,26 @@ export type PollDimension = {
   kind: PollKind;
   /** Hex used for this poll's bars and highlights. */
   accent: string;
+  /** "spectrum" renders ordered options as a sky track (day to night). */
+  variant?: "spectrum";
   options: { value: string; label: string; icon?: string }[];
 };
 
 export const POLLS: PollDimension[] = [
+  {
+    key: "timeofday",
+    accent: "#6366f1",
+    title: "Day or night?",
+    kind: "single",
+    variant: "spectrum",
+    options: [
+      { value: "day", label: "Daytime", icon: "sun" },
+      { value: "leans_day", label: "Leans day", icon: "sunset" },
+      { value: "anytime", label: "Either", icon: "sunmoon" },
+      { value: "leans_night", label: "Leans night", icon: "cloudmoon" },
+      { value: "night", label: "Nighttime", icon: "moon" },
+    ],
+  },
   {
     key: "gender",
     accent: "#8b5cf6",

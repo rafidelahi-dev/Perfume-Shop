@@ -25,6 +25,7 @@ import {
   type UserVote,
 } from "@/lib/polls";
 import { useInView } from "@/lib/hooks/useInView";
+import DayNightPoll from "./DayNightPoll";
 
 type Props = {
   polls: PollCounts;
@@ -93,6 +94,20 @@ function SinglePoll({
   const top = showBars
     ? Math.max(...poll.options.map((o) => counts?.[o.value]?.yes ?? 0))
     : 0;
+
+  if (poll.variant === "spectrum") {
+    return (
+      <DayNightPoll
+        poll={poll}
+        counts={counts}
+        voters={voters}
+        mine={mine}
+        onVote={onVote}
+        seen={seen}
+        pulse={pulse}
+      />
+    );
+  }
 
   return (
     <div className="space-y-2">
@@ -305,7 +320,7 @@ function PollCard({
     <div
       ref={ref}
       className={`rounded-3xl border border-black/5 bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_10px_28px_-14px_rgba(0,0,0,0.12)] sm:p-5 ${
-        poll.kind === "yes_no" ? "md:col-span-2" : ""
+        poll.kind === "yes_no" || poll.variant === "spectrum" ? "md:col-span-2" : ""
       }`}
     >
       <div className="mb-3 flex items-center justify-between gap-3">

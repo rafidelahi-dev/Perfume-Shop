@@ -291,7 +291,7 @@ flowchart TD
     H -- none --> K[Normal page]
     K --> L[Tap a star: saved instantly]
     L --> M[Optional: text, up to 4 photos, own it, knows seller, anonymous]
-    K --> N[Tap polls: gender, longevity, projection, value, climate, place]
+    K --> N[Tap polls: day or night, gender, longevity, projection, value, climate, place]
     K --> O[Report a review]
     O --> P[Flagged: superadmin reviews, can hide, unflag or delete]
 ```
@@ -387,4 +387,5 @@ with its own diagram + AI-tool quote, following the same format.
 | 2026-10-19 | Seller ratings on /perfumes/[username] (login-gated, resume via ?next=), average shown on listing seller card, superadmin moderation of seller ratings | Section 7 (new) |
 | 2026-10-19 | /join quick signup (Google or phone code, auto username) for raters; share-link card, review activity and rate-more cards on /dashboard; ?review=1 scrolls to the review section | Section 8 (new) |
 | 2026-10-20 | Google login fixed via /auth/callback code exchange | Section 8 |
+| 2026-10-21 | New "Day or night?" poll (sun-to-moon spectrum, 5 options) on fragrance pages; password strength checklist on signup/reset | Section 6 |
 | 2026-10-20 | /signup is Google or phone/email + password verified by OTP; single-field login detects email vs phone; fragrance polls/ratings restyled (animated bars, completion meter, join CTA) | Section 8 |

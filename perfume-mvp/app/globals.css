@@ -189,9 +189,15 @@ a:focus-visible {
   transform-origin: left center;
   transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
+@keyframes twinkle {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50% { opacity: 0.25; transform: scale(0.7); }
+}
+.anim-twinkle { animation: twinkle 3.2s ease-in-out infinite; }
 ::selection { background: rgba(212, 175, 55, 0.35); }
 
 @media (prefers-reduced-motion: reduce) {
+  .anim-twinkle { animation: none; }
   .anim-star-pop, .anim-star-ring, .anim-check-pop, .anim-tile-pulse, .gold-sweep { animation: none; }
   .bar-grow { transition: none; }
 }
