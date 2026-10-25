@@ -4,7 +4,7 @@ import Footer from '@/components/Footer'
 import DirectoryList, { type DirectoryEntry } from './DirectoryList'
 import { createPublicSupabase } from '@/lib/queries/perfumes'
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Fragrance Directory — Prices & Decants in Bangladesh',
