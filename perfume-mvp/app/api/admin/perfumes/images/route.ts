@@ -8,6 +8,7 @@ const EXT: Record<string, string> = {
   'image/png': 'png',
   'image/jpeg': 'jpg',
   'image/webp': 'webp',
+  'image/avif': 'avif',
 }
 
 // One file per request keeps each body under Vercel's ~4.5MB function limit;
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
   }
   const ext = EXT[file.type]
   if (!ext) {
-    return NextResponse.json({ error: 'Only PNG, JPEG or WebP images are allowed' }, { status: 400 })
+    return NextResponse.json({ error: 'Only PNG, JPEG, WebP or AVIF images are allowed' }, { status: 400 })
   }
   if (file.size > MAX_BYTES) {
     return NextResponse.json({ error: 'Image must be 4MB or smaller' }, { status: 400 })

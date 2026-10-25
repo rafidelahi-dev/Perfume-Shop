@@ -147,7 +147,7 @@ export default function BlogEditor({ content, onChange, postId }: Props) {
       <input
         ref={fileRef}
         type="file"
-        accept="image/png,image/jpeg,image/webp"
+        accept="image/png,image/jpeg,image/webp,image/avif"
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0]

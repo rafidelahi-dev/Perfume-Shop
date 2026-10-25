@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
 
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
 
-  const allowed = ['image/png', 'image/jpeg', 'image/webp']
+  const allowed = ['image/png', 'image/jpeg', 'image/webp', 'image/avif']
   if (!allowed.includes(file.type)) {
     return NextResponse.json({ error: 'Invalid file type' }, { status: 400 })
   }
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'File too large (max 5MB)' }, { status: 400 })
   }
 
-  const ext = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' }[file.type]
+  const ext = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/avif': 'avif' }[file.type]
   // New posts use a client-made id (React useId), saved ones a UUID.
   if (postId && !/^[A-Za-z0-9_-]{1,64}$/.test(postId)) {
     return NextResponse.json({ error: 'Invalid postId' }, { status: 400 })
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     const { error: bucketErr } = await supabase.storage.createBucket('blog-images', {
       public: true,
       fileSizeLimit: 5 * 1024 * 1024,
-      allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+      allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/avif'],
     })
     if (bucketErr) {
       return NextResponse.json({ error: `Storage bucket error: ${bucketErr.message}` }, { status: 500 })

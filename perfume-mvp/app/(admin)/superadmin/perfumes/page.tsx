@@ -87,7 +87,7 @@ function ImagePicker({ urls, onChange }: { urls: string[]; onChange: (urls: stri
           {uploading ? 'Uploading…' : '+ Add'}
           <input
             type="file"
-            accept="image/png,image/jpeg,image/webp"
+            accept="image/png,image/jpeg,image/webp,image/avif"
             multiple
             disabled={uploading}
             onChange={onFiles}

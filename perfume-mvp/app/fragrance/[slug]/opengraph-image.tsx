@@ -21,7 +21,7 @@ export default async function Image({ params }: Props) {
   const brand = perfume?.brand ?? 'Cloud PerfumeBD';
   const name = perfume?.name ?? 'Fragrance Directory';
   // The card renderer draws WebP as a blank box, so only PNG/JPEG photos are used.
-  const photo = perfume?.images?.find((u) => !/\.webp(\?|$)/i.test(u)) ?? null;
+  const photo = perfume?.images?.find((u) => !/\.(webp|avif)(\?|$)/i.test(u)) ?? null;
   const accords = (perfume?.accords ?? []).slice(0, 4);
 
   const stats: Stat[] = [];
