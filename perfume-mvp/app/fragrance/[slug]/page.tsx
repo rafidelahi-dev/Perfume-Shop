@@ -21,7 +21,7 @@ import {
   type PerfumeProfile,
 } from '@/lib/queries/perfumes';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 const SITE_URL = 'https://www.cloudperfumebd.com';
 const MIN_REVIEWS_FOR_SCHEMA = 3;

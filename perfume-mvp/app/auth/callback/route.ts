@@ -1,11 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
-
-// Same-site paths only: "next" is user-controlled.
-function safeNext(raw: string | null): string {
-  return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : "/dashboard";
-}
+import { safeNext } from "@/lib/safeNext";
 
 /**
  * OAuth (PKCE) landing point: swaps the ?code for a session cookie on the

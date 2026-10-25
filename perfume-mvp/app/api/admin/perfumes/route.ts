@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import { requireAdmin } from '@/lib/adminAuth'
 
@@ -87,5 +88,6 @@ export async function POST(req: NextRequest) {
   const { data, error } = await supabase.from('perfumes').insert(insertRow).select(SELECT_FIELDS).single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  revalidatePath('/fragrances')
   return NextResponse.json(data, { status: 201 })
 }

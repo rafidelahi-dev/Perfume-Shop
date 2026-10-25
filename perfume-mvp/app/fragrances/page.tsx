@@ -5,7 +5,7 @@ import DirectoryList, { type DirectoryEntry } from './DirectoryList'
 import { createPublicSupabase } from '@/lib/queries/perfumes'
 import { fetchAllRows } from '@/lib/fetchAllRows'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 export const metadata: Metadata = {
   title: 'Fragrance Directory — Prices & Decants in Bangladesh',

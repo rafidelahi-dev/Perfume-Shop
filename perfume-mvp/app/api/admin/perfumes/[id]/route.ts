@@ -62,7 +62,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Public page is ISR-cached for an hour; push edits live right away.
+  // Public pages are ISR-cached for a minute; push edits live right away.
+  revalidatePath('/fragrances')
   for (const s of new Set([before?.slug, data.slug])) if (s) revalidatePath(`/fragrance/${s}`)
   return NextResponse.json(data)
 }
@@ -90,6 +91,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
 
   const { error } = await supabase.from('perfumes').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  revalidatePath('/fragrances')
   if (existing?.slug) revalidatePath(`/fragrance/${existing.slug}`)
   return NextResponse.json({ ok: true })
 }

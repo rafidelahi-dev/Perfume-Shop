@@ -1,16 +1,9 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...nextVitals,
+  ...nextTs,
   {
     ignores: [
       "node_modules/**",
@@ -24,6 +17,10 @@ const eslintConfig = [
       // turn off specific rules you don’t like
       "react/no-unescaped-entities": "off",
       "@next/next/no-page-custom-font": "off",
+
+      // new React Compiler rules from eslint-config-next 16: advice for now, not blockers
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/static-components": "warn",
 
       // optional: if you want to be more chill while finishing MVP
       // "@typescript-eslint/no-explicit-any": "off",
