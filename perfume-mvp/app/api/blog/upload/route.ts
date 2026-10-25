@@ -26,7 +26,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'File too large (max 5MB)' }, { status: 400 })
   }
 
-  const ext = file.name.split('.').pop()
+  const ext = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' }[file.type]
+  // New posts use a client-made id (React useId), saved ones a UUID.
+  if (postId && !/^[A-Za-z0-9_-]{1,64}$/.test(postId)) {
+    return NextResponse.json({ error: 'Invalid postId' }, { status: 400 })
+  }
   const id = postId ?? `tmp-${user.id}`
   const path =
     type === 'cover'

@@ -1,4 +1,5 @@
 // server component
+import { jsonLd } from "@/lib/jsonLd";
 import SellerRatingBadge from "@/components/reviews/SellerRatingBadge";
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
@@ -243,8 +244,8 @@ export default async function ListingDetailPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(productSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbSchema) }} />
       <Header />
       <main className="mx-auto max-w-6xl px-4 pb-12 pt-24">
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-10">

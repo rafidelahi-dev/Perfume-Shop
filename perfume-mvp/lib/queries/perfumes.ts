@@ -31,16 +31,6 @@ export type PerfumeProfile = {
 const PROFILE_COLUMNS =
   "id, slug, name, brand, meta_title, meta_description, top_notes, heart_notes, base_notes, accords, search_terms, gender_lean, house_description, is_verified, authenticity_batch_code, authenticity_packaging_notes, authenticity_other_notes, images";
 
-export async function fetchAllPerfumeSlugs(): Promise<{ slug: string }[]> {
-  const supabase = createPublicSupabase();
-  const { data, error } = await supabase.from("perfumes").select("slug");
-  if (error) {
-    console.error("[perfumes] fetchAllPerfumeSlugs failed:", error.message);
-    return [];
-  }
-  return data ?? [];
-}
-
 export async function fetchPerfumeBySlug(slug: string): Promise<PerfumeProfile | null> {
   const supabase = createPublicSupabase();
   const { data, error } = await supabase

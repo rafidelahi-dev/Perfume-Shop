@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
     // the old authenticated-callable version returned the OTP to the caller.
     const { data: otp, error } = await admin.rpc("admin_send_contact_otp", {
       p_user_id: user.id,
-      p_phone: phone,
+      p_phone: normalized,
     });
 
     if (error) {
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
     const bodyParams = new URLSearchParams({
       api_key: apiKey,
       senderid: senderId,
-      number: phone,
+      number: normalized,
       message: smsBody,
     });
 

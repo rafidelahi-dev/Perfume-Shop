@@ -3,6 +3,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import DirectoryList, { type DirectoryEntry } from './DirectoryList'
 import { createPublicSupabase } from '@/lib/queries/perfumes'
+import { fetchAllRows } from '@/lib/fetchAllRows'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,17 +16,20 @@ export const metadata: Metadata = {
 
 async function fetchDirectoryEntries(): Promise<DirectoryEntry[]> {
   const supabase = createPublicSupabase()
-  const { data, error } = await supabase
-    .from('perfumes')
-    .select('slug, name, brand')
-    .order('brand', { ascending: true })
-    .order('name', { ascending: true })
-
-  if (error) {
-    console.error('[FragranceDirectory] fetch failed:', error.message)
+  try {
+    return await fetchAllRows((from, to) =>
+      supabase
+        .from('perfumes')
+        .select('slug, name, brand')
+        .order('brand', { ascending: true })
+        .order('name', { ascending: true })
+        .order('slug', { ascending: true })
+        .range(from, to)
+    )
+  } catch (e) {
+    console.error('[FragranceDirectory] fetch failed:', e instanceof Error ? e.message : e)
     return []
   }
-  return data ?? []
 }
 
 export default async function FragranceDirectoryPage() {

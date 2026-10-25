@@ -1,4 +1,5 @@
 // app/page.tsx
+import { jsonLd } from "@/lib/jsonLd";
 import type { Metadata } from "next";
 import { createClient } from "@supabase/supabase-js";
 import Footer from "@/components/Footer";
@@ -74,11 +75,11 @@ export default async function Home() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd(websiteSchema) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd(organizationSchema) }}
       />
       <Header />
 

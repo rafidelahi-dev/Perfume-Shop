@@ -1,29 +1,42 @@
 import { MetadataRoute } from "next";
 import { createPublicSupabase } from "@/lib/queries/perfumes";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 
 const SITE_URL = "https://www.cloudperfumebd.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createPublicSupabase();
 
-  const [{ data: profiles }, { data: listings }, { data: blogPosts }, { data: perfumes }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("username, updated_at")
-      .not("username", "is", null),
-    supabase
-      .from("listings")
-      .select("id, updated_at, profiles!inner(username)")
-      .eq("is_hidden", false)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("blog_posts")
-      .select("slug, updated_at")
-      .eq("status", "published")
-      .order("published_at", { ascending: false }),
-    supabase
-      .from("perfumes")
-      .select("slug, updated_at"),
+  const [profiles, listings, blogPosts, perfumes] = await Promise.all([
+    fetchAllRows((from, to) =>
+      supabase
+        .from("profiles")
+        .select("username, updated_at")
+        .not("username", "is", null)
+        .order("id")
+        .range(from, to)
+    ),
+    fetchAllRows((from, to) =>
+      supabase
+        .from("listings")
+        .select("id, updated_at, profiles!inner(username)")
+        .eq("is_hidden", false)
+        .order("created_at", { ascending: false })
+        .order("id")
+        .range(from, to)
+    ),
+    fetchAllRows((from, to) =>
+      supabase
+        .from("blog_posts")
+        .select("slug, updated_at")
+        .eq("status", "published")
+        .order("published_at", { ascending: false })
+        .order("slug")
+        .range(from, to)
+    ),
+    fetchAllRows((from, to) =>
+      supabase.from("perfumes").select("slug, updated_at").order("slug").range(from, to)
+    ),
   ]);
 
   const staticPages: MetadataRoute.Sitemap = [
