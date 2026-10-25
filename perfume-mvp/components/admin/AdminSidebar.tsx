@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Users, List, FileText, Droplet, MessageSquare } from 'lucide-react'
+import { Users, List, FileText, Droplet, MessageSquare, Leaf } from 'lucide-react'
 import { useAdminSellers, useAdminReviews } from '@/lib/queries/admin'
 import { useAdminBlogPosts } from '@/lib/queries/blog'
 import { useAdminPerfumes } from '@/lib/queries/adminPerfumes'
@@ -13,6 +13,7 @@ const NAV = [
   { href: '/superadmin/reviews',  label: 'Reviews',  icon: MessageSquare },
   { href: '/superadmin/blog',     label: 'Blog',     icon: FileText },
   { href: '/superadmin/perfumes', label: 'Perfumes', icon: Droplet },
+  { href: '/superadmin/notes',    label: 'Notes',    icon: Leaf },
 ]
 
 export default function AdminSidebar() {

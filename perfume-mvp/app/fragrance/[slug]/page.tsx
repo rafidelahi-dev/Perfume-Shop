@@ -8,6 +8,8 @@ import BlogPostCard from '@/components/blog/BlogPostCard';
 import SimilarPerfumeCard from '@/components/perfume/SimilarPerfumeCard';
 import DemandRequestButtons from '@/components/perfume/DemandRequestButtons';
 import PerfumeGallery from '@/components/perfume/PerfumeGallery';
+import NotePyramid from '@/components/perfume/NotePyramid';
+import { fetchNoteImages } from '@/lib/queries/notes';
 import { AtAGlance, BestFor } from '@/components/perfume/AtAGlance';
 import { buildGlance } from '@/lib/glance';
 import FeedbackSection from '@/components/reviews/FeedbackSection';
@@ -121,31 +123,19 @@ async function fetchListings(perfume: PerfumeProfile): Promise<FragranceListing[
   );
 }
 
-function NoteTier({ label, notes }: { label: string; notes: string[] }) {
-  return (
-    <div>
-      <p className="text-xs uppercase tracking-widest text-gray-400 mb-1.5">{label}</p>
-      {notes.length > 0 ? (
-        <p className="text-sm text-[#1a1a1a] capitalize">{notes.join(', ')}</p>
-      ) : (
-        <p className="text-sm text-gray-400 italic">Not yet documented</p>
-      )}
-    </div>
-  );
-}
-
 export default async function FragrancePage({ params }: Props) {
   const { slug } = await params;
   const perfume = await fetchPerfumeBySlug(slug);
   if (!perfume) notFound();
 
-  const [listings, relatedPosts, similarPerfumes, aggregate, reviews, trend] = await Promise.all([
+  const [listings, relatedPosts, similarPerfumes, aggregate, reviews, trend, noteImages] = await Promise.all([
     fetchListings(perfume),
     fetchRelatedPosts(perfume),
     fetchSimilarPerfumes(perfume),
     fetchPerfumeReviewAggregate(perfume.id),
     fetchPerfumeReviews(perfume.id),
     fetchPerfumeTrend(perfume.id),
+    fetchNoteImages([...perfume.top_notes, ...perfume.heart_notes, ...perfume.base_notes]),
   ]);
 
   const prices = listings.map(effectivePrice).filter(Number.isFinite);
@@ -279,11 +269,12 @@ export default async function FragrancePage({ params }: Props) {
 
         <section className="mb-12 rounded-2xl border border-black/5 bg-white p-6">
           <h2 className="text-lg font-serif font-semibold text-[#1a1a1a] mb-4">Note Pyramid</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <NoteTier label="Top Notes" notes={perfume.top_notes} />
-            <NoteTier label="Heart Notes" notes={perfume.heart_notes} />
-            <NoteTier label="Base Notes" notes={perfume.base_notes} />
-          </div>
+          <NotePyramid
+            top={perfume.top_notes}
+            heart={perfume.heart_notes}
+            base={perfume.base_notes}
+            images={noteImages}
+          />
         </section>
 
         <div className="mb-12 rounded-2xl border border-black/5 bg-white p-6">

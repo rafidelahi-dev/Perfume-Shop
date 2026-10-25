@@ -391,3 +391,4 @@ with its own diagram + AI-tool quote, following the same format.
 | 2026-10-20 | Google login fixed via /auth/callback code exchange | Section 8 |
 | 2026-10-21 | New "Day or night?" poll (sun-to-moon spectrum, 5 options) on fragrance pages; password strength checklist on signup/reset | Section 6 |
 | 2026-10-20 | /signup is Google or phone/email + password verified by OTP; single-field login detects email vs phone; fragrance polls/ratings restyled (animated bars, completion meter, join CTA) | Section 8 |
+| 2026-10-26 | Note pyramid now stacked (top, middle, base). New `notes` table (auto-filled by trigger from perfume notes) + /superadmin/notes to upload one image per note | Section 1 (Perfumes branch) |
