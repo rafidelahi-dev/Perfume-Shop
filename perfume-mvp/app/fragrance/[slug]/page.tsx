@@ -6,6 +6,9 @@ import Footer from '@/components/Footer';
 import BlogPostCard from '@/components/blog/BlogPostCard';
 import SimilarPerfumeCard from '@/components/perfume/SimilarPerfumeCard';
 import DemandRequestButtons from '@/components/perfume/DemandRequestButtons';
+import PerfumeGallery from '@/components/perfume/PerfumeGallery';
+import { AtAGlance, BestFor } from '@/components/perfume/AtAGlance';
+import { buildGlance } from '@/lib/glance';
 import FeedbackSection from '@/components/reviews/FeedbackSection';
 import {
   createPublicSupabase,
@@ -14,6 +17,7 @@ import {
   fetchSimilarPerfumes,
   fetchPerfumeReviewAggregate,
   fetchPerfumeReviews,
+  fetchPerfumeTrend,
   type PerfumeProfile,
 } from '@/lib/queries/perfumes';
 
@@ -140,17 +144,19 @@ export default async function FragrancePage({ params }: Props) {
   const perfume = await fetchPerfumeBySlug(slug);
   if (!perfume) notFound();
 
-  const [listings, relatedPosts, similarPerfumes, aggregate, reviews] = await Promise.all([
+  const [listings, relatedPosts, similarPerfumes, aggregate, reviews, trend] = await Promise.all([
     fetchListings(perfume),
     fetchRelatedPosts(perfume),
     fetchSimilarPerfumes(perfume),
     fetchPerfumeReviewAggregate(perfume.id),
     fetchPerfumeReviews(perfume.id),
+    fetchPerfumeTrend(perfume.id),
   ]);
 
   const prices = listings.map(effectivePrice).filter(Number.isFinite);
   const lowPrice = prices.length > 0 ? Math.min(...prices) : null;
   const highPrice = prices.length > 0 ? Math.max(...prices) : null;
+  const glance = buildGlance(aggregate, lowPrice, trend);
 
   const productSchema = {
     '@context': 'https://schema.org',
@@ -158,6 +164,7 @@ export default async function FragrancePage({ params }: Props) {
     name: perfume.name,
     brand: { '@type': 'Brand', name: perfume.brand },
     description: perfume.meta_description ?? undefined,
+    ...(perfume.images && perfume.images.length > 0 && { image: perfume.images }),
     ...(listings.length > 0 && {
       offers: {
         '@type': 'AggregateOffer',
@@ -268,6 +275,13 @@ export default async function FragrancePage({ params }: Props) {
           )}
         </div>
 
+        <div className="mb-8 grid items-start gap-6 md:grid-cols-2">
+          <PerfumeGallery images={perfume.images ?? []} name={perfume.name} />
+          <AtAGlance glance={glance} accords={perfume.accords} />
+        </div>
+
+        <BestFor glance={glance} />
+
         <section className="mb-12 rounded-2xl border border-black/5 bg-white p-6">
           <h2 className="text-lg font-serif font-semibold text-[#1a1a1a] mb-4">Note Pyramid</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -286,34 +300,6 @@ export default async function FragrancePage({ params }: Props) {
             initialReviews={reviews}
           />
         </div>
-
-        {(perfume.authenticity_batch_code || perfume.authenticity_packaging_notes || perfume.authenticity_other_notes) && (
-          <section className="mb-8 rounded-2xl border border-black/5 bg-white p-6">
-            <h2 className="text-lg font-serif font-semibold text-[#1a1a1a] mb-4">
-              How to Spot a Fake {perfume.name}
-            </h2>
-            <div className="space-y-3 text-sm text-gray-600">
-              {perfume.authenticity_batch_code && (
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Batch Code</p>
-                  <p>{perfume.authenticity_batch_code}</p>
-                </div>
-              )}
-              {perfume.authenticity_packaging_notes && (
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Cap &amp; Box Print</p>
-                  <p>{perfume.authenticity_packaging_notes}</p>
-                </div>
-              )}
-              {perfume.authenticity_other_notes && (
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Other Signs</p>
-                  <p>{perfume.authenticity_other_notes}</p>
-                </div>
-              )}
-            </div>
-          </section>
-        )}
 
         {listings.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
@@ -351,6 +337,34 @@ export default async function FragrancePage({ params }: Props) {
               );
             })}
           </ul>
+        )}
+
+        {(perfume.authenticity_batch_code || perfume.authenticity_packaging_notes || perfume.authenticity_other_notes) && (
+          <section className="mt-12 rounded-2xl border border-black/5 bg-white p-6">
+            <h2 className="text-lg font-serif font-semibold text-[#1a1a1a] mb-4">
+              How to Spot a Fake {perfume.name}
+            </h2>
+            <div className="space-y-3 text-sm text-gray-600">
+              {perfume.authenticity_batch_code && (
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Batch Code</p>
+                  <p>{perfume.authenticity_batch_code}</p>
+                </div>
+              )}
+              {perfume.authenticity_packaging_notes && (
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Cap &amp; Box Print</p>
+                  <p>{perfume.authenticity_packaging_notes}</p>
+                </div>
+              )}
+              {perfume.authenticity_other_notes && (
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Other Signs</p>
+                  <p>{perfume.authenticity_other_notes}</p>
+                </div>
+              )}
+            </div>
+          </section>
         )}
 
         {similarPerfumes.length > 0 && (

@@ -25,10 +25,11 @@ export type PerfumeProfile = {
   authenticity_batch_code: string | null;
   authenticity_packaging_notes: string | null;
   authenticity_other_notes: string | null;
+  images: string[] | null;
 };
 
 const PROFILE_COLUMNS =
-  "id, slug, name, brand, meta_title, meta_description, top_notes, heart_notes, base_notes, accords, search_terms, gender_lean, house_description, is_verified, authenticity_batch_code, authenticity_packaging_notes, authenticity_other_notes";
+  "id, slug, name, brand, meta_title, meta_description, top_notes, heart_notes, base_notes, accords, search_terms, gender_lean, house_description, is_verified, authenticity_batch_code, authenticity_packaging_notes, authenticity_other_notes, images";
 
 export async function fetchAllPerfumeSlugs(): Promise<{ slug: string }[]> {
   const supabase = createPublicSupabase();
@@ -140,6 +141,18 @@ export async function fetchPerfumeReviews(perfumeId: string): Promise<PublicRevi
     return [];
   }
   return (data ?? []) as PublicReview[];
+}
+
+/** 0-5 "flames" of recent activity (see supabase/perfume-trending.sql). */
+export async function fetchPerfumeTrend(perfumeId: string): Promise<number> {
+  const { data, error } = await createPublicSupabase().rpc("get_perfume_trend", {
+    p_perfume_id: perfumeId,
+  });
+  if (error) {
+    console.error("[perfumes] fetchPerfumeTrend failed:", error.message);
+    return 0;
+  }
+  return Number(data ?? 0);
 }
 
 export async function submitDemandRequest(
