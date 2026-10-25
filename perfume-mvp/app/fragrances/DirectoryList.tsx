@@ -1,10 +1,48 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Search, X } from 'lucide-react'
 
-export type DirectoryEntry = { slug: string; name: string; brand: string }
+export type DirectoryEntry = { slug: string; name: string; brand: string; image: string | null }
+
+/** Fades and lifts its child in the first time it scrolls into view. */
+function Reveal({ children, delay = 0, as: Tag = 'li' }: { children: React.ReactNode; delay?: number; as?: 'li' | 'section' }) {
+  const ref = useRef<HTMLElement>(null)
+  const [shown, setShown] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    if (typeof IntersectionObserver === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setShown(true)
+      return
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShown(true)
+          io.disconnect()
+        }
+      },
+      { rootMargin: '0px 0px -8% 0px' },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
+  return (
+    <Tag
+      ref={ref as never}
+      style={{ transitionDelay: shown ? `${delay}ms` : '0ms' }}
+      className={`transition-[opacity,transform] duration-500 ease-out ${
+        shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
+      }`}
+    >
+      {children}
+    </Tag>
+  )
+}
 
 export default function DirectoryList({ entries }: { entries: DirectoryEntry[] }) {
   const [q, setQ] = useState('')
@@ -65,23 +103,35 @@ export default function DirectoryList({ entries }: { entries: DirectoryEntry[] }
       ) : (
         <div className="space-y-10">
           {brands.map((brand) => (
-            <section key={brand}>
+            <Reveal as="section" key={brand}>
               <h2 className="text-xl font-serif font-semibold text-[#1a1a1a] mb-4 border-b border-black/5 pb-2">
                 {brand}
               </h2>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2">
-                {byBrand.get(brand)!.map((entry) => (
-                  <li key={entry.slug}>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
+                {byBrand.get(brand)!.map((entry, i) => (
+                  <Reveal key={entry.slug} delay={(i % 4) * 60}>
                     <Link
                       href={`/fragrance/${entry.slug}`}
-                      className="text-sm text-gray-600 hover:text-[#d4af37] transition-colors"
+                      className="group flex items-center gap-3 text-sm text-gray-600 hover:text-[#d4af37] transition-colors"
                     >
-                      {entry.name}
+                      <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-lg bg-white ring-1 ring-black/5">
+                        {entry.image && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={entry.image}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            className="h-full w-full object-contain p-0.5 transition-transform group-hover:scale-105"
+                          />
+                        )}
+                      </span>
+                      <span className="leading-snug">{entry.name}</span>
                     </Link>
-                  </li>
+                  </Reveal>
                 ))}
               </ul>
-            </section>
+            </Reveal>
           ))}
         </div>
       )}

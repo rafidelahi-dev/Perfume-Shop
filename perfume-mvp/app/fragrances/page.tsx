@@ -17,15 +17,16 @@ export const metadata: Metadata = {
 async function fetchDirectoryEntries(): Promise<DirectoryEntry[]> {
   const supabase = createPublicSupabase()
   try {
-    return await fetchAllRows((from, to) =>
+    const rows = await fetchAllRows((from, to) =>
       supabase
         .from('perfumes')
-        .select('slug, name, brand')
+        .select('slug, name, brand, images')
         .order('brand', { ascending: true })
         .order('name', { ascending: true })
         .order('slug', { ascending: true })
         .range(from, to)
     )
+    return rows.map(({ images, ...rest }) => ({ ...rest, image: images?.[0] ?? null }))
   } catch (e) {
     console.error('[FragranceDirectory] fetch failed:', e instanceof Error ? e.message : e)
     return []
@@ -41,7 +42,7 @@ export default async function FragranceDirectoryPage() {
     <>
       <Header />
       <main className="min-h-screen bg-[#fdfbf7] pt-28 pb-20 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-7xl">
           <div className="mb-12">
             <p className="text-xs uppercase tracking-widest text-[#d4af37] font-semibold mb-2">
               Directory
