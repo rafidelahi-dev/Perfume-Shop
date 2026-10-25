@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Search, Plus, ChevronDown, ChevronUp } from 'lucide-react'
+import { useEffect, useRef, useState, type MutableRefObject } from 'react'
+import { Search, Plus, ChevronDown, ChevronUp, Maximize2, Minimize2, ImageOff, BadgeCheck, Trash2 } from 'lucide-react'
 import {
   useAdminPerfumes,
   useAdminUpdatePerfume,
@@ -67,7 +67,7 @@ function ImagePicker({ urls, onChange }: { urls: string[]; onChange: (urls: stri
 
   return (
     <div className="mb-3">
-      <p className="text-xs text-gray-500 mb-1">Images (PNG/JPEG/WebP, photos are auto-resized; first is the main image)</p>
+      <p className="text-xs text-gray-500 mb-1">Images (PNG/JPEG/WebP/AVIF, photos are auto-resized; first is the main image)</p>
       <div className="flex flex-wrap gap-2 items-center">
         {urls.map((u, i) => (
           <div key={u} className="relative w-20 h-20 rounded-lg border border-gray-200 overflow-hidden">
@@ -220,10 +220,131 @@ function NewPerfumeForm() {
   )
 }
 
-function PerfumeRow({ perfume }: { perfume: AdminPerfume }) {
+type Check = { label: string; filled: boolean }
+type Section = { title: string; checks: Check[] }
+
+const has = (v: string | null | undefined) => !!v && v.trim().length > 0
+const hasAny = (v: string[] | null | undefined) => (v ?? []).length > 0
+
+/** The editable fields besides image, brand, name and verified, grouped like the form. */
+function sectionsOf(p: AdminPerfume): Section[] {
+  return [
+    {
+      title: 'Notes',
+      checks: [
+        { label: 'Top notes', filled: hasAny(p.top_notes) },
+        { label: 'Heart notes', filled: hasAny(p.heart_notes) },
+        { label: 'Base notes', filled: hasAny(p.base_notes) },
+        { label: 'Accords', filled: hasAny(p.accords) },
+        { label: 'House description', filled: has(p.house_description) },
+      ],
+    },
+    {
+      title: 'SEO',
+      checks: [
+        { label: 'Meta title', filled: has(p.meta_title) },
+        { label: 'Meta description', filled: has(p.meta_description) },
+        { label: 'Search terms', filled: hasAny(p.search_terms) },
+      ],
+    },
+    {
+      title: 'Fake check',
+      checks: [
+        { label: 'Batch code', filled: has(p.authenticity_batch_code) },
+        { label: 'Cap / box notes', filled: has(p.authenticity_packaging_notes) },
+        { label: 'Other notes', filled: has(p.authenticity_other_notes) },
+      ],
+    },
+  ]
+}
+
+function VerifiedPill({ verified }: { verified: boolean }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+        verified ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
+      }`}
+    >
+      {verified && <BadgeCheck className="w-3 h-3" aria-hidden />}
+      {verified ? 'Verified' : 'Unverified'}
+    </span>
+  )
+}
+
+function CompletionRow({ section }: { section: Section }) {
+  const done = section.checks.filter((c) => c.filled).length
+  return (
+    <div className="flex items-center gap-2">
+      <span className="w-16 shrink-0 text-[11px] text-gray-500 truncate">{section.title}</span>
+      <span className="flex items-center gap-1">
+        {section.checks.map((c) => (
+          <span
+            key={c.label}
+            title={`${c.label}: ${c.filled ? 'filled' : 'empty'}`}
+            className={`block w-2.5 h-2.5 rounded-full ${c.filled ? 'bg-emerald-600' : 'bg-red-500'}`}
+          />
+        ))}
+      </span>
+      <span className="ml-auto text-[11px] tabular-nums text-gray-500">
+        {done}/{section.checks.length}
+      </span>
+    </div>
+  )
+}
+
+function PerfumeCard({ perfume, onOpen }: { perfume: AdminPerfume; onOpen: () => void }) {
+  const cover = perfume.images?.[0]
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-expanded={false}
+      aria-label={`Expand ${perfume.brand} ${perfume.name}`}
+      className="group text-left bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-[#d4af37] hover:shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d4af37]"
+    >
+      <div className="relative aspect-[4/3] bg-gray-50">
+        {cover ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={cover} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-contain p-2" />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-gray-400">
+            <ImageOff className="w-5 h-5" aria-hidden />
+            <span className="text-[11px]">No image</span>
+          </div>
+        )}
+        <span className="absolute top-2 left-2">
+          <VerifiedPill verified={perfume.is_verified} />
+        </span>
+        <span className="absolute top-1.5 right-1.5 grid place-items-center w-8 h-8 rounded-full bg-white/90 border border-gray-200 text-gray-500 group-hover:text-[#8a6d0b]">
+          <Maximize2 className="w-3.5 h-3.5" aria-hidden />
+        </span>
+      </div>
+      <div className="p-3">
+        <p className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2 min-h-[2.5rem]">{perfume.name}</p>
+        <p className="text-xs text-gray-500 truncate mb-2.5">{perfume.brand}</p>
+        <div className="space-y-1.5">
+          {sectionsOf(perfume).map((sec) => (
+            <CompletionRow key={sec.title} section={sec} />
+          ))}
+        </div>
+      </div>
+    </button>
+  )
+}
+
+function PerfumeEditor({
+  perfume,
+  dirtyRef,
+  onClose,
+}: {
+  perfume: AdminPerfume
+  dirtyRef: MutableRefObject<boolean>
+  onClose: () => void
+}) {
   const update = useAdminUpdatePerfume()
   const deletePerfume = useAdminDeletePerfume()
   const [showDelete, setShowDelete] = useState(false)
+  const ref = useRef<HTMLElement>(null)
 
   const [slug, setSlug] = useState(perfume.slug)
   const [name, setName] = useState(perfume.name)
@@ -240,6 +361,35 @@ function PerfumeRow({ perfume }: { perfume: AdminPerfume }) {
   const [packagingNotes, setPackagingNotes] = useState(perfume.authenticity_packaging_notes ?? '')
   const [otherNotes, setOtherNotes] = useState(perfume.authenticity_other_notes ?? '')
   const [images, setImages] = useState<string[]>(perfume.images ?? [])
+
+  const dirty =
+    slug !== perfume.slug ||
+    name !== perfume.name ||
+    brand !== perfume.brand ||
+    metaTitle !== (perfume.meta_title ?? '') ||
+    metaDescription !== (perfume.meta_description ?? '') ||
+    searchTerms !== arrayToText(perfume.search_terms) ||
+    topNotes !== arrayToText(perfume.top_notes) ||
+    heartNotes !== arrayToText(perfume.heart_notes) ||
+    baseNotes !== arrayToText(perfume.base_notes) ||
+    accords !== arrayToText(perfume.accords) ||
+    description !== (perfume.house_description ?? '') ||
+    batchCode !== (perfume.authenticity_batch_code ?? '') ||
+    packagingNotes !== (perfume.authenticity_packaging_notes ?? '') ||
+    otherNotes !== (perfume.authenticity_other_notes ?? '') ||
+    images.join('|') !== (perfume.images ?? []).join('|')
+
+  useEffect(() => {
+    dirtyRef.current = dirty
+    return () => {
+      dirtyRef.current = false
+    }
+  }, [dirty, dirtyRef])
+
+  useEffect(() => {
+    ref.current?.scrollIntoView({ block: 'start' })
+    ref.current?.focus({ preventScroll: true })
+  }, [])
 
   function save(extra: Partial<{ is_verified: boolean }> = {}) {
     update.mutate({
@@ -263,174 +413,110 @@ function PerfumeRow({ perfume }: { perfume: AdminPerfume }) {
     })
   }
 
+  const sectionTitle = 'text-xs font-semibold text-gray-500 mb-2'
+
   return (
-    <div className="border-b border-gray-100 px-6 py-4">
-      <div className="flex items-center justify-between mb-3">
-        <span
-          className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-            perfume.is_verified ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
-          }`}
-        >
-          {perfume.is_verified ? 'Verified' : 'Unverified'}
-        </span>
+    <section
+      ref={ref}
+      tabIndex={-1}
+      aria-label={`Editing ${perfume.brand} ${perfume.name}`}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape' && !showDelete) onClose()
+      }}
+      className="col-span-full scroll-mt-4 bg-white rounded-xl border border-[#d4af37] shadow-sm outline-none"
+    >
+      <div className="flex items-center justify-between gap-3 px-5 py-3 border-b border-gray-100">
+        <div className="flex items-center gap-3 min-w-0">
+          <h2 className="text-base font-semibold text-gray-900 truncate">
+            {perfume.name} <span className="font-normal text-gray-500">· {perfume.brand}</span>
+          </h2>
+          <VerifiedPill verified={perfume.is_verified} />
+          {dirty && <span className="text-xs text-amber-700">Unsaved changes</span>}
+        </div>
         <button
-          onClick={() => setShowDelete(true)}
-          className="px-2.5 py-1 text-xs font-medium bg-red-100 hover:bg-red-200 text-red-800 rounded-lg transition-colors"
+          type="button"
+          onClick={onClose}
+          aria-expanded
+          className="inline-flex items-center gap-1.5 shrink-0 px-3 py-2.5 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg"
         >
-          Delete
+          <Minimize2 className="w-3.5 h-3.5" aria-hidden />
+          Collapse
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-        <label className="text-xs text-gray-500">
-          Brand
-          <input
-            value={brand}
-            onChange={(e) => setBrand(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm font-medium"
-          />
-        </label>
-        <label className="text-xs text-gray-500">
-          Name
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm font-medium"
-          />
-        </label>
-        <label className="text-xs text-gray-500">
-          Slug
-          <input
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
-          />
-        </label>
+      <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]">
+        <div>
+          <ImagePicker urls={images} onChange={setImages} />
+        </div>
+
+        <div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            <Field label="Brand" value={brand} onChange={setBrand} />
+            <Field label="Name" value={name} onChange={setName} />
+            <Field label="Slug" value={slug} onChange={setSlug} />
+          </div>
+
+          <p className={sectionTitle}>Notes and description</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <Field label="Top notes" value={topNotes} onChange={setTopNotes} />
+            <Field label="Heart notes" value={heartNotes} onChange={setHeartNotes} />
+            <Field label="Base notes" value={baseNotes} onChange={setBaseNotes} />
+            <Field label="Accords" value={accords} onChange={setAccords} />
+          </div>
+          <div className="mb-4">
+            <Field label="House description" value={description} onChange={setDescription} rows={2} />
+          </div>
+
+          <p className={sectionTitle}>SEO</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <Field label="Meta title" value={metaTitle} onChange={setMetaTitle} />
+            <Field label="Search terms (comma-separated)" value={searchTerms} onChange={setSearchTerms} />
+          </div>
+          <div className="mb-4">
+            <Field label="Meta description" value={metaDescription} onChange={setMetaDescription} rows={2} />
+          </div>
+
+          <p className={sectionTitle}>Authenticity guide (fake-spotting)</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <Field label="Batch code" value={batchCode} onChange={setBatchCode} placeholder="e.g. where to find it, format" />
+            <Field
+              label="Cap / box print notes"
+              value={packagingNotes}
+              onChange={setPackagingNotes}
+              placeholder="e.g. cap texture, box print quality"
+            />
+          </div>
+          <Field label="Other authenticity notes" value={otherNotes} onChange={setOtherNotes} rows={2} />
+        </div>
       </div>
 
-      <ImagePicker urls={images} onChange={setImages} />
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-        <label className="text-xs text-gray-500">
-          Top notes
-          <input
-            value={topNotes}
-            onChange={(e) => setTopNotes(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
-          />
-        </label>
-        <label className="text-xs text-gray-500">
-          Heart notes
-          <input
-            value={heartNotes}
-            onChange={(e) => setHeartNotes(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
-          />
-        </label>
-        <label className="text-xs text-gray-500">
-          Base notes
-          <input
-            value={baseNotes}
-            onChange={(e) => setBaseNotes(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
-          />
-        </label>
-        <label className="text-xs text-gray-500">
-          Accords
-          <input
-            value={accords}
-            onChange={(e) => setAccords(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
-          />
-        </label>
-      </div>
-      <label className="text-xs text-gray-500 block mb-3">
-        House description
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={2}
-          className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
-        />
-      </label>
-
-      <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">SEO</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-        <label className="text-xs text-gray-500">
-          Meta title
-          <input
-            value={metaTitle}
-            onChange={(e) => setMetaTitle(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
-          />
-        </label>
-        <label className="text-xs text-gray-500">
-          Search terms (comma-separated)
-          <input
-            value={searchTerms}
-            onChange={(e) => setSearchTerms(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
-          />
-        </label>
-      </div>
-      <label className="text-xs text-gray-500 block mb-3">
-        Meta description
-        <textarea
-          value={metaDescription}
-          onChange={(e) => setMetaDescription(e.target.value)}
-          rows={2}
-          className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
-        />
-      </label>
-
-      <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">
-        Authenticity guide (fake-spotting)
-      </p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-        <label className="text-xs text-gray-500">
-          Batch code
-          <input
-            value={batchCode}
-            onChange={(e) => setBatchCode(e.target.value)}
-            placeholder="e.g. where to find it, format"
-            className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
-          />
-        </label>
-        <label className="text-xs text-gray-500">
-          Cap / box print notes
-          <input
-            value={packagingNotes}
-            onChange={(e) => setPackagingNotes(e.target.value)}
-            placeholder="e.g. cap texture, box print quality"
-            className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
-          />
-        </label>
-      </div>
-      <label className="text-xs text-gray-500 block mb-3">
-        Other authenticity notes
-        <textarea
-          value={otherNotes}
-          onChange={(e) => setOtherNotes(e.target.value)}
-          rows={2}
-          className="mt-1 w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm"
-        />
-      </label>
-
-      <div className="flex gap-2">
+      <div className="flex flex-wrap items-center gap-2 px-5 py-3 border-t border-gray-100">
         <button
+          type="button"
           onClick={() => save()}
-          className="px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg"
+          disabled={update.isPending}
+          className="px-4 py-2 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg disabled:opacity-50"
         >
-          Save
+          {update.isPending ? 'Saving…' : 'Save'}
         </button>
         {!perfume.is_verified && (
           <button
+            type="button"
             onClick={() => save({ is_verified: true })}
-            className="px-3 py-1.5 text-xs font-medium bg-[#d4af37] hover:bg-[#c4a030] text-[#1a1a1a] rounded-lg"
+            disabled={update.isPending}
+            className="px-4 py-2 text-xs font-medium bg-[#d4af37] hover:bg-[#c4a030] text-[#1a1a1a] rounded-lg disabled:opacity-50"
           >
             Save & Verify
           </button>
         )}
+        <button
+          type="button"
+          onClick={() => setShowDelete(true)}
+          className="ml-auto inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium bg-red-100 hover:bg-red-200 text-red-800 rounded-lg transition-colors"
+        >
+          <Trash2 className="w-3.5 h-3.5" aria-hidden />
+          Delete
+        </button>
       </div>
 
       {showDelete && (
@@ -438,17 +524,27 @@ function PerfumeRow({ perfume }: { perfume: AdminPerfume }) {
           title="Delete perfume"
           description={`This permanently deletes "${perfume.name}" and its price history and demand-request signals. This cannot be undone. If any seller listings still reference it, deletion will be blocked.`}
           confirmLabel="Delete perfume"
-          onConfirm={() => deletePerfume.mutate(perfume.id, { onSuccess: () => setShowDelete(false) })}
+          onConfirm={() =>
+            deletePerfume.mutate(perfume.id, {
+              onSuccess: () => {
+                setShowDelete(false)
+                dirtyRef.current = false
+                onClose()
+              },
+            })
+          }
           onClose={() => setShowDelete(false)}
         />
       )}
-    </div>
+    </section>
   )
 }
 
 export default function AdminPerfumesPage() {
   const { data: perfumes = [], isLoading } = useAdminPerfumes()
   const [search, setSearch] = useState('')
+  const [openId, setOpenId] = useState<string | null>(null)
+  const dirtyRef = useRef(false)
 
   const filtered = perfumes.filter((p) => {
     if (!search) return true
@@ -456,10 +552,21 @@ export default function AdminPerfumesPage() {
     return p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q)
   })
 
+  function openCard(id: string | null) {
+    if (openId !== null && dirtyRef.current && !window.confirm('Discard unsaved changes?')) return
+    dirtyRef.current = false
+    setOpenId(id)
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Perfumes</h1>
+        {!isLoading && (
+          <p className="text-sm text-gray-500 tabular-nums">
+            {filtered.length} of {perfumes.length}
+          </p>
+        )}
       </div>
 
       <NewPerfumeForm />
@@ -476,11 +583,19 @@ export default function AdminPerfumesPage() {
 
       {isLoading && <div className="text-center py-20 text-gray-400">Loading…</div>}
 
+      {!isLoading && filtered.length === 0 && (
+        <div className="text-center py-20 text-gray-400">No perfumes match “{search}”.</div>
+      )}
+
       {!isLoading && (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          {filtered.map((perfume) => (
-            <PerfumeRow key={perfume.id} perfume={perfume} />
-          ))}
+        <div className="grid grid-flow-dense gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+          {filtered.map((perfume) =>
+            perfume.id === openId ? (
+              <PerfumeEditor key={perfume.id} perfume={perfume} dirtyRef={dirtyRef} onClose={() => openCard(null)} />
+            ) : (
+              <PerfumeCard key={perfume.id} perfume={perfume} onOpen={() => openCard(perfume.id)} />
+            ),
+          )}
         </div>
       )}
     </div>

@@ -63,7 +63,9 @@ flowchart TD
     Demand --> Perfumes{Catalog gap?\nnew perfume needed,\nor existing page\nneeds real content?}
 
     Perfumes -- Need new page --> PerfumeCreate["/superadmin/perfumes →\nAdd new perfume\n(brand, name required;\nslug auto-generated)"]
-    Perfumes -- Fix existing page --> PerfumeEdit[Edit notes, accords,\nhouse description,\nSEO meta fields]
+    Perfumes -- Fix existing page --> PerfumeEdit[Card grid: red/green dots show
+what is missing → expand card →
+Edit notes, accords,\nhouse description,\nSEO meta fields]
     Perfumes -- Add fake-spotting guide --> PerfumeVerify[Fill batch code /\npackaging notes →\nSave & Verify]
     Perfumes -- Duplicate/bad entry --> PerfumeDelete{Any listings\nreference it?}
     PerfumeDelete -- Yes --> PerfumeBlocked[Delete blocked —\nreassign/remove listings first]
