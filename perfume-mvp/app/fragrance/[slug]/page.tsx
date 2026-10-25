@@ -12,7 +12,6 @@ import { buildGlance } from '@/lib/glance';
 import FeedbackSection from '@/components/reviews/FeedbackSection';
 import {
   createPublicSupabase,
-  fetchAllPerfumeSlugs,
   fetchPerfumeBySlug,
   fetchSimilarPerfumes,
   fetchPerfumeReviewAggregate,
@@ -21,17 +20,12 @@ import {
   type PerfumeProfile,
 } from '@/lib/queries/perfumes';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 const SITE_URL = 'https://www.cloudperfumebd.com';
 const MIN_REVIEWS_FOR_SCHEMA = 3;
 
 type Props = { params: Promise<{ slug: string }> };
-
-export async function generateStaticParams() {
-  const slugs = await fetchAllPerfumeSlugs();
-  return slugs.map((e) => ({ slug: e.slug }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;

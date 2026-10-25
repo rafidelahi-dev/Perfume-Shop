@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { compressImage } from '@/lib/compressImage'
 import { toast } from 'sonner'
 import { qk } from './key'
 
@@ -68,7 +69,8 @@ export type AdminPerfumeCreate = Pick<AdminPerfume, 'name' | 'brand'> &
 
 export async function uploadAdminPerfumeImages(files: File[]): Promise<string[]> {
   const urls: string[] = []
-  for (const file of files) {
+  for (const original of files) {
+    const file = await compressImage(original)
     const fd = new FormData()
     fd.append('file', file)
     const res = await fetch('/api/admin/perfumes/images', { method: 'POST', body: fd })
@@ -121,7 +123,10 @@ export function useAdminUpdatePerfume() {
         if (!r.ok) throw new Error((await r.json()).error ?? 'Failed')
         return r.json() as Promise<AdminPerfume>
       }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: qk.adminPerfumes() }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.adminPerfumes() })
+      toast.success('Saved')
+    },
     onError: (e: Error) => toast.error(e.message),
   })
 }

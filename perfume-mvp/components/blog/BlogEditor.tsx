@@ -1,6 +1,7 @@
 'use client'
 
 import { useEditor, EditorContent } from '@tiptap/react'
+import { compressImage } from '@/lib/compressImage'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
@@ -47,7 +48,8 @@ export default function BlogEditor({ content, onChange, postId }: Props) {
 
   if (!editor) return null
 
-  async function uploadImage(file: File) {
+  async function uploadImage(original: File) {
+    const file = await compressImage(original)
     const fd = new FormData()
     fd.append('file', file)
     fd.append('postId', postId)

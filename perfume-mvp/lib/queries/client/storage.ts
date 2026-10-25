@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
+import { compressImage } from "@/lib/compressImage";
 import { getSessionUserId } from "@/lib/queries/auth";
 
 export async function uploadToBucket(
@@ -7,7 +8,8 @@ export async function uploadToBucket(
 ): Promise<string[]> {
   const userId = await getSessionUserId();
   const urls: string[] = [];
-  for (const file of files) {
+  for (const original of files) {
+    const file = await compressImage(original);
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     const path = `${userId}/${Date.now()}-${safeName}`;
     const { error } = await supabase.storage

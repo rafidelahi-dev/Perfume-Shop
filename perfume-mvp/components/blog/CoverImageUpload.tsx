@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { compressImage } from '@/lib/compressImage'
 import { useRef, useState } from 'react'
 import { ImageIcon, X } from 'lucide-react'
 import { toast } from 'sonner'
@@ -15,8 +16,9 @@ export default function CoverImageUpload({ value, onChange, postId }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
 
-  async function upload(file: File) {
+  async function upload(original: File) {
     setUploading(true)
+    const file = await compressImage(original)
     const fd = new FormData()
     fd.append('file', file)
     fd.append('postId', postId)

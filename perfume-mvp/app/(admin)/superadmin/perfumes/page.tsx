@@ -67,7 +67,7 @@ function ImagePicker({ urls, onChange }: { urls: string[]; onChange: (urls: stri
 
   return (
     <div className="mb-3">
-      <p className="text-xs text-gray-500 mb-1">Images (PNG/JPEG/WebP, max 4MB each; first is the main image; the share card only uses PNG/JPEG)</p>
+      <p className="text-xs text-gray-500 mb-1">Images (PNG/JPEG/WebP, photos are auto-resized; first is the main image)</p>
       <div className="flex flex-wrap gap-2 items-center">
         {urls.map((u, i) => (
           <div key={u} className="relative w-20 h-20 rounded-lg border border-gray-200 overflow-hidden">

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import { requireAdmin } from '@/lib/adminAuth'
 
@@ -50,6 +51,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (authenticity_other_notes !== undefined) updates.authenticity_other_notes = authenticity_other_notes
   if (Array.isArray(images)) updates.images = images.filter((u: unknown) => typeof u === 'string')
 
+  const { data: before } = await supabase.from('perfumes').select('slug').eq('id', id).maybeSingle()
+
   const { data, error } = await supabase
     .from('perfumes')
     .update(updates)
@@ -58,6 +61,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Public page is ISR-cached for an hour; push edits live right away.
+  for (const s of new Set([before?.slug, data.slug])) if (s) revalidatePath(`/fragrance/${s}`)
   return NextResponse.json(data)
 }
 
@@ -67,6 +73,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
 
   const { id } = await params
   const supabase = createAdminClient()
+  const { data: existing } = await supabase.from('perfumes').select('slug').eq('id', id).maybeSingle()
 
   const { count, error: listingsError } = await supabase
     .from('listings')
@@ -83,5 +90,6 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
 
   const { error } = await supabase.from('perfumes').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (existing?.slug) revalidatePath(`/fragrance/${existing.slug}`)
   return NextResponse.json({ ok: true })
 }
