@@ -5,7 +5,7 @@ import { rateLimit, clientIp as ipOf, tooManyRequests } from "@/lib/rateLimit";
 export async function POST(req: NextRequest) {
   // Fired right after signup, before a server-readable session exists, so this
   // can't require login. Cap volume and input shape instead.
-  if (!rateLimit(`capi:${ipOf(req)}`, 5, 60 * 60 * 1000)) return tooManyRequests();
+  if (!(await rateLimit(`capi:${ipOf(req)}`, 5, 60 * 60 * 1000))) return tooManyRequests();
 
   const body = await req.json().catch(() => null);
   const { eventId, email, phone, sourceUrl } = body ?? {};

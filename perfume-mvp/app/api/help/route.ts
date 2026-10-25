@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!rateLimit(`help:${clientIp(req)}`, 5, 60 * 60 * 1000)) {
+  if (!(await rateLimit(`help:${clientIp(req)}`, 5, 60 * 60 * 1000))) {
     return tooManyRequests("Too many messages sent, please try again later.");
   }
 

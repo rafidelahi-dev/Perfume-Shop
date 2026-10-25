@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!rateLimit(`otp-confirm:${user.id}`, 10, 10 * 60 * 1000)) {
+    if (!(await rateLimit(`otp-confirm:${user.id}`, 10, 10 * 60 * 1000))) {
       return tooManyRequests();
     }
 

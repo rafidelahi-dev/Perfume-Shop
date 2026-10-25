@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   const { user, response } = await requireUser()
   if (response) return response
 
-  if (!rateLimit(`upload:${user.id}`, 30, 60 * 60 * 1000)) {
+  if (!(await rateLimit(`upload:${user.id}`, 30, 60 * 60 * 1000))) {
     return tooManyRequests('Upload limit reached, try again in an hour.')
   }
 

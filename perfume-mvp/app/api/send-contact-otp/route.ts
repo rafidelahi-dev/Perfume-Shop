@@ -32,8 +32,8 @@ export async function POST(req: NextRequest) {
 
     // App-level rate limit on top of the DB-level 3-per-10-min limit
     if (
-      !rateLimit(`otp:${user.id}`, 3, 10 * 60 * 1000) ||
-      !rateLimit(`otp-ip:${clientIp(req)}`, 6, 10 * 60 * 1000)
+      !(await rateLimit(`otp:${user.id}`, 3, 10 * 60 * 1000)) ||
+      !(await rateLimit(`otp-ip:${clientIp(req)}`, 6, 10 * 60 * 1000))
     ) {
       return tooManyRequests("Too many OTP requests, please try again later.");
     }

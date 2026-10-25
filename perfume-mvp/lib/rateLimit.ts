@@ -1,15 +1,16 @@
 import 'server-only'
 
+import { createAdminClient } from '@/lib/supabaseAdmin'
+
 /**
- * Minimal in-memory sliding-window rate limiter.
- *
- * Per-instance only (serverless instances each keep their own window), so this
- * is abuse mitigation, not a hard guarantee. Good enough for OTP/email/upload
- * endpoints at MVP scale; swap for Upstash/Redis if traffic grows.
+ * Shared rate limiter backed by the rate_limit_hit() Postgres function
+ * (supabase/rate-limits.sql), so every server instance sees the same counts.
+ * If the database call fails it falls back to a per-instance in-memory window
+ * rather than blocking real users.
  */
 const buckets = new Map<string, number[]>()
 
-export function rateLimit(key: string, limit: number, windowMs: number): boolean {
+export function memoryRateLimit(key: string, limit: number, windowMs: number): boolean {
   const now = Date.now()
   const windowStart = now - windowMs
   const hits = (buckets.get(key) ?? []).filter((t) => t > windowStart)
@@ -29,6 +30,19 @@ export function rateLimit(key: string, limit: number, windowMs: number): boolean
     }
   }
   return true
+}
+
+export async function rateLimit(key: string, limit: number, windowMs: number): Promise<boolean> {
+  const { data, error } = await createAdminClient().rpc('rate_limit_hit', {
+    p_key: key,
+    p_limit: limit,
+    p_window_seconds: Math.ceil(windowMs / 1000),
+  })
+  if (error || typeof data !== 'boolean') {
+    console.error('[rateLimit] database limiter failed, using memory:', error?.message)
+    return memoryRateLimit(key, limit, windowMs)
+  }
+  return data
 }
 
 /** Best-effort client IP from proxy headers. */
