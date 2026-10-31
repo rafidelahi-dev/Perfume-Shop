@@ -1,9 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { Users, List, FileText, Droplet, MessageSquare, Leaf, Menu, X } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState, useTransition } from 'react'
+import { Users, List, FileText, Droplet, MessageSquare, Leaf, Menu, X, LogOut } from 'lucide-react'
+import { supabase } from '@/lib/supabaseClient'
+import { withTimeout } from '@/lib/queries/auth'
 import { useAdminSellers, useAdminReviews } from '@/lib/queries/admin'
 import { useAdminBlogPosts } from '@/lib/queries/blog'
 import { useAdminPerfumes } from '@/lib/queries/adminPerfumes'
@@ -19,10 +21,17 @@ const NAV = [
 
 export default function AdminSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
   // Close the drawer after navigating
   useEffect(() => setOpen(false), [pathname])
+
+  const logout = async () => {
+    await withTimeout(supabase.auth.signOut({ scope: 'local' }), 4000, undefined)
+    startTransition(() => router.replace('/login'))
+  }
 
   const { data: sellers = [] } = useAdminSellers()
   const { data: blogPosts = [] } = useAdminBlogPosts()
@@ -99,6 +108,16 @@ export default function AdminSidebar() {
           )
         })}
       </nav>
+      <div className="border-t border-gray-200 px-3 py-3 pb-4">
+        <button
+          onClick={logout}
+          disabled={isPending}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60"
+        >
+          <LogOut className="h-4 w-4 flex-shrink-0" />
+          {isPending ? 'Logging out…' : 'Logout'}
+        </button>
+      </div>
     </aside>
     </>
   )
