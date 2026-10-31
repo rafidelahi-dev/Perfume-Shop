@@ -1,5 +1,6 @@
 "use client";
 
+import PasswordInput from "@/components/auth/PasswordInput";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -123,10 +124,10 @@ export default function LoginClient({ nextPath }: LoginClientProps) {
               type="text"
               required
             />
-            <input
+            <PasswordInput
               className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
               placeholder="Password"
-              type="password"
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

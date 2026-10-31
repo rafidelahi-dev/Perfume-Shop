@@ -1,6 +1,7 @@
 // app/dashboard/profile/page.tsx (with mobile improvements)
 "use client";
 
+import PasswordInput from "@/components/auth/PasswordInput";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -674,9 +675,8 @@ export default function ProfilePage() {
         <Card icon={<Lock className="h-5 w-5" aria-hidden="true" />} title="Password" description="Choose a new password to keep your account secure.">
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <Field label="New password" htmlFor="new_password">
-              <input
+              <PasswordInput
                 id="new_password"
-                type="password"
                 autoComplete="new-password"
                 className={INPUT}
                 value={pwd.newPwd}
@@ -687,9 +687,8 @@ export default function ProfilePage() {
               />
             </Field>
             <Field label="Confirm password" htmlFor="confirm_password">
-              <input
+              <PasswordInput
                 id="confirm_password"
-                type="password"
                 autoComplete="new-password"
                 className={INPUT}
                 value={pwd.confirmPwd}

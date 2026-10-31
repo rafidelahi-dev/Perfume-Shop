@@ -1,5 +1,6 @@
 "use client";
 
+import PasswordInput from "@/components/auth/PasswordInput";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -166,8 +167,7 @@ export default function ResetRequestClient() {
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, OTP_LENGTH))}
           />
-          <input
-            type="password"
+          <PasswordInput
             autoComplete="new-password"
             required
             className="w-full border rounded p-2"
@@ -176,8 +176,7 @@ export default function ResetRequestClient() {
             onChange={(e) => setPassword(e.target.value)}
           />
           <PasswordChecklist password={password} />
-          <input
-            type="password"
+          <PasswordInput
             autoComplete="new-password"
             required
             className="w-full border rounded p-2"

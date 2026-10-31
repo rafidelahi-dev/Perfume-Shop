@@ -1,9 +1,9 @@
 "use client";
 
+import PasswordInput from "@/components/auth/PasswordInput";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { normalizeBdPhone, isValidBdPhone } from "@/lib/queries/client/auth";
 import { withTimeout } from "@/lib/queries/auth";
@@ -28,7 +28,6 @@ export default function SignupClient({ nextPath }: Props) {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPw, setShowPw] = useState(false);
   const [code, setCode] = useState("");
   const [step, setStep] = useState<"form" | "code">("form");
   const [busy, setBusy] = useState(false);
@@ -186,26 +185,15 @@ export default function SignupClient({ nextPath }: Props) {
                     required
                   />
                 )}
-                <div className="relative">
-                  <input
-                    className={`${input} pr-11`}
-                    placeholder="Create a password"
-                    type={showPw ? "text" : "password"}
-                    autoComplete="new-password"
-                    aria-label="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPw((v) => !v)}
-                    aria-label={showPw ? "Hide password" : "Show password"}
-                    className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center text-gray-400 hover:text-gray-700"
-                  >
-                    {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
+                <PasswordInput
+                  className={input}
+                  placeholder="Create a password"
+                  autoComplete="new-password"
+                  aria-label="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
                 <PasswordChecklist password={password} />
                 <button
                   disabled={busy || !isStrongPassword(password)}
