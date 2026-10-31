@@ -3,3 +3,4 @@
 # local tooling
 supabase/.temp/
 .claude/settings.local.json
+.superpowers/
