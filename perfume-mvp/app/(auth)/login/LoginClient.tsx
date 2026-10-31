@@ -64,7 +64,7 @@ export default function LoginClient({ nextPath }: LoginClientProps) {
 
       const redirectTo =
         typeof window !== "undefined"
-          ? `${location.origin}${nextPath}`
+          ? `${location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
           : undefined;
 
       const { error } = await supabase.auth.signInWithOAuth({

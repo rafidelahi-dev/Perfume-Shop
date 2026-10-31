@@ -35,5 +35,16 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.redirect(`${origin}${next}`);
+  // Default landing is the dashboard; admins go to the superadmin panel instead.
+  // An explicit deeper destination (?next=/x) is always respected.
+  let dest = next;
+  if (next === "/dashboard") {
+    const { data: u } = await supabase.auth.getUser();
+    if (u.user) {
+      const { data: p } = await supabase.from("profiles").select("role").eq("id", u.user.id).single();
+      if (p?.role === "admin") dest = "/superadmin";
+    }
+  }
+
+  return NextResponse.redirect(`${origin}${dest}`);
 }
