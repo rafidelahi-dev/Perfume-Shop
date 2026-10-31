@@ -126,10 +126,24 @@ export default function ProfilePage() {
 
   async function onSave(e: React.FormEvent) {
     e.preventDefault();
+    const site = (form.website ?? "").trim();
+    let website: string | null = null;
+    if (site) {
+      const withScheme = /^https?:\/\//i.test(site) ? site : /^[a-z][a-z0-9+.-]*:(?!d)/i.test(site) ? "" : `https://${site}`;
+      try {
+        const u = new URL(withScheme);
+        if (u.protocol !== "http:" && u.protocol !== "https:") throw new Error();
+        website = u.href;
+      } catch {
+        toast.error("Website must be a valid http:// or https:// link");
+        return;
+      }
+    }
+
     setSaving(true);
 
     try {
-      await updateMyProfile(form);
+      await updateMyProfile({ ...form, website });
       await qc.invalidateQueries({ queryKey: qk.profile(userId) });
       toast.success("Profile updated successfully");
     } catch (err) {
@@ -532,6 +546,7 @@ export default function ProfilePage() {
                   className={`${INPUT} min-w-0 flex-1`}
                   inputMode="tel"
                   value={form.contact_number ?? ""}
+                  disabled={!!profile.phone_verified}
                   onChange={(e) => setForm((f) => ({ ...f, contact_number: e.target.value }))}
                   placeholder="+8801XXXXXXXXX"
                   onBlur={() => {
@@ -557,6 +572,9 @@ export default function ProfilePage() {
                   </span>
                 )}
               </div>
+              {profile.phone_verified && (
+                <p className="mt-2 text-sm text-[#777]">This is the number you signed up with.</p>
+              )}
               {contactNumber && !contactOk && !profile.phone_verified && (
                 <p className="mt-2 text-sm text-red-600">
                   Use the Bangladeshi format <b>+8801XXXXXXXXX</b>.
