@@ -74,7 +74,7 @@ export default function AdminSidebar() {
           <X className="h-4 w-4" />
         </button>
       </div>
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="px-3 py-4 space-y-1">
         {NAV.map(({ href, label, icon: Icon }) => {
           const active = pathname.startsWith(href)
           return (
@@ -108,7 +108,7 @@ export default function AdminSidebar() {
           )
         })}
       </nav>
-      <div className="border-t border-gray-200 px-3 py-3 pb-4">
+      <div className="mx-3 border-t border-gray-200 py-3">
         <button
           onClick={logout}
           disabled={isPending}
