@@ -367,6 +367,45 @@ Friends may review; the "knows seller" badge discloses it. A seller never posts
 as a fake customer. The dashboard activity card counts other people only and
 never shows who they are.
 
+## 9. Seller Pass (Tiers, Share Card, Join Bar)
+
+Every seller has a public Seller Pass at `/perfumes/username`: a dark/gold header
+card, then tabs for Listings and Ratings. The tier comes from non-hidden seller
+ratings only, computed in SQL (`get_seller_pass`), never in the app.
+
+Tier needs enough ratings AND a minimum average (Silver 4.2, Gold 4.4,
+Platinum 4.5). Rating counts step up as the community grows (`tier_config`):
+
+| Members | Silver | Gold | Platinum |
+|---------|--------|------|----------|
+| 0+ | 20 | 35 | 50 |
+| 150+ | 50 | 75 | 100 |
+| 200 | 100 | 125 | 150 |
+| 201+ | 100 | 150 | 200 |
+
+A tier once earned is kept (`tier_floor`) when the bar rises. Founding sellers
+(first 100 signups) show a FOUNDING #nnn badge. Phone-verified signups show
+VERIFIED PHONE and their contact number is locked in the profile form.
+
+```mermaid
+flowchart TD
+    A[Reviewer rates a seller, section 7] --> B[DB trigger refreshes tier and floor]
+    B --> C[Seller page revalidates, max 5 min]
+    C --> D[Seller Pass header: tier, badges, rating, listings, member since]
+    D --> E[Share link /perfumes/username]
+    E --> F[WhatsApp or Messenger shows generated card image]
+    F --> G[Visitor opens the page, logged out]
+    G --> H[Join bar: Get your card]
+    H --> I["/signup?next=/perfumes/username (section 8)"]
+    J[Superadmin /superadmin/sellers] --> K[Freeze tier or Unfreeze tier]
+    K --> L[Tier hidden on page and card, listings and ratings stay]
+    L --> C
+```
+
+The card image is `/perfumes/username/opengraph-image` (1200x630, avatar or
+initial, name, tier, stats). Names with non-Latin letters fall back to
+`@username` on the card only. Seller website is optional, http(s) links only.
+
 ## Workflow Changelog
 
 | Date | What changed | Diagram(s) affected |
@@ -392,3 +431,4 @@ with its own diagram + AI-tool quote, following the same format.
 | 2026-10-21 | New "Day or night?" poll (sun-to-moon spectrum, 5 options) on fragrance pages; password strength checklist on signup/reset | Section 6 |
 | 2026-10-20 | /signup is Google or phone/email + password verified by OTP; single-field login detects email vs phone; fragrance polls/ratings restyled (animated bars, completion meter, join CTA) | Section 8 |
 | 2026-10-26 | Note pyramid now stacked (top, middle, base). New `notes` table (auto-filled by trigger from perfume notes) + /superadmin/notes to upload one image per note | Section 1 (Perfumes branch) |
+| 2026-10-31 | Seller Pass: public profile header with Silver/Gold/Platinum tiers from ratings, Verified Phone and Founding badges, generated share card, "Get your card" join bar, admin tier freeze | Section 9 |
