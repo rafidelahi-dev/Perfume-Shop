@@ -431,4 +431,5 @@ with its own diagram + AI-tool quote, following the same format.
 | 2026-10-21 | New "Day or night?" poll (sun-to-moon spectrum, 5 options) on fragrance pages; password strength checklist on signup/reset | Section 6 |
 | 2026-10-20 | /signup is Google or phone/email + password verified by OTP; single-field login detects email vs phone; fragrance polls/ratings restyled (animated bars, completion meter, join CTA) | Section 8 |
 | 2026-10-26 | Note pyramid now stacked (top, middle, base). New `notes` table (auto-filled by trigger from perfume notes) + /superadmin/notes to upload one image per note | Section 1 (Perfumes branch) |
+| 2026-10-26 | বাংলা / EN toggle (header, saved in browser only). Notes get an optional Bangla name set in /superadmin/notes; fragrance page labels, accords and note names follow the toggle. Name, brand, slug, description, reviews stay as written | Section 1 (Perfumes branch) |
 | 2026-10-31 | Seller Pass: public profile header with Silver/Gold/Platinum tiers from ratings, Verified Phone and Founding badges, generated share card, "Get your card" join bar, admin tier freeze | Section 9 |

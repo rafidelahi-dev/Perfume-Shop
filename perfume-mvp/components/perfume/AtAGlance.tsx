@@ -1,5 +1,6 @@
 import { Flame } from "lucide-react";
 import type { Glance, GlanceBar } from "@/lib/glance";
+import { Accords, L } from "@/lib/lang";
 
 const TRENDING_LABELS = ["Quiet", "Warming up", "Gaining", "Popular", "Hot", "On fire"];
 
@@ -9,8 +10,8 @@ function Row({
   children,
   value,
 }: {
-  title: string;
-  hint?: string;
+  title: React.ReactNode;
+  hint?: React.ReactNode;
   children: React.ReactNode;
   value: string;
 }) {
@@ -52,26 +53,26 @@ export function AtAGlance({ glance, accords }: { glance: Glance; accords: string
       className="space-y-5 rounded-2xl border border-black/5 bg-white p-5 sm:p-6"
     >
       <Row
-        title="DNA"
-        hint={accords.slice(0, 3).join(" · ")}
+        title={<L en="DNA" bn="ডিএনএ" />}
+        hint={<Accords names={accords.slice(0, 3)} />}
         value={dna.label}
       >
         <Bar bar={dna} color="#d4af37" />
       </Row>
 
-      <Row title="Performance" value={performance.label}>
+      <Row title={<L en="Performance" bn="স্থায়িত্ব ও ছড়ানো" />} value={performance.label}>
         <Bar bar={performance} color="#f59e0b" />
       </Row>
 
       <Row
-        title="Price"
+        title={<L en="Price" bn="দাম" />}
         hint={price.lowPrice != null ? `from Tk ${Math.round(price.lowPrice).toLocaleString("en-US")}` : undefined}
         value={price.label}
       >
         <Bar bar={price} color="#10b981" />
       </Row>
 
-      <Row title="Trending" value={TRENDING_LABELS[trendFlames]}>
+      <Row title={<L en="Trending" bn="ট্রেন্ডিং" />} value={TRENDING_LABELS[trendFlames]}>
         <div className="flex justify-between" role="img" aria-label={`${trendFlames} of 5 flames`}>
           {[1, 2, 3, 4, 5].map((n) => (
             <Flame
@@ -96,10 +97,10 @@ function Chip({ children }: { children: React.ReactNode }) {
 
 /** Season, setting and who it suits: the quick read before the notes and full polls. */
 export function BestFor({ glance }: { glance: Glance }) {
-  const groups: { title: string; items: string[] }[] = [
-    { title: "Suits", items: [glance.gender?.label, glance.timeOfDay?.label].filter((s): s is string => !!s) },
-    { title: "Season", items: glance.climate },
-    { title: "Where", items: glance.places },
+  const groups: { title: string; bn: string; items: string[] }[] = [
+    { title: "Suits", bn: "যাদের জন্য", items: [glance.gender?.label, glance.timeOfDay?.label].filter((s): s is string => !!s) },
+    { title: "Season", bn: "ঋতু", items: glance.climate },
+    { title: "Where", bn: "কোথায়", items: glance.places },
   ].filter((g) => g.items.length > 0);
 
   if (groups.length === 0) return null;
@@ -108,7 +109,7 @@ export function BestFor({ glance }: { glance: Glance }) {
       <div className="space-y-4">
         {groups.map((g) => (
           <div key={g.title}>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">{g.title}</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500"><L en={g.title} bn={g.bn} /></p>
             <ul className="flex flex-wrap gap-2">
               {g.items.map((i) => (
                 <Chip key={i}>{i}</Chip>

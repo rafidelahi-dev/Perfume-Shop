@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-export type NoteRow = { name: string; image_url: string | null }
+export type NoteRow = { name: string; image_url: string | null; name_bn: string | null }
 
 const KEY = ['admin', 'notes'] as const
 
@@ -16,22 +16,25 @@ export function useAdminNotes() {
   })
 }
 
-export function useSetNoteImage() {
+function useNotePatch(message: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ name, image_url }: { name: string; image_url: string | null }) =>
+    mutationFn: (patch: { name: string; image_url?: string | null; name_bn?: string | null }) =>
       fetch('/api/admin/notes', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, image_url }),
+        body: JSON.stringify(patch),
       }).then(async (r) => {
         if (!r.ok) throw new Error((await r.json()).error ?? 'Failed')
         return r.json() as Promise<NoteRow>
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: KEY })
-      toast.success('Note image saved')
+      toast.success(message)
     },
     onError: (e: Error) => toast.error(e.message),
   })
 }
+
+export const useSetNoteImage = () => useNotePatch('Note image saved')
+export const useSetNoteBn = () => useNotePatch('Bangla name saved')

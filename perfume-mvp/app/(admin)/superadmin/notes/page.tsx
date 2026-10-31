@@ -3,13 +3,24 @@
 import { useMemo, useRef, useState } from 'react'
 import { ImagePlus, Search, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { useAdminNotes, useSetNoteImage } from '@/lib/queries/adminNotes'
+import { useAdminNotes, useSetNoteBn, useSetNoteImage } from '@/lib/queries/adminNotes'
 import { uploadAdminPerfumeImages, useAdminPerfumes } from '@/lib/queries/adminPerfumes'
 
 type Filter = 'all' | 'missing' | 'done'
 
-function NoteCard({ name, image, uses }: { name: string; image: string | null; uses: number }) {
+function NoteCard({
+  name,
+  image,
+  bn,
+  uses,
+}: {
+  name: string
+  image: string | null
+  bn: string | null
+  uses: number
+}) {
   const setImage = useSetNoteImage()
+  const setBn = useSetNoteBn()
   const input = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
 
@@ -63,6 +74,17 @@ function NoteCard({ name, image, uses }: { name: string; image: string | null; u
         />
       </div>
       <p className="text-center text-sm font-medium capitalize text-gray-900">{name}</p>
+      <input
+        key={bn ?? ''}
+        defaultValue={bn ?? ''}
+        placeholder="বাংলা নাম"
+        aria-label={`Bangla name for ${name}`}
+        onBlur={(e) => {
+          const v = e.target.value.trim()
+          if (v !== (bn ?? '')) setBn.mutate({ name, name_bn: v || null })
+        }}
+        className="w-full rounded-md border border-gray-200 px-2 py-1 text-center text-xs"
+      />
       <p className="text-xs text-gray-400">{uses} perfume{uses === 1 ? '' : 's'}</p>
     </div>
   )
@@ -99,7 +121,7 @@ export default function NotesPage() {
         <span className="text-sm text-gray-500">{withImage} / {notes.length} have images</span>
       </div>
       <p className="mb-6 max-w-2xl text-sm text-gray-500">
-        One image per note, shown on every fragrance page that uses it. New notes appear here
+        One image and an optional Bangla name per note (leave the name empty to keep English), shown on every fragrance page that uses it. New notes appear here
         automatically when you add them to a perfume. Most-used notes come first.
       </p>
 
@@ -130,7 +152,7 @@ export default function NotesPage() {
       {isError && <p className="text-sm text-red-600">Could not load notes.</p>}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
         {filtered.map((n) => (
-          <NoteCard key={n.name} name={n.name} image={n.image_url} uses={uses.get(n.name) ?? 0} />
+          <NoteCard key={n.name} name={n.name} image={n.image_url} bn={n.name_bn} uses={uses.get(n.name) ?? 0} />
         ))}
       </div>
     </div>

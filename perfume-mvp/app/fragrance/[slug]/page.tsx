@@ -8,8 +8,9 @@ import BlogPostCard from '@/components/blog/BlogPostCard';
 import SimilarPerfumeCard from '@/components/perfume/SimilarPerfumeCard';
 import DemandRequestButtons from '@/components/perfume/DemandRequestButtons';
 import PerfumeGallery from '@/components/perfume/PerfumeGallery';
+import { L } from '@/lib/lang';
 import NotePyramid from '@/components/perfume/NotePyramid';
-import { fetchNoteImages } from '@/lib/queries/notes';
+import { fetchNoteInfo } from '@/lib/queries/notes';
 import { AtAGlance, BestFor } from '@/components/perfume/AtAGlance';
 import { buildGlance } from '@/lib/glance';
 import FeedbackSection from '@/components/reviews/FeedbackSection';
@@ -128,14 +129,14 @@ export default async function FragrancePage({ params }: Props) {
   const perfume = await fetchPerfumeBySlug(slug);
   if (!perfume) notFound();
 
-  const [listings, relatedPosts, similarPerfumes, aggregate, reviews, trend, noteImages] = await Promise.all([
+  const [listings, relatedPosts, similarPerfumes, aggregate, reviews, trend, noteInfo] = await Promise.all([
     fetchListings(perfume),
     fetchRelatedPosts(perfume),
     fetchSimilarPerfumes(perfume),
     fetchPerfumeReviewAggregate(perfume.id),
     fetchPerfumeReviews(perfume.id),
     fetchPerfumeTrend(perfume.id),
-    fetchNoteImages([...perfume.top_notes, ...perfume.heart_notes, ...perfume.base_notes]),
+    fetchNoteInfo([...perfume.top_notes, ...perfume.heart_notes, ...perfume.base_notes]),
   ]);
 
   const prices = listings.map(effectivePrice).filter(Number.isFinite);
@@ -268,12 +269,12 @@ export default async function FragrancePage({ params }: Props) {
         <BestFor glance={glance} />
 
         <section className="mb-12 rounded-2xl border border-black/5 bg-white p-6">
-          <h2 className="text-lg font-serif font-semibold text-[#1a1a1a] mb-4">Note Pyramid</h2>
+          <h2 className="text-lg font-serif font-semibold text-[#1a1a1a] mb-4"><L en="Note Pyramid" bn="নোট পিরামিড" /></h2>
           <NotePyramid
             top={perfume.top_notes}
             heart={perfume.heart_notes}
             base={perfume.base_notes}
-            images={noteImages}
+            info={noteInfo}
           />
         </section>
 
