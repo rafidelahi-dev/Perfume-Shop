@@ -7,6 +7,15 @@ import { supabase } from "@/lib/supabaseClient";
 import { withTimeout } from "@/lib/queries/auth";
 import { useTransition, useState, useEffect } from "react";
 
+const SITE_LINKS = [
+  { href: "/", label: "Home" },
+  { href: "/perfumes", label: "Sell Post" },
+  { href: "/fragrances", label: "Fragrances" },
+  { href: "/blog", label: "Blog" },
+  { href: "/partials", label: "Drop your partials" },
+  { href: "/wanted", label: "Wanted" },
+];
+
 export function DashboardSidebar({ email }: { email: string | null }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -94,7 +103,7 @@ export function DashboardSidebar({ email }: { email: string | null }) {
           bg-white
           border-r
           p-4
-          flex flex-col justify-between
+          flex flex-col justify-between overflow-y-auto
           transform transition-transform duration-300 ease-in-out
           ${isMobileOpen ? 'translate-x-0 z-50' : '-translate-x-full lg:translate-x-0 lg:z-40'}
         `}
@@ -109,6 +118,14 @@ export function DashboardSidebar({ email }: { email: string | null }) {
             <NavLink href="/dashboard/reviews" label="My Reviews" />
             <NavLink href="/dashboard/blog" label="My Articles" />
             <NavLink href="/dashboard/profile" label="Profile" />
+          </nav>
+
+          {/* Mobile only: the public site links, below the dashboard links */}
+          <nav aria-label="Site" className="mt-4 space-y-1 border-t pt-4 lg:hidden">
+            <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">Explore</p>
+            {SITE_LINKS.map((l) => (
+              <NavLink key={l.href} href={l.href} label={l.label} />
+            ))}
           </nav>
         </div>
 
