@@ -18,6 +18,7 @@ export type AdminSeller = {
   status_updated_at: string | null
   created_at: string
   listing_count: number
+  tier_frozen: boolean
 }
 
 export type AdminListing = {
@@ -62,6 +63,20 @@ export function useSellerAction() {
       qc.invalidateQueries({ queryKey: qk.adminSellers() })
       qc.invalidateQueries({ queryKey: qk.adminListings() })
     },
+    onError: () => toast.error('Action failed. Please try again.'),
+  })
+}
+
+export function useTierFreeze() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, frozen }: { id: string; frozen: boolean }) =>
+      fetch(`/api/admin/sellers/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier_frozen: frozen }),
+      }).then((r) => { if (!r.ok) throw new Error('Failed') }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.adminSellers() }),
     onError: () => toast.error('Action failed. Please try again.'),
   })
 }

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Phone, MessageCircle, Facebook, AlertTriangle, CheckCircle } from 'lucide-react'
-import { AdminSeller, AdminListing, useSellerAction } from '@/lib/queries/admin'
+import { AdminSeller, AdminListing, useSellerAction, useTierFreeze } from '@/lib/queries/admin'
 import { ActionModal } from './ActionModal'
 import { StatusBadge } from './StatusBadge'
 
@@ -16,6 +16,7 @@ type Props = {
 export function SellerDetailPanel({ seller, listings }: Props) {
   const [modal, setModal] = useState<ModalType>(null)
   const action = useSellerAction()
+  const freeze = useTierFreeze()
 
   const contactOk = !!seller.contact_number && !!(seller.whatsapp_number || seller.facebook_link)
   const sellerListings = listings.filter((l) => l.user_id === seller.id)
@@ -116,6 +117,13 @@ export function SellerDetailPanel({ seller, listings }: Props) {
               Ban
             </button>
           )}
+          <button
+            onClick={() => freeze.mutate({ id: seller.id, frozen: !seller.tier_frozen })}
+            disabled={freeze.isPending}
+            className="px-3 py-1.5 text-xs font-medium bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {seller.tier_frozen ? 'Unfreeze tier' : 'Freeze tier'}
+          </button>
           {seller.status === 'banned' && (
             <button
               onClick={() => setModal('unban')}

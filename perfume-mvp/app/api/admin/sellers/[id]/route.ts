@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import { requireAdmin } from '@/lib/adminAuth'
+import { revalidatePath } from 'next/cache'
 
 type Action = 'flag' | 'ban' | 'unflag' | 'unban'
 
@@ -19,7 +20,7 @@ export async function PATCH(
   if (response) return response
 
   const { id } = await params
-  let body: { action: Action; reason?: string }
+  let body: { action?: Action; reason?: string; tier_frozen?: unknown }
   try {
     body = await req.json()
   } catch {
@@ -27,8 +28,21 @@ export async function PATCH(
   }
   const { action, reason } = body
 
+  // Tier freeze is its own toggle: hides the seller's earned tier on profile and card.
+  if (body.tier_frozen !== undefined) {
+    if (typeof body.tier_frozen !== 'boolean') {
+      return NextResponse.json({ error: 'tier_frozen must be a boolean' }, { status: 400 })
+    }
+    const sb = createAdminClient()
+    const { data, error: fErr } = await sb
+      .from('profiles').update({ tier_frozen: body.tier_frozen }).eq('id', id).select('username').single()
+    if (fErr) return NextResponse.json({ error: fErr.message }, { status: 500 })
+    if (data?.username) revalidatePath(`/perfumes/${data.username}`)
+    return NextResponse.json({ ok: true })
+  }
+
   const validActions: Action[] = ['flag','ban', 'unflag', 'unban']
-  if (!validActions.includes(action)) {
+  if (!action || !validActions.includes(action)) {
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
   }
 

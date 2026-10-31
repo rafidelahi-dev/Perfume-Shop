@@ -129,7 +129,7 @@ export default function ProfilePage() {
     const site = (form.website ?? "").trim();
     let website: string | null = null;
     if (site) {
-      const withScheme = /^https?:\/\//i.test(site) ? site : /^[a-z][a-z0-9+.-]*:(?!d)/i.test(site) ? "" : `https://${site}`;
+      const withScheme = /^https?:\/\//i.test(site) ? site : /^[a-z][a-z0-9+.-]*:(?!\d)/i.test(site) ? "" : `https://${site}`;
       try {
         const u = new URL(withScheme);
         if (u.protocol !== "http:" && u.protocol !== "https:") throw new Error();

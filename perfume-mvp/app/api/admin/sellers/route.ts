@@ -13,7 +13,7 @@ export async function GET() {
     .select(`
       id, username, display_name, contact_number, whatsapp_number,
       facebook_link, bio, location, avatar_url,
-      status, flag_reason, ban_reason, status_updated_at, created_at,
+      status, flag_reason, ban_reason, status_updated_at, created_at, tier_frozen,
       listings(count)
     `)
     .order('created_at', { ascending: false })
