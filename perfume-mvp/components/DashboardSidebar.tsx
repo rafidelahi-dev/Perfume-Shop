@@ -120,8 +120,8 @@ export function DashboardSidebar({ email }: { email: string | null }) {
             <NavLink href="/dashboard/profile" label="Profile" />
           </nav>
 
-          {/* Mobile only: the public site links, below the dashboard links */}
-          <nav aria-label="Site" className="mt-4 space-y-1 border-t pt-4 lg:hidden">
+          {/* Public site links, below the dashboard links */}
+          <nav aria-label="Site" className="mt-4 space-y-1 border-t pt-4">
             <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">Explore</p>
             {SITE_LINKS.map((l) => (
               <NavLink key={l.href} href={l.href} label={l.label} />
