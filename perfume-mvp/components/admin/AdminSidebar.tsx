@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Users, List, FileText, Droplet, MessageSquare, Leaf } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Users, List, FileText, Droplet, MessageSquare, Leaf, Menu, X } from 'lucide-react'
 import { useAdminSellers, useAdminReviews } from '@/lib/queries/admin'
 import { useAdminBlogPosts } from '@/lib/queries/blog'
 import { useAdminPerfumes } from '@/lib/queries/adminPerfumes'
@@ -18,6 +19,10 @@ const NAV = [
 
 export default function AdminSidebar() {
   const pathname = usePathname()
+  const [open, setOpen] = useState(false)
+
+  // Close the drawer after navigating
+  useEffect(() => setOpen(false), [pathname])
 
   const { data: sellers = [] } = useAdminSellers()
   const { data: blogPosts = [] } = useAdminBlogPosts()
@@ -29,11 +34,36 @@ export default function AdminSidebar() {
   const flaggedReviewCount = reviews.filter((r) => r.is_flagged).length
 
   return (
-    <aside className="w-56 min-h-screen bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
-      <div className="px-6 py-5 border-b border-gray-200">
+    <>
+    {/* Mobile top bar: the sidebar is a drawer below lg */}
+    <div className="lg:hidden fixed top-0 inset-x-0 z-40 flex h-14 items-center gap-3 border-b border-gray-200 bg-white px-3">
+      <button
+        onClick={() => setOpen(true)}
+        aria-label="Open admin menu"
+        aria-expanded={open}
+        className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+      <span className="text-xs font-semibold text-[#d4af37] uppercase tracking-widest">Superadmin</span>
+    </div>
+    {open && <div className="lg:hidden fixed inset-0 z-40 bg-black/30" onClick={() => setOpen(false)} />}
+    <aside
+      className={`fixed lg:sticky top-0 left-0 z-50 lg:z-auto h-dvh lg:h-screen w-64 lg:w-56 overflow-y-auto bg-white border-r border-gray-200 flex flex-col flex-shrink-0 transition-transform duration-300 ${
+        open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}
+    >
+      <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200">
         <span className="text-xs font-semibold text-[#d4af37] uppercase tracking-widest">
           Superadmin
         </span>
+        <button
+          onClick={() => setOpen(false)}
+          aria-label="Close admin menu"
+          className="lg:hidden flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
       <nav className="flex-1 px-3 py-4 space-y-1">
         {NAV.map(({ href, label, icon: Icon }) => {
@@ -70,5 +100,6 @@ export default function AdminSidebar() {
         })}
       </nav>
     </aside>
+    </>
   )
 }
