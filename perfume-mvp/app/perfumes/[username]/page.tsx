@@ -16,6 +16,7 @@ import { UsernameListingGrid } from "./components/UsernameListingGrid";
 import { Facebook, MessageSquare, Phone, User } from "lucide-react";
 import SellerRatingSection from "@/components/reviews/SellerRatingSection";
 import SellerRatingBadge from "@/components/reviews/SellerRatingBadge";
+import { fetchSellerPass, tierLabel } from "@/lib/sellerPass";
 import type { PublicSellerReview } from "@/lib/queries/sellerReviews";
 
 type Params = { username: string };
@@ -26,41 +27,30 @@ export async function generateMetadata({
   params: Promise<{ username: string }>;
 }): Promise<Metadata> {
   const { username } = await params;
-  const supabase = createPublicSupabase();
+  const pass = await fetchSellerPass(username);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("username, display_name, bio, avatar_url")
-    .eq("username", username)
-    .single();
-
-  if (!profile) {
+  if (!pass) {
     return { title: "Seller Not Found | CloudPerfumeBD" };
   }
 
-  const displayName = profile.display_name ?? profile.username;
+  const displayName = pass.displayName;
   const title = `${displayName}'s Perfumes | CloudPerfumeBD`;
-  const description = profile.bio
-    ? `${profile.bio} — Browse ${displayName}'s perfume listings on CloudPerfumeBD.`
+  const standing = [
+    pass.tier ? tierLabel(pass.tier, pass.isEarly) : null,
+    pass.ratingAvg != null && pass.ratingCount > 0
+      ? `${pass.ratingAvg.toFixed(1)}★ from ${pass.ratingCount} review${pass.ratingCount > 1 ? "s" : ""}`
+      : null,
+  ].filter(Boolean).join(", ");
+  const base = pass.bio
+    ? `${pass.bio} — Browse ${displayName}'s perfume listings on CloudPerfumeBD.`
     : `Browse ${displayName}'s perfume listings on CloudPerfumeBD.`;
+  const description = standing ? `${standing}. ${base}` : base;
 
   return {
     title,
     description,
-    openGraph: {
-      title,
-      description,
-      ...(profile.avatar_url
-        ? { images: [{ url: profile.avatar_url, width: 400, height: 400, alt: displayName }] }
-        : {}),
-      type: "profile",
-    },
-    twitter: {
-      card: "summary",
-      title,
-      description,
-      ...(profile.avatar_url ? { images: [profile.avatar_url] } : {}),
-    },
+    openGraph: { title, description, type: "profile" },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 
