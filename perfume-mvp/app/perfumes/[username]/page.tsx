@@ -33,6 +33,8 @@ export async function generateMetadata({
   }
 
   const displayName = pass.displayName;
+  // Without this the layout's homepage canonical wins and link previews show just the domain.
+  const url = `https://www.cloudperfumebd.com/perfumes/${username}`;
   const title = `${displayName}'s Perfumes | CloudPerfumeBD`;
   const standing = [
     pass.tier ? tierLabel(pass.tier, pass.isEarly) : null,
@@ -48,7 +50,8 @@ export async function generateMetadata({
   return {
     title,
     description,
-    openGraph: { title, description, type: "profile" },
+    alternates: { canonical: url },
+    openGraph: { title, description, type: "profile", url },
     twitter: { card: "summary_large_image", title, description },
   };
 }
