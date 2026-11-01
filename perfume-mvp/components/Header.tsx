@@ -9,7 +9,6 @@ import { LayoutDashboard, Droplets, Tag, Star, PenLine, Settings, BellRing } fro
 import { supabase } from "@/lib/supabaseClient";
 import { useAuthProfile } from "@/lib/hooks/useAuthProfile";
 import { withTimeout } from "@/lib/queries/auth";
-import { LangToggle } from "@/lib/lang";
 
 const DASHBOARD_TILES = [
   { href: "/dashboard", label: "Overview", hint: "Your summary", Icon: LayoutDashboard },
@@ -202,7 +201,6 @@ export default function Header({
             </div>
 
             <div className="h-6 w-px bg-gray-300 mx-2" />
-            <LangToggle />
 
             {loading ? (
               <div className="flex items-center gap-3 ml-2 animate-pulse">
@@ -249,9 +247,8 @@ export default function Header({
             )}
           </nav>
 
-          {/* Mobile language toggle + menu button */}
+          {/* Mobile menu button */}
           <div className="flex items-center gap-1 md:hidden">
-          <LangToggle />
           {!hideMobileBurger && (
             <button
               onClick={() => setOpen((o) => !o)}

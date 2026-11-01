@@ -1,0 +1,37 @@
+-- Bangla names for the remaining notes (name_bn was null). Only fills blanks.
+update notes n set name_bn = v.bn
+from (values
+('aldehydes','অ্যালডিহাইড'),('amber','অ্যাম্বার'),('ambergris','অ্যাম্বারগ্রিস'),('amberwood','অ্যাম্বারউড'),
+('ambrette','অ্যাম্ব্রেট'),('ambrettolide','অ্যাম্ব্রেটোলাইড'),('ambronova','অ্যাম্ব্রোনোভা'),('ambroxan','অ্যাম্ব্রক্সান'),
+('aquatic notes','জলীয় নোট'),('aquozone','অ্যাকুয়োজোন'),('aromatic notes','সুগন্ধি ভেষজ নোট'),('artemisia','আর্টেমিসিয়া'),
+('benzoin','বেনজয়িন'),('bergamot','বারগামট'),('birch','বার্চ কাঠ'),('black currant','কালো কারেন্ট'),
+('black truffle','কালো ট্রাফল'),('blackcurrant','কালো কারেন্ট'),('blonde woods','হালকা রঙের কাঠ'),('blood orange','লাল কমলা'),
+('boozy notes','মদির নোট'),('cacao','কোকো'),('cade oil','কেড তেল'),('calabrian bergamot','ক্যালাব্রিয়ান বারগামট'),
+('calone','ক্যালোন'),('cannabis','গাঁজা'),('caramel','ক্যারামেল'),('carnation','কার্নেশন'),
+('cascalone','ক্যাসক্যালোন'),('cashmeran','ক্যাশমেরান'),('cedar','সিডার'),('cedarwood','সিডারউড'),
+('chestnut','চেস্টনাট'),('chinese pepper','চীনা মরিচ'),('chocolate','চকলেট'),('citron','সিট্রন লেবু'),
+('citrus','লেবুজাতীয়'),('citrus notes','লেবুজাতীয় নোট'),('citruses','লেবুজাতীয় ফল'),('civet','সিভেট'),
+('clary sage','ক্ল্যারি সেজ'),('coffee','কফি'),('cognac','কনিয়াক'),('condensed milk','কনডেন্সড মিল্ক'),
+('coumarin','কুমারিন'),('cypress','সাইপ্রেস'),('cypriol','সিপ্রিওল'),('dark chocolate','ডার্ক চকলেট'),
+('davana','দাভানা'),('driftwood','ভেসে আসা কাঠ'),('dry amber','শুকনো অ্যাম্বার'),('egyptian jasmine','মিশরীয় জুঁই'),
+('elemi','এলেমি'),('fir','ফার গাছ'),('freesia','ফ্রিজিয়া'),('frozen apple','বরফশীতল আপেল'),
+('gardenia','গার্ডেনিয়া'),('geranium','জেরানিয়াম'),('grapefruit blossom','জাম্বুরা ফুল'),('green mandarin','সবুজ কমলা'),
+('green tea','সবুজ চা'),('guaiac wood','গুয়াইয়াক কাঠ'),('gurjun balsam','গর্জন বালসাম'),('hazelnut','হ্যাজেলনাট'),
+('herbal tones','ভেষজ সুর'),('iris','আইরিস'),('italian bergamot','ইতালীয় বারগামট'),('italian lemon','ইতালীয় লেবু'),
+('labdanum','ল্যাবডানাম'),('lavender','ল্যাভেন্ডার'),('lily of the valley','লিলি অব দ্য ভ্যালি'),('liquor','মদ'),
+('magnolia','ম্যাগনোলিয়া'),('maltol','মালটল'),('marshmallow','মার্শমেলো'),('may rose','মে গোলাপ'),
+('melon','তরমুজজাতীয় ফল'),('mineral amber','খনিজ অ্যাম্বার'),('mineral notes','খনিজ নোট'),('moroccan jasmine','মরক্কান জুঁই'),
+('mugwort','মাগওয়ার্ট'),('musk','মাস্ক'),('neroli','নেরোলি'),('nutty notes','বাদামের নোট'),
+('oak','ওক কাঠ'),('oakmoss','ওকমস'),('olibanum','অলিবানাম'),('opoponax','ওপোপ্যানাক্স'),
+('orange blossom','কমলার ফুল'),('orcanox','অর্কানক্স'),('orris','অরিস'),('orris root','অরিস শিকড়'),
+('palisander rosewood','প্যালিস্যান্ডার রোজউড'),('passion fruit','প্যাশন ফ্রুট'),('patchouli','প্যাচুলি'),('peach','পিচ'),
+('peony','পিওনি'),('peppermint','পিপারমিন্ট'),('pink pepper','গোলাপি মরিচ'),('powdery notes','পাউডারি নোট'),
+('praline','প্রালিন'),('prickly pear','কাঁটাযুক্ত নাশপাতি'),('raspberry','র‍্যাস্পবেরি'),('rhubarb','রেউচিনি'),
+('rosemary','রোজমেরি'),('rosewood','রোজউড'),('rum','রাম'),('sage','সেজ'),
+('sichuan pepper','সিচুয়ান মরিচ'),('strawberry','স্ট্রবেরি'),('suede','সুয়েড'),('tangerine','ট্যানজারিন'),
+('thyme','থাইম'),('toffee','টফি'),('tonka bean','টঙ্কা বিন'),('vanilla','ভ্যানিলা'),
+('vanilla orchid','ভ্যানিলা অর্কিড'),('violet','ভায়োলেট'),('virginia cedar','ভার্জিনিয়া সিডার'),('watery fruits','রসালো জলীয় ফল'),
+('watery notes','জলীয় নোট'),('white moss','সাদা মস'),('white musk','সাদা মাস্ক'),('wormwood','ওয়ার্মউড'),
+('ylang-ylang','ইলাং-ইলাং')
+) as v(name, bn)
+where n.name = v.name and n.name_bn is null;

@@ -8,7 +8,7 @@ import BlogPostCard from '@/components/blog/BlogPostCard';
 import SimilarPerfumeCard from '@/components/perfume/SimilarPerfumeCard';
 import DemandRequestButtons from '@/components/perfume/DemandRequestButtons';
 import PerfumeGallery from '@/components/perfume/PerfumeGallery';
-import { L } from '@/lib/lang';
+import { L, LangToggle } from '@/lib/lang';
 import NotePyramid from '@/components/perfume/NotePyramid';
 import { fetchNoteInfo } from '@/lib/queries/notes';
 import { AtAGlance, BestFor } from '@/components/perfume/AtAGlance';
@@ -269,7 +269,10 @@ export default async function FragrancePage({ params }: Props) {
         <BestFor glance={glance} />
 
         <section className="mb-12 rounded-2xl border border-black/5 bg-white p-6">
-          <h2 className="text-lg font-serif font-semibold text-[#1a1a1a] mb-4"><L en="Note Pyramid" bn="নোট পিরামিড" /></h2>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="text-lg font-serif font-semibold text-[#1a1a1a]"><L en="Note Pyramid" bn="নোট পিরামিড" /></h2>
+            <LangToggle />
+          </div>
           <NotePyramid
             top={perfume.top_notes}
             heart={perfume.heart_notes}
