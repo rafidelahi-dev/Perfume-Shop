@@ -1,4 +1,5 @@
 import { Facebook, Globe, MessageSquare, Phone, Star, User } from "lucide-react";
+import ShareProfileButton from "./ShareProfileButton";
 import { tierLabel, type SellerPass } from "@/lib/sellerPass";
 
 export type PassContact = {
@@ -90,6 +91,7 @@ export default function SellerPassHeader({ pass, contact }: { pass: SellerPass; 
           </div>
         )}
         <div className="flex flex-wrap gap-2">
+          <ShareProfileButton name={name} username={pass.username} />
           {contact.whatsapp && (
             <a href={`https://wa.me/${contact.whatsapp}`} target="_blank" rel="noreferrer" className={`${btn} bg-[#34A853] hover:bg-[#2d9146]`}>
               <MessageSquare className="h-4 w-4" />

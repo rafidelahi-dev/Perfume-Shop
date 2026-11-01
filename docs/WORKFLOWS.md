@@ -434,3 +434,4 @@ with its own diagram + AI-tool quote, following the same format.
 | 2026-10-26 | বাংলা / EN toggle (header, saved in browser only). Notes get an optional Bangla name set in /superadmin/notes; fragrance page labels, accords and note names follow the toggle. Name, brand, slug, description, reviews stay as written | Section 1 (Perfumes branch) |
 | 2026-11-01 | Bangla toggle moved out of the header: it now shows only on a perfume page (/fragrance/slug), next to Note Pyramid. All 211 notes have a Bangla name; the choice is saved in the browser and ignored on other pages | Section 1 (Perfumes branch) |
 | 2026-10-31 | Seller Pass: public profile header with Silver/Gold/Platinum tiers from ratings, Verified Phone and Founding badges, generated share card, "Get your card" join bar, admin tier freeze | Section 9 |
+| 2026-11-01 | Share button on every Seller Pass (owner or visitor): opens the phone share sheet, or copies /perfumes/username on desktop | Section 9 |
