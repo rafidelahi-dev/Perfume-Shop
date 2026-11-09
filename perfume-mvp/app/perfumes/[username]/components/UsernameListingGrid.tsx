@@ -1,7 +1,7 @@
 // app/perfumes/[username]/UsernameListingGrid.tsx
 "use client";
 import Link from "next/link";
-import Image from "next/image";
+import CardImage from "../../components/CardImage";
 
 type SellerListing = {
   id: string;
@@ -45,7 +45,6 @@ export function UsernameListingGrid({
   return (
     <div className="grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {listings.map((l) => {
-        const thumb = Array.isArray(l.images) ? l.images[0] : null;
         const priceToShow = effectivePrice(l);
         const linkHref = `/perfumes/${l?.profiles?.username}/${l.id}`;
 
@@ -59,19 +58,10 @@ export function UsernameListingGrid({
         >
             {/* Image Area */}
             <div className="aspect-[3/4] relative bg-[#f9f6ef] overflow-hidden">
-                {thumb ? (
-                    <Image
-                        src={thumb}
-                        alt={l.perfume_name || "Perfume"}
-                        fill
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-[#f2eee4] text-[#aaa] text-sm">
-                        No Image
-                    </div>
-                )}
+                <CardImage
+                    images={Array.isArray(l.images) ? l.images : []}
+                    alt={l.perfume_name || "Perfume"}
+                />
             </div>
 
           {/* Text info */}

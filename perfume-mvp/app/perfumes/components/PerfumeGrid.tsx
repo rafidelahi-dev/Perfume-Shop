@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import CardImage from "./CardImage";
 import DecantOptions from "./DecantOptions";
 import { supabase } from "@/lib/supabaseClient";
 import { BadgeCheck } from "lucide-react";
@@ -101,7 +101,6 @@ export default function PerfumeGrid({
   return (
     <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {perfumes.map((p) => {
-        const thumb = Array.isArray(p.images) ? p.images[0] : null;
         const priceToShow = effectivePrice(p);
         const badge = typeBadge(p);
         const sold = p.status === "sold";
@@ -120,19 +119,11 @@ export default function PerfumeGrid({
             >
               {/* ---------------- Image ---------------- */}
               <div className="aspect-[3/4] relative bg-[#f9f6ef] overflow-hidden">
-                {thumb ? (
-                  <Image
-                    src={thumb}
-                    alt={p.perfume_name || "Perfume"}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    className={`object-cover transition-transform duration-500 group-hover:scale-105 ${sold ? "grayscale" : ""}`}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-[#f2eee4] text-[#aaa] text-sm">
-                    No Image
-                  </div>
-                )}
+                <CardImage
+                  images={Array.isArray(p.images) ? p.images : []}
+                  alt={p.perfume_name || "Perfume"}
+                  sold={sold}
+                />
                 {isNew && (
                   <span className="absolute left-2 top-2 rounded-full bg-[#d4af37] px-2.5 py-1 text-[11px] font-semibold text-[#1a1a1a] shadow">
                     New
